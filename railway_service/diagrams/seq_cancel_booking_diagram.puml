@@ -1,0 +1,65 @@
+@startuml seq_booking_cancellation
+
+actor User
+
+box "IN" #AliceBlue
+    participant Frontend
+    participant Backend
+    participant AuthService
+    participant DB
+    participant PaymentService
+end box
+
+' ===== 1. Пользователь инициирует отмену бронирования =====
+User -> Frontend: Запрос отмены бронирования\n(bookingId, token)
+activate Frontend
+
+Frontend -> Backend: POST /api/bookings/cancel\n{ "bookingId": "..." }\n(Header: Authorization Bearer {token})
+activate Backend
+
+' ===== 2. Проверка валидности токена =====
+Backend -> AuthService: Проверить токен
+activate AuthService
+alt Токен недействителен
+    AuthService --> Backend: 401 Unauthorized
+    Backend --> Frontend: 401 Unauthorized\n{"error": "Invalid token"}
+    deactivate AuthService
+    deactivate Backend
+else
+    AuthService --> Backend: 200 OK
+    deactivate AuthService
+end
+
+' ===== 3. Получение данных бронирования =====
+Backend -> DB: Получить данные бронирования по bookingId
+activate DB
+DB --> Backend: BookingDetails { status: RESERVED/PAID, детали }
+deactivate DB
+
+' ===== 4. Ветвление логики на основе статуса =====
+alt Билет забронирован (RESERVED)
+    Backend -> DB: Отменить бронирование и освободить места
+    activate DB
+    DB --> Backend: Cancellation Success
+    deactivate DB
+    
+    Backend --> Frontend: 200 OK\n{"message": "Бронирование отменено, места возвращены"}
+else Билет оплачен (PAID)
+    Backend -> PaymentService: Запрос возврата средств\n{ "bookingId": "..." }
+    activate PaymentService
+    PaymentService --> Backend: Refund Processed
+    deactivate PaymentService
+    
+    Backend -> DB: Отменить бронирование и освободить места
+    activate DB
+    DB --> Backend: Cancellation Success
+    deactivate DB
+
+    Backend --> Frontend: 200 OK\n{"message": "Бронирование отменено, средства возвращены, места возвращены"}
+end
+deactivate Backend
+
+Frontend -> User: Отображает уведомление о результате отмены
+deactivate Frontend
+
+@enduml

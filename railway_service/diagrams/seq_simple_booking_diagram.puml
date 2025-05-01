@@ -1,0 +1,112 @@
+@startuml seq_ticket_booking_with_token
+
+actor User
+
+box "IN" #AliceBlue
+    participant Frontend
+    participant Backend
+    participant AuthService
+    participant DB
+end box
+
+' ===== Получение маршрутов =====
+
+User -> Frontend: Выбирает начальную и конечную станции, дату поездки\n(токен уже получен)
+activate Frontend
+Frontend -> Backend: GET /api/routes?startStation=...&endStation=...&date=...\n(Header: Authorization Bearer {token})
+activate Backend
+
+' Проверяем валидность токена для запроса маршрутов
+Backend -> AuthService: Проверить валидность токена
+activate AuthService
+alt Токен действителен
+    AuthService --> Backend: Token valid
+else Токен недействителен
+    AuthService --> Backend: Token invalid
+    Backend --> Frontend: 401 Unauthorized\n{"error": "Invalid token"}
+    deactivate AuthService
+    deactivate Backend
+end
+deactivate AuthService
+
+Backend -> DB: Запрос маршрутов по заданным критериям
+activate DB
+DB --> Backend: Список подходящих маршрутов
+deactivate DB
+
+Backend --> Frontend: 200 OK\n{ список маршрутов }
+deactivate Backend
+Frontend -> User: Отображает список маршрутов
+deactivate Frontend
+
+' ===== Просмотр расписания =====
+
+User -> Frontend: Выбирает маршрут и запрашивает расписание
+activate Frontend
+Frontend -> Backend: GET /api/routes/{routeId}/schedule\n(Header: Authorization Bearer {token})
+activate Backend
+
+' Проверяем токен для запроса расписания
+Backend -> AuthService: Проверить валидность токена
+activate AuthService
+alt Токен действителен
+    AuthService --> Backend: Token valid
+else Токен недействителен
+    AuthService --> Backend: Token invalid
+    Backend --> Frontend: 401 Unauthorized\n{"error": "Invalid token"}
+    deactivate AuthService
+    deactivate Backend
+end
+deactivate AuthService
+
+Backend -> DB: Запрос расписания для маршрута {routeId}
+activate DB
+DB --> Backend: Данные расписания (остановки, время прибытия/отправления)
+deactivate DB
+
+Backend --> Frontend: 200 OK\n{ schedule data }
+deactivate Backend
+Frontend -> User: Отображает расписание движения по станциям
+deactivate Frontend
+
+' ===== Выбор поезда и бронирование билета =====
+
+User -> Frontend: Выбирает поезд, вагон, место\nи вводит паспортные данные
+activate Frontend
+Frontend -> Backend: POST /api/bookings\n{routeId, trainId, wagon, seat, passportDetails}\n(Header: Authorization Bearer {token})
+activate Backend
+
+' Проверяем токен для процесса бронирования
+Backend -> AuthService: Проверить валидность токена
+activate AuthService
+alt Токен действителен
+    AuthService --> Backend: Token valid
+else Токен недействителен
+    AuthService --> Backend: Token invalid
+    Backend --> Frontend: 401 Unauthorized\n{"error": "Invalid token"}
+    deactivate AuthService
+    deactivate Backend
+end
+deactivate AuthService
+
+Backend -> DB: Проверить доступность выбранного места
+activate DB
+DB --> Backend: Результат проверки (место свободно/занято)
+deactivate DB
+
+alt Место доступно
+    Backend -> DB: Создать запись бронирования\n(booking status = RESERVED, expires = T+20 минут)
+    activate DB
+    DB --> Backend: Данные брони (booking id, детали)
+    deactivate DB
+    
+    Backend --> Frontend: 201 Created\n{booking id, статус RESERVED, информация о брони}
+else Место недоступно
+    Backend --> Frontend: 409 Conflict\n{"error": "Место не доступно"}
+end
+deactivate Backend
+
+Frontend -> User: Отображает статус бронирования (успех/ошибка)
+deactivate Frontend
+
+@enduml
