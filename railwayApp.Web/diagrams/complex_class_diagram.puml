@@ -1,0 +1,422 @@
+@startuml
+
+'#########################
+'### Domain Layer ###
+'#########################
+
+package "Domain" {
+  package "Entities" {
+    class UserAccount {
+      +Id: Guid
+      +Email: string
+      +PasswordHash: string
+      +Phone: string
+      +Status: AccountStatus
+      +Register()
+      +Block()
+      
+      +-- AccountStatus
+    }
+  
+    class Ticket {
+      +Id: Guid
+      +Route: Route
+      +Train: Train
+      +SeatNumber: int
+      +Status: TicketStatus
+      +Cancel()
+      
+      +-- TicketStatus
+    }
+  
+    class Route {
+      +Id: Guid
+      +Stations: List<Station>
+      +Schedule: Schedule
+      +Train: Train
+      +CalculatePrice()
+    }
+  
+    class Train {
+      +Id: Guid
+      +Type: TrainType
+      +Carriages: List<Carriage>
+      +GetAvailableSeats()
+    }
+  
+    class Station {
+      +Name: string
+      +Code: string
+    }
+   
+   
+    class CompositeRoute {
+      +Id: Guid
+      +Segments: List<Route>
+      +TotalPrice: decimal
+      +TotalDuration: TimeSpan
+      +CalculatePrice()
+    }
+
+    
+    
+    AccountStatus*-->UserAccount
+    TicketStatus*-->Ticket
+  
+
+  }
+  package "Interfaces" {
+    interface IUserRepository {
+      +GetById(id: Guid): UserAccount
+      +Add(user: UserAccount): void
+      +Update(user: UserAccount): void
+      +Delete(id: Guid): void
+    }
+  
+    interface ITicketRepository {
+      +GetById(id: Guid): Ticket
+      +Add(ticket: Ticket): void
+      +Update(ticket: Ticket): void
+      +Delete(id: Guid): void
+    }
+  
+    interface IRouteRepository {
+      +GetById(id: Guid): Route
+      +Add(route: Route): void
+      +Update(route: Route): void
+      +Delete(id: Guid): void
+      +SearchRoutes(criteria: SearchCriteria): List<Route>
+    }
+  
+    interface ITrainRepository {
+      +GetById(id: Guid): Train
+      +Add(train: Train): void
+      +Update(train: Train): void
+      +Delete(id: Guid): void
+    }
+    
+    interface ICompositeRouteRepository {
+        +GetById(id: Guid): CompositeRoute
+        +SearchCompositeRoutes(criteria: CompositeSearchCriteria): List<CompositeRoute>
+        +Add(route: CompositeRoute): void
+        +Update(route: CompositeRoute): void
+    }
+  }
+
+}
+
+'#############################
+'### Application Layer ###
+'#############################
+
+package "Application" {
+    interface IUserService {
+       +RegisterUser(dto: RegisterDto)
+       +BlockUser(id: Guid)
+    }
+  
+    interface ITicketService {
+      +BookTicket(dto: TicketDto)
+      +CancelTicket(id: Guid)
+      +PayTicket(id: Guid)
+    }
+  
+    interface IRouteService {
+      +SearchRoutes(criteria: SearchCriteria)
+    }
+  
+    interface IAuthService {
+      +Authenticate(email: string, password: string)
+    }
+    
+    interface ICompositeRouteService {
+        +SearchCompositeRoutes(criteria: CompositeSearchCriteria)
+        +CreateCompositeRoute(request: CreateCompositeRouteRequest)
+        +GetRouteDetails(routeId: Guid)
+    }  
+  
+   '#############################
+   '### Реализации сервисов ###
+   '#############################
+    class UserService {
+      -_userRepo: IUserRepository
+      +RegisterUser(dto: RegisterDto)
+      +BlockUser(id: Guid)
+    }
+  
+    class TicketService {
+      -_ticketRepo: ITicketRepository
+      +BookTicket(dto: TicketDto)
+      +CancelTicket(id: Guid)
+      +PayTicket(id: Guid)
+    }
+  
+    class RouteService {
+      -_routeRepo: IRouteRepository
+      -_trainRepo: ITrainRepository
+      +SearchRoutes(criteria: SearchCriteria)
+    }
+  
+    class AuthService {
+      -_userRepo: IUserRepository
+      +Authenticate(email: string, password: string)
+    }
+    
+    class CompositeRouteService {
+        -_compositeRepo: ICompositeRouteRepository
+        -_segmentRepo: IRouteSegmentRepository
+        +SearchCompositeRoutes(criteria: CompositeSearchCriteria): List<CompositeRouteResponse>
+        +CreateCompositeRoute(request: CreateCompositeRouteRequest): CompositeRouteResponse
+        +GetRouteDetails(routeId: Guid): CompositeRouteDetails
+    }
+  
+    '#############################
+    '### Связи реализации ###
+    '#############################
+    UserService ..|> IUserService
+    TicketService ..|> ITicketService
+    RouteService ..|> IRouteService
+    AuthService ..|> IAuthService
+    CompositeRouteService ..|> ICompositeRouteService
+  
+    '#############################
+    '### Зависимости ###
+    '#############################
+    UserService --> IUserRepository
+    AuthService --> IUserRepository
+    TicketService --> ITicketRepository
+    RouteService --> IRouteRepository
+    RouteService --> ITrainRepository
+    CompositeRouteService --> ICompositeRouteRepository
+    CompositeRouteService --> IRouteRepository
+    CompositeRouteService --> ITrainRepository
+}
+
+'###############################
+'### Infrastructure Layer ###
+'###############################
+
+package "Infrastructure" {
+    package "Repositories" {
+      class UserRepository {
+        +GetById(id: Guid): UserAccount
+        +Add(user: UserAccount): void
+        +Update(user: UserAccount): void
+        +Delete(id: Guid): void
+      }
+    
+      class TicketRepository {
+        +GetById(id: Guid): Ticket
+        +Add(ticket: Ticket): void
+        +Update(ticket: Ticket): void
+        +Delete(id: Guid): void
+      }
+    
+      class RouteRepository {
+        +GetById(id: Guid): Route
+        +Add(route: Route): void
+        +Update(route: Route): void
+        +Delete(id: Guid): void
+        +SearchRoutes(criteria: SearchCriteria): List<Route>
+      }
+    
+      class TrainRepository {
+        +GetById(id: Guid): Train
+        +Add(train: Train): void
+        +Update(train: Train): void
+        +Delete(id: Guid): void
+      }
+      
+      class CompositeRouteRepository {
+          +GetById(id: Guid): CompositeRoute
+          +SearchCompositeRoutes(criteria: CompositeSearchCriteria): List<CompositeRoute>
+          +Add(route: CompositeRoute): void
+          +Update(route: CompositeRoute): void
+      }
+    }
+}
+
+'###############################
+'### Presentation Layer ###
+'###############################
+
+package "Presentation" {
+  package "Controllers" {
+    class AuthController {
+      -_authService: IAuthService
+      -_mapper: AuthMapper
+      +Register(request: RegisterRequest): UserAccountResponse
+      +Login(request: LoginRequest): AuthResponse
+    }
+
+    class RoutesController {
+      -_routeService: IRouteService
+      -_mapper: RouteMapper
+      +Search(request: SearchRequest): List<RouteResponse>
+      +GetSchedule(routeId: Guid): ScheduleResponse
+    }
+
+    class TicketsController {
+      -_ticketService: ITicketService
+      -_mapper: TicketMapper
+      +BookTicket(request: BookTicketRequest): TicketResponse
+      +CancelTicket(request: CancelTicketRequest): OperationResponse
+      +PayTicket(request: PaymentRequest): PaymentResponse
+    }
+    
+    class ComplexRoutesController {
+      -_service: IComplexRouteService
+      -_mapper: ComplexRouteMapper
+      +SearchComplexRoutes(request: SearchComplexRouteRequest): ActionResult<ComplexRouteResponse>
+      +CreateComplexRoute(request: CreateComplexRouteRequest): ActionResult<ComplexRouteResponse>
+      +GetRouteDetails(id: Guid): ActionResult<ComplexRouteDetailsResponse>
+    }
+  }
+
+  package "Models" {
+    package "Requests" {
+      class RegisterRequest {
+        +Email: string
+        +Password: string
+        +Phone: string
+      }
+
+      class LoginRequest {
+        +Email: string
+        +Password: string
+      }
+
+      class SearchRequest {
+        +From: string
+        +To: string
+        +Date: DateTime
+      }
+
+      class BookTicketRequest {
+        +RouteId: Guid
+        +TrainId: Guid
+        +SeatNumber: int
+      }
+
+      class CancelTicketRequest {
+        +TicketId: Guid
+      }
+
+      class PaymentRequest {
+        +TicketId: Guid
+        +CardNumber: string
+      }
+      
+      
+      class SearchComplexRouteRequest {
+        +FromStation: string
+        +ToStation: string
+        +Date: DateTime
+      }
+       
+      
+    }
+
+    package "Responses" {
+      class UserAccountResponse {
+        +Id: Guid
+        +Email: string
+        +Status: string
+      }
+
+      class AuthResponse {
+        +Token: string
+        +Expires: DateTime
+      }
+
+      class RouteResponse {
+        +Id: Guid
+        +Stations: List<string>
+        +Price: decimal
+        +Duration: TimeSpan
+      }
+
+      class TicketResponse {
+        +Id: Guid
+        +Status: string
+        +SeatNumber: int
+        +RouteInfo: RouteResponse
+      }
+
+      class ScheduleResponse {
+        +Departure: DateTime
+        +Arrival: DateTime
+        +Stations: List<ScheduleItem>
+      }
+
+      class PaymentResponse {
+        +Success: bool
+        +TransactionId: string
+      }
+
+      class OperationResponse {
+        +Success: bool
+        +Message: string
+      }
+      
+      
+      class ComplexRouteResponse {
+        +Id: Guid
+        +TotalPrice: decimal
+        +TotalDuration: string
+        +SegmentsCount: int
+      }      
+    }
+  }
+
+  package "Mappers" {
+    
+  }
+}
+
+' #############################
+' ### Связи между компонентами ###
+' #############################
+
+AuthController --> RegisterRequest
+AuthController --> LoginRequest
+AuthController --> UserAccountResponse
+AuthController --> AuthResponse 
+
+RoutesController --> SearchRequest
+RoutesController --> RouteResponse 
+RoutesController --> ScheduleResponse 
+
+TicketsController --> BookTicketRequest 
+TicketsController --> CancelTicketRequest
+TicketsController --> PaymentRequest 
+TicketsController --> TicketResponse
+TicketsController --> PaymentResponse 
+TicketsController --> OperationResponse 
+
+ComplexRoutesController --> SearchComplexRouteRequest
+ComplexRoutesController --> ComplexRouteResponse
+ComplexRoutesController --> ScheduleResponse 
+
+
+'#############################
+'### Связи ###
+'#############################
+
+Domain.Interfaces.IUserRepository <|.. Infrastructure.Repositories.UserRepository
+Domain.Interfaces.ITicketRepository <|.. Infrastructure.Repositories.TicketRepository
+
+' IUserRepository <|.. UserRepository
+' ITicketRepository <|.. TicketRepository
+IRouteRepository <|.. RouteRepository
+ITrainRepository <|.. TrainRepository
+ICompositeRouteRepository <|.. CompositeRouteRepository
+
+' Связи между классами
+Ticket --> Route : references
+Ticket --> Train : references
+Route --> Train : contains
+Route --> Station : has many
+CompositeRoute --> Route : has many
+UserAccount --> Ticket : has many
+@enduml

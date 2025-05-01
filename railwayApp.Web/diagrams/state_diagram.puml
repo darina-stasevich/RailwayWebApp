@@ -1,0 +1,27 @@
+@startuml
+
+'### Диаграмма состояний ПОЛЬЗОВАТЕЛЯ ###
+state Пользовательский_аккаунт {
+    [*] --> Guest : Начало
+    Guest --> Registered : Регистрация
+    Registered --> Active : Активация (подтверждение email)
+    Active --> Blocked : Блокировка администратором
+    Blocked --> Active : Разблокировка
+    Active --> Deleted : Удаление аккаунта
+    Deleted --> [*] : Завершение
+}
+
+'### Диаграмма состояний БИЛЕТА ###
+state Билет {
+    [*] --> New : Создание
+    New -[#green,dashed]-> Reserved : Бронирование\n<<только если пользователь Active>>
+    Reserved --> PaymentPending : Начало оплаты
+    PaymentPending --> Paid : Успешная оплата
+    PaymentPending --> Expired : Таймаут (20 мин)
+    Paid --> Cancelled : Отмена с возвратом
+    Reserved --> Cancelled : Отмена брони
+    Cancelled --> [*] : Завершение
+    Expired --> [*] : Завершение
+}
+
+@enduml

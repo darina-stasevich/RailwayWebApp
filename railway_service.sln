@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "railway_service", "railway_service\railway_service.csproj", "{3330734A-623A-482F-8E3D-A852580276FE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "railwayApp.Web", "railwayApp.Web\railwayApp.Web.csproj", "{3330734A-623A-482F-8E3D-A852580276FE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RailwayApp.Domain", "RailwayApp.Domain\RailwayApp.Domain.csproj", "{CE4EB7AB-5537-4AAA-B80E-D8597AAD50E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -12,5 +14,9 @@ Global
 		{3330734A-623A-482F-8E3D-A852580276FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3330734A-623A-482F-8E3D-A852580276FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3330734A-623A-482F-8E3D-A852580276FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE4EB7AB-5537-4AAA-B80E-D8597AAD50E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE4EB7AB-5537-4AAA-B80E-D8597AAD50E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE4EB7AB-5537-4AAA-B80E-D8597AAD50E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE4EB7AB-5537-4AAA-B80E-D8597AAD50E8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

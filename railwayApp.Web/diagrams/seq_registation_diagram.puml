@@ -1,0 +1,35 @@
+@startuml
+actor User
+box "IN" #AliceBlue
+participant UserFrontend
+participant Backend
+participant DB
+end box
+
+User -> UserFrontend: Вводит email, пароль, телефон
+activate UserFrontend
+
+UserFrontend -> Backend: POST /api/register\n{email, password, phone}
+activate Backend
+
+Backend -> DB: Проверить уникальность email
+activate DB
+DB --> Backend: Результат проверки
+deactivate DB
+
+alt email уникален
+    Backend -> Backend: Хешировать пароль
+    Backend -> DB: Сохранить UserAccount\n(email, hash, phone, status=PENDING)
+    activate DB
+    DB --> Backend: OK
+    deactivate DB
+    Backend --> UserFrontend: 201 Created\n{"id", "email", "status"}
+else email занят
+    Backend --> UserFrontend: 409 Conflict\n{"error": "Email already exists"}
+end
+
+deactivate Backend
+
+UserFrontend -> User: Отобразить результат\n(успех/ошибка)
+deactivate UserFrontend
+@enduml

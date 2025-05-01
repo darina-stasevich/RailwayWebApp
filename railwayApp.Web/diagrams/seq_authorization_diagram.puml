@@ -1,0 +1,36 @@
+@startuml
+actor User
+box "IN" #AliceBlue
+participant UserFrontend
+participant Backend
+participant DB
+end box
+
+User -> UserFrontend: Вводит email и пароль
+activate UserFrontend
+
+UserFrontend -> Backend: POST /api/login\n{email, password}
+activate Backend
+
+Backend -> DB: Найти пользователя по email
+activate DB
+DB --> Backend: UserAccount (hash)
+deactivate DB
+
+alt пользователь найден
+    Backend -> Backend: Сравнить хеши паролей
+    alt пароль верный
+        Backend -> Backend: Сгенерировать JWT
+        Backend --> UserFrontend: 200 OK\n{"token", "expires"}
+    else пароль неверный
+        Backend --> UserFrontend: 401 Unauthorized\n{"error": "Invalid password"}
+    end
+else пользователь не найден
+    Backend --> UserFrontend: 404 Not Found\n{"error": "User not found"}
+end
+
+deactivate Backend
+
+UserFrontend -> User: Отобразить результат\n(токен/ошибка)
+deactivate UserFrontend
+@enduml

@@ -1,0 +1,102 @@
+@startuml seq_ticket_booking_composite_updated
+
+actor User
+
+box "IN" #AliceBlue
+    participant Frontend
+    participant Backend
+    participant AuthService
+    participant DB
+end box
+
+' ===== 1. Поиск составных маршрутов =====
+User -> Frontend: Вводит начальную/конечную станции, дату
+activate Frontend
+Frontend -> Backend: GET /api/composite-routes?from=...&to=...&date=...\n(Header: Authorization Bearer {token})
+activate Backend
+
+Backend -> AuthService: Проверить токен
+activate AuthService
+alt Токен невалиден
+    AuthService --> Backend: 401 Unauthorized
+    Backend --> Frontend: 401 Unauthorized
+    deactivate AuthService
+    deactivate Backend
+else
+    AuthService --> Backend: 200 OK
+    deactivate AuthService
+    Backend -> DB: Поиск составных маршрутов
+    activate DB
+    DB --> Backend: Список составных маршрутов с сегментами
+    deactivate DB
+    Backend --> Frontend: 200 OK\n(массив CompositeRouteResponse)
+end
+deactivate Backend
+Frontend -> User: Отображает составные маршруты\n(с пометкой о пересадках)
+deactivate Frontend
+
+' ===== 2. Выбор конкретного составного маршрута =====
+User -> Frontend: Выбирает составной маршрут
+activate Frontend
+Frontend -> Backend: GET /api/composite-routes/{routeId}\n(Header: Authorization Bearer {token})
+activate Backend
+Backend -> DB: Получить детали сегментов (поезда, расписание, доступные места)
+activate DB
+DB --> Backend: Детали выбранного маршрута (сегменты, поезда, время, места)
+deactivate DB
+Backend --> Frontend: 200 OK\n{сегменты с доступными местами}
+deactivate Backend
+Frontend -> User: Отображает детали маршрута с сегментами
+deactivate Frontend
+
+' ===== 3. Выбор мест для каждого сегмента =====
+loop Для каждого сегмента
+    User -> Frontend: Выбирает место для сегмента {N}\n(просмотр расписания, проверка корректности)
+    activate Frontend
+    Frontend -> Backend: POST /api/seats/reserve\n{segmentId, seatNumber}
+    activate Backend
+    Backend -> DB: Проверить доступность и корректность выбранного места\nдля сегмента {segmentId}
+    activate DB
+    alt Место некорректно или занято
+        DB --> Backend: Ошибка: Место недоступно
+        Backend --> Frontend: 409 Conflict\n{"error": "Место недоступно для сегмента {segmentId}"}
+        deactivate DB
+        deactivate Backend
+    else Место доступно
+        DB --> Backend: Подтверждение временной брони (bookingId)
+        deactivate DB
+        Backend --> Frontend: 200 OK\n{bookingId для сегмента {segmentId}}
+    end
+    deactivate Backend
+    deactivate Frontend
+end
+
+' ===== 4. Ввод паспортных данных и подтверждение бронирования =====
+User -> Frontend: Вводит паспортные данные и подтверждает бронирование
+activate Frontend
+Frontend -> Backend: POST /api/bookings/confirm\n{\n  \"bookingIds\": [...],\n  \"passportData\": \"...\"\n}\n(Header: Authorization Bearer {token})
+activate Backend
+Backend -> AuthService: Проверить токен
+activate AuthService
+alt Токен невалиден
+    AuthService --> Backend: 401 Unauthorized
+    Backend --> Frontend: 401 Unauthorized
+    deactivate AuthService
+    deactivate Backend
+else
+    AuthService --> Backend: 200 OK
+    deactivate AuthService
+end
+
+' ===== 5. Финализация бронирования =====
+Backend -> DB: Начать транзакцию
+Backend -> DB: Подтвердить бронирование для всех bookingIds\n(изменить статус на "забронирован")
+activate DB
+DB --> Backend: Бронирование подтверждено
+deactivate DB
+Backend --> Frontend: 201 Created\n{\n  \"tickets\": [\n    {\"segment\": 1, \"id\": \"...\"},\n    {\"segment\": 2, \"id\": \"...\"}\n  ]\n}
+deactivate Backend
+Frontend -> User: Отображает билеты (все сегменты забронированы)
+deactivate Frontend
+
+@enduml
