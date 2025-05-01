@@ -1,3 +1,4 @@
+using MongoDB.Bson.Serialization.Attributes;
 using RailwayApp.Domain.Statuses;
 
 namespace RailwayApp.Domain.Entities;
@@ -11,6 +12,7 @@ namespace RailwayApp.Domain.Entities;
 /// </summary>
 public class Train
 {
-    public string Number { get; set; }
-    public TrainType Type { get; set; }
+    [BsonId]
+    public string Number { get; set; } // key
+    public Guid TrainTypeId { get; set; }
 }

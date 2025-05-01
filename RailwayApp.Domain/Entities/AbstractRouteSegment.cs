@@ -1,3 +1,5 @@
+using MongoDB.Bson.Serialization.Attributes;
+
 namespace RailwayApp.Domain.Entities;
 
 /// <summary>
@@ -6,7 +8,8 @@ namespace RailwayApp.Domain.Entities;
 /// </summary>
 public class AbstractRouteSegment
 {
-    public Guid Id { get; set; }
+    [BsonId]
+    public Guid Id { get; set; } = Guid.NewGuid();
     
     public Guid AbstractRouteId { get; set; }
     

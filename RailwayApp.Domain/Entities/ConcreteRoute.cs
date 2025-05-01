@@ -1,3 +1,5 @@
+using MongoDB.Bson.Serialization.Attributes;
+
 namespace RailwayApp.Domain.Entities;
 
 // связь с абстрактным маршрутом по id
@@ -6,8 +8,11 @@ namespace RailwayApp.Domain.Entities;
 
 public class ConcreteRoute
 {
-    public Guid Id { get; set; }
+    [BsonId]
+    public Guid Id { get; set; } = Guid.NewGuid();
     public Guid AbstractRouteId { get; set; }
     public DateTime RouteDepartureDate { get; set; }
-    public List<ConcreteRouteSegment> Segments { get; set; } = new();
+    
+    // connect to segments through ConcreteRouteSegment.ConcreteRouteId
+    //public List<ConcreteRouteSegment> Segments { get; set; } = new();
 }

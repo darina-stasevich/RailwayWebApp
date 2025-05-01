@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices.JavaScript;
+using MongoDB.Bson.Serialization.Attributes;
 using RailwayApp.Domain.Statuses;
 
 namespace RailwayApp.Domain.Entities;
@@ -8,7 +9,7 @@ namespace RailwayApp.Domain.Entities;
 // связь с concreteRoute по RouteId
 /// <summary>
 /// Id как идентификатор билета
-/// UserAccountId как связь с пользователем
+/// UserAccountEmail как связь с пользователем
 /// TrainNumber как связь с Train
 /// RouteId как связь с ConcreteRoute
 /// StartSegmentId, EndSegmentId как связь с сегментами в ConcreteRoute.RouteSegments
@@ -18,23 +19,21 @@ namespace RailwayApp.Domain.Entities;
 /// </summary>
 public class Ticket
 {
-    Guid Id { get; set; }
-
-    Guid RouteId { get; set; }
-    Guid UserAccountId { get; set; }
+    [BsonId]
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid RouteId { get; set; } // concreteRoute
+    public string UserAccountEmail { get; set; }
     
-    Guid StartSegmentId { get; set; }  
-    Guid EndSegmentId { get; set; }      
+    public Guid StartSegmentId { get; set; }   // concreteRouteSegment
+    public Guid EndSegmentId { get; set; }     // concreteRouteSegment
 
-    DateTime DepartureDate { get; set; }
-    decimal Price { get; set; }
+    public DateTime DepartureDate { get; set; }
+    public decimal Price { get; set; }
 
-    PassengerData PassengerData { get; set; }
-
-    int Carriage { get; set; }
-    int Seat { get; set; }
-    
-    bool HasBedLinenSet  { get; set; }
+    public Guid PassengerDataId { get; set; }   // PassengerData
+    public int Carriage { get; set; }
+    public int Seat { get; set; }
+    public bool HasBedLinenSet  { get; set; }
         
-    TicketStatus Status { get; set; }
+    public TicketStatus Status { get; set; }
 }

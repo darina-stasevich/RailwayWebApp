@@ -1,3 +1,4 @@
+using MongoDB.Bson.Serialization.Attributes;
 using RailwayApp.Domain.Statuses;
 
 namespace RailwayApp.Domain.Entities;
@@ -9,16 +10,17 @@ namespace RailwayApp.Domain.Entities;
 /// </summary>
 public class PassengerData
 {
-    public Guid Id { get; set; }
+    [BsonId]
+    public Guid Id { get; set; } = Guid.NewGuid();
     
     public Guid TicketId { get; set; }
     
-    string Surname { get; set; }
-    string FirstName { get; set; }
-    string? SecondName { get; set; }
+    public string Surname { get; set; }
+    public string FirstName { get; set; }
+    public string? SecondName { get; set; }
 
-    Gender Gender { get; set; }
-    DateTime BirthDate { get; set; }
+    public Gender Gender { get; set; }
+    public DateTime BirthDate { get; set; }
     
-    string PassportNumber { get; set; }
+    public string PassportNumber { get; set; }
 }

@@ -1,3 +1,4 @@
+using MongoDB.Bson.Serialization.Attributes;
 using RailwayApp.Domain.Statuses;
 
 namespace RailwayApp.Domain.Entities;
@@ -7,21 +8,22 @@ namespace RailwayApp.Domain.Entities;
 
 public class UserAccount
 {
-    string Email { get; set; }
+    [BsonId]
+    public string Email { get; set; } // key
     
-    string Surname { get; set; }
-    string Name { get; set; }
-    string? SecondName { get; set; }
+    public string Surname { get; set; }
+    public string Name { get; set; }
+    public string? SecondName { get; set; }
     
-    string? PhoneNumber { get; set; }
+    public string? PhoneNumber { get; set; }
     
-    DateTime BirthDate { get; set; }
+    public DateTime BirthDate { get; set; }
     
-    string? PassportNumber { get; set; }
-    Gender? Gender { get; set; }
+    public string? PassportNumber { get; set; }
+    public Gender? Gender { get; set; }
     
-    string HashedPassword { get; set; }
-    UserAccountStatus Status { get; set; }
+    public string HashedPassword { get; set; }
+    public UserAccountStatus Status { get; set; }
     
-    List<Ticket> Tickets { get; set; } = new List<Ticket>();    
+    // public List<Ticket> Tickets { get; set; } = new List<Ticket>();    
 }
