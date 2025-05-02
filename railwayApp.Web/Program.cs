@@ -6,11 +6,32 @@ using RailwayApp.Domain.Interfaces.IRepositories;
 using RailwayApp.Web.Controllers;
 using MongoDB.Driver;
 using RailwayApp.Domain.Interfaces;
+using RailwayApp.Infrastructure;
 using RailwayApp.Infrastructure.Repositories;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false);
 
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}")
+    .WriteTo.File(
+        path: "logs/log-.txt",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 7,
+        outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"
+    )
+    .CreateLogger();
+
+builder.Host.UseSerilog(); // Интеграция с ASP.NET Core
+
+
+builder.Services.AddMongoDb(builder.Configuration);
+/*
 builder.Services.Configure<MongoDbSettings>(
     builder.Configuration.GetSection("MongoDbSettings"));
 
@@ -26,6 +47,8 @@ builder.Services.AddSingleton<IMongoClient>(serviceProvider =>
 // Репозитории
 builder.Services.AddScoped<IUserAccountRepository, UserAccountRepository>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+
+*/
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
