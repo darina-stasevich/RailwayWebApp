@@ -26,42 +26,26 @@ public class MongoDbTicketRepository : ITicketRepository
 
     public async Task<IEnumerable<Ticket>> GetByUserEmailAsync(string email)
     {
-        try
-        {
-            _logger.LogInformation($"GetByUserEmailAsync: {email}", email);
-            return await _collection.Find(t => t.UserAccountEmail == email).ToListAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"GetByUserEmailAsync: {email}", email);
-            throw;
-        }
+        return await _collection.Find(t => t.UserAccountEmail == email).ToListAsync();
     }
 
     public async Task<Ticket> GetByIdAsync(Guid id)
     {
-        try
-        {
-            _logger.LogInformation($"GetByIdAsync: {id}", id);
-            return await _collection.Find(t => t.Id == id).FirstOrDefaultAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"GetByIdAsync: {id}", id);
-            throw;
-        }
+        return await _collection.Find(t => t.Id == id).FirstOrDefaultAsync();
     }
 
-    public async Task CreateAsync(Ticket ticket)
+    public async Task<Guid> CreateAsync(Ticket ticket)
     {
         try
         {
             await _collection.InsertOneAsync(ticket);
             _logger.LogInformation($"CreateAsync: {ticket.Id}", ticket.Id);
+            return ticket.Id;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, $"CreateAsync: {ticket.Id}", ticket.Id);
+            throw;
         }
     }
 }

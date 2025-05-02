@@ -17,11 +17,13 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\RailwayApp.Application\RailwayApp.Application.csproj" />
       <ProjectReference Include="..\RailwayApp.Infrastructure\RailwayApp.Infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <Folder Include="logs\" />
+      <Folder Include="Models\Requests\" />
     </ItemGroup>
 
 </Project>

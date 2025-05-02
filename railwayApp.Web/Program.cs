@@ -5,7 +5,10 @@ using MongoDB.Bson.Serialization.Serializers;
 using RailwayApp.Domain.Interfaces.IRepositories;
 using RailwayApp.Web.Controllers;
 using MongoDB.Driver;
+using RailwayApp.Application.Services;
+using RailwayApp.Domain.Entities;
 using RailwayApp.Domain.Interfaces;
+using RailwayApp.Domain.Interfaces.IServices;
 using RailwayApp.Infrastructure;
 using RailwayApp.Infrastructure.Repositories;
 using Serilog;
@@ -29,6 +32,7 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog(); // Интеграция с ASP.NET Core
 
+builder.Services.AddScoped<IStationService, StationService>();
 
 builder.Services.AddMongoDb(builder.Configuration);
 /*

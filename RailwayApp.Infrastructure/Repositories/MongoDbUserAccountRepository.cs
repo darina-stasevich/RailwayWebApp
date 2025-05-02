@@ -25,29 +25,22 @@ public class MongoDbUserAccountRepository : IUserAccountRepository
 
     public async Task<UserAccount> GetByEmailAsync(string email)
     {
-        try
-        {
-            _logger.LogInformation($"GetByEmailAsync: {email}", email);
-            return await _collection.Find(u => u.Email == email).FirstOrDefaultAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"GetByEmailAsync: {email}", email);
-            throw;
-        }
+        return await _collection.Find(u => u.Email == email).FirstOrDefaultAsync();
     }
 
 
-    public async Task CreateAsync(UserAccount user)
+    public async Task<string> CreateAsync(UserAccount user)
     {
         try
         {
             _logger.LogInformation($"CreateAsync: {user.Email}", user.Email);
             await _collection.InsertOneAsync(user);
+            return user.Email;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, $"CreateAsync: {user.Email}", user.Email);
+            throw;
         }
     }
 }

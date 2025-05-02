@@ -35,6 +35,8 @@ public static class MongoDbExtensions
     {
         services.AddScoped<IUserAccountRepository, MongoDbUserAccountRepository>();
         services.AddScoped<ITicketRepository, MongoDbTicketRepository>();
+        services.AddScoped<IStationRepository, MongoDbStationRepository>();
+        
         return services;
     }
 }
