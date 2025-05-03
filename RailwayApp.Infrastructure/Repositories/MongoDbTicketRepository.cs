@@ -21,6 +21,11 @@ public class MongoDbTicketRepository : ITicketRepository
         _collection.Indexes.CreateOne(new CreateIndexModel<Ticket>(indexKeys));
     }
 
+    public async Task DeleteAllAsync()
+    {
+        var deleteResult = await _collection.DeleteManyAsync(FilterDefinition<Ticket>.Empty);
+    }
+    
     public async Task<IEnumerable<Ticket>> GetByUserEmailAsync(string email)
     {
         return await _collection.Find(t => t.UserAccountEmail == email).ToListAsync();

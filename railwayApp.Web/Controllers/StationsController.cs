@@ -38,7 +38,7 @@ public class StationsController(IStationService stationService
                 return BadRequest(ModelState);
             }
 
-            var station = await stationService.CreateStationAsync(request);
+            var station = await stationService.CreateStationAsync(request.Name, request.Region);
             return CreatedAtAction(nameof(GetStations), station);
         }
         catch (InvalidOperationException ex)

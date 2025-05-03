@@ -19,6 +19,10 @@ public class MongoDbUserAccountRepository : IUserAccountRepository
         var indexKeys = Builders<UserAccount>.IndexKeys.Ascending(u => u.Email);
         _collection.Indexes.CreateOne(new CreateIndexModel<UserAccount>(indexKeys));
     }
+    public async Task DeleteAllAsync()
+    {
+        var deleteResult = await _collection.DeleteManyAsync(FilterDefinition<UserAccount>.Empty);
+    }
 
     public async Task<UserAccount> GetByEmailAsync(string email)
     {

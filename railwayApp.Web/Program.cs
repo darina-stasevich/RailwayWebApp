@@ -33,6 +33,7 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog(); // Интеграция с ASP.NET Core
 
 builder.Services.AddScoped<IStationService, StationService>();
+builder.Services.AddScoped<IRouteSearchService, RouteSearchService>();
 
 builder.Services.AddMongoDb(builder.Configuration);
 /*

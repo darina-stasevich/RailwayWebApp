@@ -11,7 +11,9 @@ public class ConcreteRouteSegment
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid AbstractSegmentId { get; set; }
     public Guid ConcreteRouteId { get; set; }
-    public DateTime SegmentDepartureDate { get; set; }
+    public DateTime ConcreteDepartureDate { get; set; }
+    public DateTime ConcreteArrivalDate { get; set; }
+    
     
     // connect to carriageAvailability through CarriageAvailability.ConcreteRouteSegmentId
 //    public List<CarriageAvailability> AvailableSeats { get; set; } = new List<CarriageAvailability>();

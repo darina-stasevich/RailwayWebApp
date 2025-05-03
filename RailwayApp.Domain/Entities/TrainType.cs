@@ -8,5 +8,5 @@ public class TrainType
     [BsonId]
     public Guid Id { get; set; }
     public string TypeName { get; set; }
-    public List<CarriageTemplate> CarriageTemplates { get; set; } = new();
+//    public List<CarriageTemplate> CarriageTemplates { get; set; } = new();
 }

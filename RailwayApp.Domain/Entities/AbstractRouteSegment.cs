@@ -18,8 +18,8 @@ public class AbstractRouteSegment
     public Guid FromStationId { get; set; }
     public Guid ToStationId { get; set; }
     
-    public DateTime FromTime { get; set; }
-    public DateTime ToTime { get; set; }
+    public TimeSpan FromTime { get; set; }
+    public TimeSpan ToTime { get; set; }
     
     public decimal SegmentCost { get; set; }
 }

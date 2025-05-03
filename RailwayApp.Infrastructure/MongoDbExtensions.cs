@@ -36,7 +36,14 @@ public static class MongoDbExtensions
         services.AddScoped<IUserAccountRepository, MongoDbUserAccountRepository>();
         services.AddScoped<ITicketRepository, MongoDbTicketRepository>();
         services.AddScoped<IStationRepository, MongoDbStationRepository>();
-        
+        services.AddScoped<IAbstractRouteRepository, MongoDbAbstractRouteRepository>();
+        services.AddScoped<IAbstractRouteSegmentRepository, MongoDbAbstractRouteSegmentRepository>();
+        services.AddScoped<ICarriageAvailabilityRepository, MongoDbCarriageAvailabilityRepository>();
+        services.AddScoped<ICarriageTemplateRepository, MongoDbCarriageTemplateRepository>();
+        services.AddScoped<IConcreteRouteSegmentRepository, MongoDbConcreteRouteSegmentRepository>();
+        services.AddScoped<IConcreteRouteRepository, MongoDbConcreteRouteRepository>();
+        services.AddScoped<ITrainRepository, MongoDbTrainRepository>();
+        services.AddScoped<ITrainTypeRepository, MongoDbTrainTypeRepository>();
         return services;
     }
 }

@@ -10,48 +10,25 @@ public class StationService(IStationRepository stationRepository) : IStationServ
 {
     public async Task<List<Station>> GetAllStationsAsync()
     {
-        try
-        {
-            var stations = await stationRepository.GetAllAsync();
-            return stations;
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
+        return await stationRepository.GetAllAsync();
     }
 
-    public async Task<Guid> CreateStationAsync(CreateStationRequest request)
+    public async Task<Guid> CreateStationAsync(string name, string region)
     {
-        Station? existingStation = null;
-        try
-        {
-            existingStation = await stationRepository.GetByNameAsync(request.Name);
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
+        var existingStation = await stationRepository.GetByNameAsync(name);
 
         if (existingStation != null)
         {
-            throw new InvalidOperationException($"Station {request.Name} already exists");
+            throw new InvalidOperationException($"Station {name} already exists");
         }
         
         var station = new Station 
         { 
-            Name = request.Name,
-            Region = request.Region
+            Name = name,
+            Region = region
         };
 
-        try
-        {
-            var id = await stationRepository.CreateAsync(station);
-            return id;
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
+        var id = await stationRepository.CreateAsync(station);
+        return id;
     }
 }

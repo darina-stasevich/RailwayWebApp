@@ -16,7 +16,7 @@ public class AbstractRoute
 
     public string ActiveDays { get; set; }
     //public List<DayOfWeek> ActiveDays { get; set; } = new();
-    
+    public TimeSpan DepartureTime { get; set; }
     public decimal TransferCost { get; set; }
     public bool HasBeddingOption { get; set; }
     
