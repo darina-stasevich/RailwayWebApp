@@ -131,8 +131,6 @@ public class RouteSearchService(IStationRepository stationRepository,
                 directRoutes.Add(complexRoute);
             }
         }
-        
-        // 11. return dto
         return directRoutes;
     }
 
@@ -165,14 +163,8 @@ public class RouteSearchService(IStationRepository stationRepository,
         }
         
         // 3. Get relevant abstract route segments (has segment numbers)
-        Console.WriteLine(startSegmentNumber);
-        Console.WriteLine(endSegmentNumber);
         var abstractRouteSegments =
             await abstractRouteSegmentRepository.GetAbstractSegmentsByRouteIdAsync(abstractRoute.Id);
-        foreach (var element in abstractRouteSegments)
-        {
-            Console.WriteLine(element.SegmentNumber);
-        }
         var relevantAbstractRouteSegments = abstractRouteSegments
             .Where(s => s.SegmentNumber >= startSegmentNumber && s.SegmentNumber <= endSegmentNumber);
         var segmentsHashSet = new HashSet<Guid>(relevantAbstractRouteSegments.Select(s => s.Id));
