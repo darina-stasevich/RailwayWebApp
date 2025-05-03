@@ -8,6 +8,6 @@ public interface IAbstractRouteSegmentRepository
     Task<Guid> CreateAsync(AbstractRouteSegment segment);
     Task<List<AbstractRouteSegment>> GetAbstractSegmentsByFromStationAsync(Guid fromStationId);
     Task<List<AbstractRouteSegment>> GetAbstractSegmentsByToStationAsync(Guid toStationId);
-
     Task<List<AbstractRouteSegment>> GetAbstractSegmentsByRouteIdAsync(Guid routeId);
+    Task<AbstractRouteSegment?> GetByIdAsync(Guid id);
 }

@@ -37,6 +37,12 @@ public class MongoDbStationRepository : IStationRepository
     {
         return (await _collection.FindAsync(s => s.Id == id)).FirstOrDefault();
     }
+    
+    public async Task<List<Station>> GetByIdsAsync(List<Guid> ids)
+    {
+        var filter = Builders<Station>.Filter.In(s => s.Id, ids);
+        return (await _collection.FindAsync(filter)).ToList();
+    }
 
     public async Task<List<Station>> GetAllAsync()
     {

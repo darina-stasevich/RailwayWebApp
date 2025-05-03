@@ -41,4 +41,9 @@ public class MongoDbAbstractRouteSegmentRepository : IAbstractRouteSegmentReposi
     {
         return (await _collection.FindAsync(s => s.AbstractRouteId == routeId)).ToList();
     }
+
+    public async Task<AbstractRouteSegment?> GetByIdAsync(Guid id)
+    {
+        return await _collection.Find(s => s.Id == id).FirstOrDefaultAsync();
+    }
 }

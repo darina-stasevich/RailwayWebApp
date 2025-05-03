@@ -34,7 +34,7 @@ builder.Host.UseSerilog(); // Интеграция с ASP.NET Core
 
 builder.Services.AddScoped<IStationService, StationService>();
 builder.Services.AddScoped<IRouteSearchService, RouteSearchService>();
-
+builder.Services.AddScoped<IScheduleService, ScheduleService>();
 builder.Services.AddMongoDb(builder.Configuration);
 /*
 builder.Services.Configure<MongoDbSettings>(

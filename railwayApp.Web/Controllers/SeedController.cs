@@ -26,7 +26,6 @@ public class SeedController(
     public async Task<IActionResult> SeedDatabase()
     {
         logger.LogInformation("Starting database seed process...");
-
         try
         {
             await carriageAvailabilityRepository.DeleteAllAsync();
