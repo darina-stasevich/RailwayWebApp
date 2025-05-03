@@ -6,35 +6,52 @@ using RailwayApp.Domain.Interfaces.IServices;
 
 namespace RailwayApp.Application.Services;
 
-public class StationService(ILogger<StationService> logger, IStationRepository stationRepository) : IStationService
+public class StationService(IStationRepository stationRepository) : IStationService
 {
     public async Task<List<Station>> GetAllStationsAsync()
     {
-        var stations = await stationRepository.GetAllAsync();
-        logger.LogInformation("GetAllStationsAsync get {stations.Count} stations", stations.Count);
-        
-        return stations;
+        try
+        {
+            var stations = await stationRepository.GetAllAsync();
+            return stations;
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
     }
 
     public async Task<Guid> CreateStationAsync(CreateStationRequest request)
     {
-        var existingStation = await stationRepository.GetByNameAsync(request.Name);
+        Station? existingStation = null;
+        try
+        {
+            existingStation = await stationRepository.GetByNameAsync(request.Name);
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
+
         if (existingStation != null)
         {
-            logger.LogWarning("Station {Name} already exists", request.Name);
             throw new InvalidOperationException($"Station {request.Name} already exists");
         }
         
-        // Создание новой станции
         var station = new Station 
         { 
             Name = request.Name,
             Region = request.Region
         };
 
-        await stationRepository.CreateAsync(station);
-        logger.LogInformation("Create station: {Id} - {Name} - {Region}", station.Id, station.Name, station.Region);
-
-        return station.Id;
+        try
+        {
+            var id = await stationRepository.CreateAsync(station);
+            return id;
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
     }
 }

@@ -11,11 +11,8 @@ using MongoDB.Driver;
 public class MongoDbUserAccountRepository : IUserAccountRepository
 {
     private readonly IMongoCollection<UserAccount> _collection;
-    private readonly ILogger<MongoDbUserAccountRepository> _logger;
-    public MongoDbUserAccountRepository(IMongoClient client, IOptions<MongoDbSettings> settings, ILogger<MongoDbUserAccountRepository> logger)
+    public MongoDbUserAccountRepository(IMongoClient client, IOptions<MongoDbSettings> settings)
     {
-        _logger = logger;
-        
         var database = client.GetDatabase(settings.Value.DatabaseName);
         _collection = database.GetCollection<UserAccount>("UserAccounts");
         
@@ -31,16 +28,7 @@ public class MongoDbUserAccountRepository : IUserAccountRepository
 
     public async Task<string> CreateAsync(UserAccount user)
     {
-        try
-        {
-            _logger.LogInformation($"CreateAsync: {user.Email}", user.Email);
-            await _collection.InsertOneAsync(user);
-            return user.Email;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"CreateAsync: {user.Email}", user.Email);
-            throw;
-        }
+        await _collection.InsertOneAsync(user);
+        return user.Email;
     }
 }

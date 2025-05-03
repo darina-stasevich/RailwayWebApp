@@ -12,11 +12,8 @@ namespace RailwayApp.Infrastructure.Repositories;
 public class MongoDbTicketRepository : ITicketRepository
 {
     private readonly IMongoCollection<Ticket> _collection;
-    private readonly ILogger<MongoDbTicketRepository> _logger;
-    public MongoDbTicketRepository(IMongoClient client, IOptions<MongoDbSettings> settings, ILogger<MongoDbTicketRepository> logger)
+    public MongoDbTicketRepository(IMongoClient client, IOptions<MongoDbSettings> settings)
     {
-        _logger = logger;
-        
         var database = client.GetDatabase(settings.Value.DatabaseName);
         _collection = database.GetCollection<Ticket>("Tickets");
         
@@ -36,16 +33,7 @@ public class MongoDbTicketRepository : ITicketRepository
 
     public async Task<Guid> CreateAsync(Ticket ticket)
     {
-        try
-        {
-            await _collection.InsertOneAsync(ticket);
-            _logger.LogInformation($"CreateAsync: {ticket.Id}", ticket.Id);
-            return ticket.Id;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"CreateAsync: {ticket.Id}", ticket.Id);
-            throw;
-        }
+        await _collection.InsertOneAsync(ticket);
+        return ticket.Id;
     }
 }

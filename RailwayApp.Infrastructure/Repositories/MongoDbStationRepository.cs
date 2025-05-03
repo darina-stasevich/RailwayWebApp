@@ -10,11 +10,9 @@ namespace RailwayApp.Infrastructure.Repositories;
 public class MongoDbStationRepository : IStationRepository
 { 
     private readonly IMongoCollection<Station> _collection;
-    private readonly ILogger<MongoDbStationRepository> _logger;
     
-    public MongoDbStationRepository(IMongoClient client, IOptions<MongoDbSettings> settings, ILogger<MongoDbStationRepository> logger)
+    public MongoDbStationRepository(IMongoClient client, IOptions<MongoDbSettings> settings)
     {
-        _logger = logger;
         
         var database = client.GetDatabase(settings.Value.DatabaseName);
         _collection = database.GetCollection<Station>("Stations");
@@ -22,17 +20,8 @@ public class MongoDbStationRepository : IStationRepository
     
     public async Task<Guid> CreateAsync(Station station)
     {
-        try
-        {
-            await _collection.InsertOneAsync(station);
-            _logger.LogInformation($"Created station: {station.Name}", station.Name);
-            return station.Id;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error Create station {station.Name}", station.Name);
-            throw;
-        }
+        await _collection.InsertOneAsync(station);
+        return station.Id;
     }
 
     public async Task<Station?> GetByNameAsync(string name)
