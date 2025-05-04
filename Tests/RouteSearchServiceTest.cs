@@ -46,7 +46,7 @@ public class RouteSearchServiceTest
     private TestDataContainer GenerateTestData()
     {
         var container = new TestDataContainer();
-        var date = DateTime.Now.AddDays(2);
+        var date = DateTime.Now.AddDays(2).Date;
 
         var stations = new List<Station>
         {
@@ -366,6 +366,8 @@ public class RouteSearchServiceTest
                 carriage2.OccupiedSeats = new BitArray(initialValues10_1);
             }
 
+            idx++;
+
             carriageAvailabilities.Add(carriage1);
             carriageAvailabilities.Add(carriage2);
         }
@@ -489,20 +491,23 @@ public class RouteSearchServiceTest
         var fromStationId = _testData.BrestId;
         var toStationId = _testData.MinskId;
         var departureDate = DateTime.Now.AddDays(2);
+        Console.WriteLine(fromStationId);
+        Console.WriteLine(toStationId);
 
         var result = await _routeSearchService.GetRoutesAsync(fromStationId, toStationId, departureDate, true);
         
-        Assert.AreEqual(2, result.Count, "Ожидалось найти ровно 2 маршрута.");
+        Assert.That(result.Count, Is.EqualTo(2), "Ожидалось найти ровно 2 маршрута.");
         var result1 = result[0];
-        Assert.True(result1.TotalDuration == TimeSpan.Zero.Add(TimeSpan.FromHours(3)));
-        Assert.True(result1.DirectRoutes.Count == 1, "Должен был быть найден маршрут без пересадки");
-        Assert.True(result1.TotalCost == 25m, "Стоимость маршрута должна быть 25");
+        Assert.That(result1.TotalDuration, Is.EqualTo(TimeSpan.Zero.Add(TimeSpan.FromHours(3))), "ожидаемое время поездки три часа");
+        Assert.That(result1.DirectRoutes.Count, Is.EqualTo(1), "Должен был быть найден маршрут без пересадки");
+        Assert.That(result1.TotalCost, Is.EqualTo(25m), "Стоимость маршрута должна быть 25");
+        Assert.That(result1.DirectRoutes[0].AvailableSeats, Is.EqualTo(10), "Должно быть 5 свободных мест в поезде");
         
         var result2 = result[1];
-        Assert.True(result2.TotalDuration == TimeSpan.Zero.Add(TimeSpan.FromMinutes(118)));
-        Assert.True(result2.DirectRoutes.Count == 1, "Должен был быть найден маршрут без пересадки");
-        Assert.True(result2.TotalCost == 25.9m, "Стоимость маршрута должна быть 25.9");
-        
+        Assert.That(result2.TotalDuration, Is.EqualTo(TimeSpan.Zero.Add(TimeSpan.FromMinutes(118))), "ожидаемое время поездки 118 минут");
+        Assert.That(result2.DirectRoutes.Count, Is.EqualTo(1), "Должен был быть найден маршрут без пересадки");
+        Assert.That(result2.TotalCost, Is.EqualTo(25.9m), "Стоимость маршрута должна быть 25.9");
+        Assert.That(result2.DirectRoutes[0].AvailableSeats, Is.EqualTo(6), "Должно быть 3 свободных места в поезде");
     }
     
     [Test]
@@ -514,12 +519,12 @@ public class RouteSearchServiceTest
 
         var result = await _routeSearchService.GetRoutesAsync(fromStationId, toStationId, departureDate, true);
         
-        Assert.AreEqual(1, result.Count, "Ожидалось найти ровно 1 маршрут.");
+        Assert.That(result.Count, Is.EqualTo(1), "Ожидалось найти ровно 1 маршрут.");
         var result1 = result[0];
-        Assert.True(result1.TotalDuration == TimeSpan.Zero.Add(TimeSpan.FromMinutes(38)));
-        Assert.True(result1.DirectRoutes.Count == 1, "Должен был быть найден маршрут без пересадки");
-        Assert.True(result1.TotalCost == 21m, "Стоимость маршрута должна быть 25");
-        
+        Assert.That(result1.TotalDuration, Is.EqualTo(TimeSpan.Zero.Add(TimeSpan.FromMinutes(38))),"ожидаемое время поездки 38 минут");
+        Assert.That(result1.DirectRoutes.Count, Is.EqualTo(1), "Должен был быть найден маршрут без пересадки");
+        Assert.That(result1.TotalCost, Is.EqualTo(21m), "Стоимость маршрута должна быть 21");
+        Assert.That(result1.DirectRoutes[0].AvailableSeats, Is.EqualTo(10), "Должно быть 10 свободных мест в поезде");
     }
 }
 

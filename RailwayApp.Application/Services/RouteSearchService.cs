@@ -16,6 +16,8 @@ public class RouteSearchService(IStationRepository stationRepository,
 {
     public Task<List<ComplexRouteDto>> GetRoutesAsync(Guid fromStationId, Guid toStationId, DateTime departureDate, bool isDirectRoute)
     {
+        Console.WriteLine(fromStationId);
+        Console.WriteLine(toStationId);
         var fromStation = stationRepository.GetByIdAsync(fromStationId).Result;
         if (fromStation == null)
         {
