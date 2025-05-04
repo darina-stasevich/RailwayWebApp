@@ -7,5 +7,5 @@ public interface ICarriageTemplateRepository
     Task DeleteAllAsync();
     Task<Guid> CreateAsync(CarriageTemplate carriageTemplate);
     Task<CarriageTemplate?> GetByIdAsync(Guid id);
-    Task<List<CarriageTemplate>> GetByTrainTypeIdAsync(Guid trainTypeId);
+    Task<List<CarriageTemplate>?> GetByTrainTypeIdAsync(Guid trainTypeId);
 }

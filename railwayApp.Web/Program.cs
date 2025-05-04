@@ -35,6 +35,11 @@ builder.Host.UseSerilog(); // Интеграция с ASP.NET Core
 builder.Services.AddScoped<IStationService, StationService>();
 builder.Services.AddScoped<IRouteSearchService, RouteSearchService>();
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
+builder.Services.AddScoped<ICarriageService, CarriageService>();
+builder.Services.AddScoped<ICarriageSeatService, CarriageSeatService>();
+builder.Services.AddScoped<ICarriageTemplateService, CarriageTemplateService>();
+builder.Services.AddScoped<IPriceCalculationService, PriceCalculationService>();
+
 builder.Services.AddMongoDb(builder.Configuration);
 /*
 builder.Services.Configure<MongoDbSettings>(

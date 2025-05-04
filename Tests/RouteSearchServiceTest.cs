@@ -491,8 +491,6 @@ public class RouteSearchServiceTest
         var fromStationId = _testData.BrestId;
         var toStationId = _testData.MinskId;
         var departureDate = DateTime.Now.AddDays(2);
-        Console.WriteLine(fromStationId);
-        Console.WriteLine(toStationId);
 
         var result = await _routeSearchService.GetRoutesAsync(fromStationId, toStationId, departureDate, true);
         

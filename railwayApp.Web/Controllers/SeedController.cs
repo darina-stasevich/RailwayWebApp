@@ -1,7 +1,7 @@
 using System.Collections;
 using Microsoft.AspNetCore.Mvc;
-using RailwayApp.Application.Models;
 using RailwayApp.Domain.Entities;
+using RailwayApp.Domain.Interfaces.Initializers;
 using RailwayApp.Domain.Interfaces.IRepositories;
 
 namespace railway_service.Controllers;
@@ -20,8 +20,11 @@ public class SeedController(
     ITrainRepository trainRepository,
     ITrainTypeRepository trainTypeRepository,
     IUserAccountRepository userAccountRepository,
-    ILogger<SeedController> logger) : ControllerBase
+    ILogger<SeedController> logger
+) : ControllerBase
 {
+    private readonly TrainCarriageInitializer _trainCarriageInitializer = new();
+
     [HttpPost]
     public async Task<IActionResult> SeedDatabase()
     {
@@ -40,47 +43,68 @@ public class SeedController(
             await trainRepository.DeleteAllAsync();
             await trainTypeRepository.DeleteAllAsync();
 
+            foreach (var carriageTemplate in _trainCarriageInitializer.CarriageTemplates)
+                await carriageTemplateRepository.CreateAsync(carriageTemplate);
+
+            foreach (var type in _trainCarriageInitializer.TrainTypes) await trainTypeRepository.CreateAsync(type);
+
             var stations = new List<Station>
             {
-                new Station
+                new()
                 {
                     Name = "Брест",
-                    Region = "Брестская",
+                    Region = "Брестская"
                 },
-                new Station
+                new()
                 {
                     Name = "Жабинка",
-                    Region = "Брестская",
+                    Region = "Брестская"
                 },
-                new Station
+                new()
                 {
                     Name = "Барановичи",
-                    Region = "Брестская",
+                    Region = "Брестская"
                 },
-                new Station
+                new()
                 {
                     Name = "Лунинец",
-                    Region = "Брестская",
+                    Region = "Брестская"
                 },
-                new Station
+                new()
                 {
                     Name = "Минск",
-                    Region = "Минск",
+                    Region = "Минск"
                 },
-                new Station
+                new()
                 {
                     Name = "Гомель",
-                    Region = "Гомельская",
-                },
+                    Region = "Гомельская"
+                }
             };
-            foreach (var station in stations)
-            { 
-                await stationRepository.CreateAsync(station);
-            }
+            foreach (var station in stations) await stationRepository.CreateAsync(station);
+            var trains = new List<Train>
+            {
+                new()
+                {
+                    Number = "TR1",
+                    TrainTypeId = _trainCarriageInitializer.TrainTypes[8].Id
+                },
+                new()
+                {
+                    Number = "TR2",
+                    TrainTypeId = _trainCarriageInitializer.TrainTypes[9].Id
+                },
+                new()
+                {
+                    Number = "TR3",
+                    TrainTypeId = _trainCarriageInitializer.TrainTypes[10].Id
+                }
+            };
+            foreach (var train in trains) await trainRepository.CreateAsync(train);
 
             var abstractRoutes = new List<AbstractRoute>
             {
-                new AbstractRoute
+                new()
                 {
                     TrainNumber = "TR1",
                     ActiveDays = "MTWHFSN",
@@ -88,7 +112,7 @@ public class SeedController(
                     HasBeddingOption = false,
                     DepartureTime = TimeSpan.Zero.Add(TimeSpan.FromHours(15))
                 },
-                new AbstractRoute
+                new()
                 {
                     TrainNumber = "TR2",
                     ActiveDays = "MTWHFSN",
@@ -96,7 +120,7 @@ public class SeedController(
                     HasBeddingOption = true,
                     DepartureTime = TimeSpan.Zero.Add(TimeSpan.FromHours(9))
                 },
-                new AbstractRoute
+                new()
                 {
                     TrainNumber = "TR1",
                     ActiveDays = "MTWHFSN",
@@ -104,7 +128,7 @@ public class SeedController(
                     HasBeddingOption = false,
                     DepartureTime = TimeSpan.Zero.Add(TimeSpan.FromHours(8).Add(TimeSpan.FromMinutes(22)))
                 },
-                new AbstractRoute
+                new()
                 {
                     TrainNumber = "TR2",
                     ActiveDays = "MTWHFSN",
@@ -112,7 +136,7 @@ public class SeedController(
                     HasBeddingOption = true,
                     DepartureTime = TimeSpan.Zero.Add(TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(05)))
                 },
-                new AbstractRoute
+                new()
                 {
                     TrainNumber = "TR3",
                     ActiveDays = "MTWHFSN",
@@ -120,22 +144,19 @@ public class SeedController(
                     HasBeddingOption = true,
                     DepartureTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(22)))
                 },
-                new AbstractRoute
+                new()
                 {
                     TrainNumber = "TR3",
                     ActiveDays = "MTWHFSN",
                     TransferCost = 20,
                     HasBeddingOption = true,
                     DepartureTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(22)))
-                },
+                }
             };
-            foreach (var route in abstractRoutes)
-            {
-                abstractRouteRepository.CreateAsync(route);
-            }
+            foreach (var route in abstractRoutes) abstractRouteRepository.CreateAsync(route);
             var abstractRouteSegments = new List<AbstractRouteSegment>
             {
-                new AbstractRouteSegment
+                new()
                 {
                     AbstractRouteId = abstractRoutes[0].Id,
                     SegmentNumber = 1,
@@ -145,7 +166,7 @@ public class SeedController(
                     ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18)),
                     SegmentCost = 5
                 },
-                new AbstractRouteSegment
+                new()
                 {
                     AbstractRouteId = abstractRoutes[1].Id,
                     SegmentNumber = 1,
@@ -155,7 +176,7 @@ public class SeedController(
                     ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(12)),
                     SegmentCost = 5
                 },
-                new AbstractRouteSegment
+                new()
                 {
                     AbstractRouteId = abstractRoutes[2].Id,
                     SegmentNumber = 1,
@@ -165,7 +186,7 @@ public class SeedController(
                     ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(8).Add(TimeSpan.FromMinutes(40))),
                     SegmentCost = (decimal)2.5
                 },
-                new AbstractRouteSegment
+                new()
                 {
                     AbstractRouteId = abstractRoutes[2].Id,
                     SegmentNumber = 2,
@@ -175,7 +196,7 @@ public class SeedController(
                     ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(9).Add(TimeSpan.FromMinutes(20))),
                     SegmentCost = 3
                 },
-                new AbstractRouteSegment
+                new()
                 {
                     AbstractRouteId = abstractRoutes[2].Id,
                     SegmentNumber = 3,
@@ -185,7 +206,7 @@ public class SeedController(
                     ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(10).Add(TimeSpan.FromMinutes(20))),
                     SegmentCost = 2.4m
                 },
-                new AbstractRouteSegment
+                new()
                 {
                     AbstractRouteId = abstractRoutes[3].Id,
                     SegmentNumber = 3,
@@ -195,7 +216,7 @@ public class SeedController(
                     ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(40))),
                     SegmentCost = (decimal)2.5
                 },
-                new AbstractRouteSegment
+                new()
                 {
                     AbstractRouteId = abstractRoutes[3].Id,
                     SegmentNumber = 2,
@@ -205,7 +226,7 @@ public class SeedController(
                     ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(20))),
                     SegmentCost = 3
                 },
-                new AbstractRouteSegment
+                new()
                 {
                     AbstractRouteId = abstractRoutes[3].Id,
                     SegmentNumber = 1,
@@ -215,8 +236,8 @@ public class SeedController(
                     ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(40))),
                     SegmentCost = 2.4m
                 },
-                
-                new AbstractRouteSegment
+
+                new()
                 {
                     AbstractRouteId = abstractRoutes[4].Id,
                     SegmentNumber = 1,
@@ -226,7 +247,7 @@ public class SeedController(
                     ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(40))),
                     SegmentCost = (decimal)2.5
                 },
-                new AbstractRouteSegment
+                new()
                 {
                     AbstractRouteId = abstractRoutes[4].Id,
                     SegmentNumber = 2,
@@ -236,7 +257,7 @@ public class SeedController(
                     ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(21).Add(TimeSpan.FromMinutes(20))),
                     SegmentCost = 3
                 },
-                new AbstractRouteSegment
+                new()
                 {
                     AbstractRouteId = abstractRoutes[4].Id,
                     SegmentNumber = 3,
@@ -246,7 +267,7 @@ public class SeedController(
                     ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(30).Add(TimeSpan.FromMinutes(20))),
                     SegmentCost = 2.4m
                 },
-                new AbstractRouteSegment
+                new()
                 {
                     AbstractRouteId = abstractRoutes[5].Id,
                     SegmentNumber = 3,
@@ -256,7 +277,7 @@ public class SeedController(
                     ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(30).Add(TimeSpan.FromMinutes(40))),
                     SegmentCost = (decimal)2.5
                 },
-                new AbstractRouteSegment
+                new()
                 {
                     AbstractRouteId = abstractRoutes[5].Id,
                     SegmentNumber = 2,
@@ -266,7 +287,7 @@ public class SeedController(
                     ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(20))),
                     SegmentCost = 3
                 },
-                new AbstractRouteSegment
+                new()
                 {
                     AbstractRouteId = abstractRoutes[5].Id,
                     SegmentNumber = 1,
@@ -275,15 +296,12 @@ public class SeedController(
                     FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(17)).Add(TimeSpan.FromMinutes(05)),
                     ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(40))),
                     SegmentCost = 2.4m
-                },
+                }
             };
-            foreach (var segment in abstractRouteSegments)
-            {
-                await abstractRouteSegmentRepository.CreateAsync(segment);
-            }
+            foreach (var segment in abstractRouteSegments) await abstractRouteSegmentRepository.CreateAsync(segment);
 
             var concreteRoutes = new List<ConcreteRoute>();
-            for (int i = 0; i < 7; i++)
+            for (var i = 0; i < 7; i++)
             {
                 var date = DateTime.Now.Date;
                 date = date.AddDays(i);
@@ -292,7 +310,7 @@ public class SeedController(
                     var route = new ConcreteRoute
                     {
                         AbstractRouteId = abstractRoute.Id,
-                        RouteDepartureDate = date.Add(abstractRoute.DepartureTime),
+                        RouteDepartureDate = date.Add(abstractRoute.DepartureTime)
                     };
                     Console.WriteLine($"time for concrete route is {route.RouteDepartureDate}");
                     await concreteRouteRepository.CreateAsync(route);
@@ -301,11 +319,11 @@ public class SeedController(
             }
 
             var concreteRouteSegments = new List<ConcreteRouteSegment>();
-            for (int i = 0; i < 7; i++)
+            for (var i = 0; i < 7; i++)
             {
                 var date = DateTime.Now.Date;
                 date = date.AddDays(i);
-                for (int j = 0; j < abstractRouteSegments.Count; j ++)
+                for (var j = 0; j < abstractRouteSegments.Count; j++)
                 {
                     var abstractRouteSegment = abstractRouteSegments[j];
                     var concreteRouteIndex = i * 6;
@@ -331,67 +349,95 @@ public class SeedController(
                         AbstractSegmentId = abstractRouteSegment.Id,
                         ConcreteRouteId = concreteRoutes[concreteRouteIndex].Id,
                         ConcreteDepartureDate = date.Add(abstractRouteSegment.FromTime),
-                        ConcreteArrivalDate = date.Add(abstractRouteSegment.ToTime),
+                        ConcreteArrivalDate = date.Add(abstractRouteSegment.ToTime)
                     };
                     concreteRouteSegments.Add(routeSegment);
                     await concreteRouteSegmentRepository.CreateAsync(routeSegment);
                 }
             }
 
-            var carriageAvailabilities = new List<CarriageAvailability>();
-            var template1Id = Guid.NewGuid();
-            var template2Id = Guid.NewGuid();
-            var random = new Random();
-            foreach (var concreteRouteSegment in concreteRouteSegments)
-            {
-                Console.WriteLine("here");
-                bool[] initialValues10 = {
-                    random.Next()%2==0?true:false,
-                    random.Next()%2==0?true:false,
-                    random.Next()%2==0?true:false,
-                    random.Next()%2==0?true:false,
-                    random.Next()%2==0?true:false,
-                    random.Next()%2==0?true:false,
-                    random.Next()%2==0?true:false,
-                    random.Next()%2==0?true:false,
-                    random.Next()%2==0?true:false,
-                    random.Next()%2==0?true:false,
-                };
-                bool[] initialValues7 = {
-                    random.Next()%2==0?true:false,
-                    random.Next()%2==0?true:false,
-                    random.Next()%2==0?true:false,
-                    random.Next()%2==0?true:false,
-                    random.Next()%2==0?true:false,
-                    random.Next()%2==0?true:false,
-                    random.Next()%2==0?true:false,
-                };
-                var carriage1 = new CarriageAvailability
-                {
-                    ConcreteRouteSegmentId = concreteRouteSegment.Id,
-                    CarriageTemplateId = template1Id,
-                    OccupiedSeats = new BitArray(initialValues10)
-                };
-                var carriage2 = new CarriageAvailability
-                {
-                    ConcreteRouteSegmentId = concreteRouteSegment.Id,
-                    CarriageTemplateId = template2Id,
-                    OccupiedSeats = new BitArray(initialValues7)
-                };
+            var trainTypeTr1Id = _trainCarriageInitializer.TrainTypes[8].Id;
+            var trainTypeTr2Id = _trainCarriageInitializer.TrainTypes[9].Id;
+            var trainTypeTr3Id = _trainCarriageInitializer.TrainTypes[10].Id;
 
-                var id1= await carriageAvailabilityRepository.CreateAsync(carriage1);
-                var id2 = await carriageAvailabilityRepository.CreateAsync(carriage2);
-                Console.WriteLine($"ok add {id1} {id2}");
-                carriageAvailabilities.Add(carriage1);
-                carriageAvailabilities.Add(carriage2);
+            var templatesByTrainTypeId = _trainCarriageInitializer.CarriageTemplates
+                .GroupBy(t => t.TrainTypeId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var random = new Random();
+            var carriageAvailabilities = new List<CarriageAvailability>();
+            var firstDayConcreteSegments = concreteRouteSegments.Take(14);
+            foreach (var concreteRouteSegment in firstDayConcreteSegments)
+            {
+                var concreteRoute = concreteRoutes.FirstOrDefault(cr => cr.Id == concreteRouteSegment.ConcreteRouteId);
+                if (concreteRoute == null)
+                {
+                    Console.WriteLine(
+                        $"Warning: ConcreteRoute not found for ConcreteSegmentId {concreteRouteSegment.Id}");
+                    continue;
+                }
+
+                var abstractRoute = abstractRoutes.FirstOrDefault(ar => ar.Id == concreteRoute.AbstractRouteId);
+                if (abstractRoute == null)
+                {
+                    Console.WriteLine($"Warning: AbstractRoute not found for ConcreteRouteId {concreteRoute.Id}");
+                    continue;
+                }
+
+                Guid currentTrainTypeId;
+                switch (abstractRoute.TrainNumber)
+                {
+                    case "TR1":
+                        currentTrainTypeId = trainTypeTr1Id;
+                        break;
+                    case "TR2":
+                        currentTrainTypeId = trainTypeTr2Id;
+                        break;
+                    case "TR3":
+                        currentTrainTypeId = trainTypeTr3Id;
+                        break;
+                    default:
+                        Console.WriteLine(
+                            $"Warning: Unknown TrainNumber {abstractRoute.TrainNumber} for AbstractRouteId {abstractRoute.Id}");
+                        continue;
+                }
+
+                if (!templatesByTrainTypeId.TryGetValue(currentTrainTypeId, out var relevantTemplates))
+                {
+                    Console.WriteLine(
+                        $"Warning: No CarriageTemplates found for TrainTypeId {currentTrainTypeId} (TrainNumber {abstractRoute.TrainNumber})");
+                    continue;
+                }
+
+                foreach (var template in relevantTemplates)
+                {
+                    var initialValues = new bool[template.TotalSeats];
+                    for (var i = 0; i < template.TotalSeats; i++)
+                        initialValues[i] = random.Next(0, 2) == 1;
+                    var occupiedSeatsArray = new BitArray(initialValues);
+
+                    var carriageAvailability = new CarriageAvailability
+                    {
+                        ConcreteRouteSegmentId = concreteRouteSegment.Id,
+                        CarriageTemplateId = template.Id,
+                        OccupiedSeats = occupiedSeatsArray
+                    };
+
+                    var createdId = await carriageAvailabilityRepository.CreateAsync(carriageAvailability);
+                    carriageAvailabilities.Add(carriageAvailability); // Добавляем в локальный список (если нужно)
+
+                    Console.WriteLine(
+                        $"OK add CarriageAvailability (ID: {createdId}) for Segment {concreteRouteSegment.Id}, Template {template.LayoutIdentifier} ({template.Id})");
+                }
             }
+
             logger.LogInformation("Database seed process completed successfully.");
             return Ok("Database seeded successfully.");
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error occurred during database seeding.");
-            return StatusCode(500, "Internal Server Error");    
+            return StatusCode(500, "Internal Server Error");
         }
     }
 }

@@ -32,7 +32,7 @@ public class MongoDbCarriageTemplateRepository : ICarriageTemplateRepository
         return (await _collection.FindAsync(t => t.Id == id)).FirstOrDefault();
     }
 
-    public async Task<List<CarriageTemplate>> GetByTrainTypeIdAsync(Guid trainTypeId)
+    public async Task<List<CarriageTemplate>?> GetByTrainTypeIdAsync(Guid trainTypeId)
     {
         return (await _collection.FindAsync(t => t.TrainTypeId == trainTypeId)).ToList();
     }
