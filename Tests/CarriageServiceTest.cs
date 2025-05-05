@@ -1,5 +1,7 @@
 using System.Collections;
+using System.Runtime.Serialization;
 using Moq;
+using RailwayApp.Application.Models;
 using RailwayApp.Application.Services;
 using RailwayApp.Domain.Entities;
 using RailwayApp.Domain.Interfaces.Initializers;
@@ -8,9 +10,8 @@ using RailwayApp.Domain.Interfaces.IRepositories;
 namespace Tests;
 
 [TestFixture]
-public class RouteSearchServiceTest
+public class CarriageServiceTest
 {
-    private Mock<IStationRepository> _mockStationRepository;
     private Mock<IAbstractRouteSegmentRepository> _mockAbstractRouteSegmentRepository;
     private Mock<IConcreteRouteSegmentRepository> _mockConcreteRouteSegmentRepository;
     private Mock<IAbstractRouteRepository> _mockAbstractRouteRepository;
@@ -19,12 +20,12 @@ public class RouteSearchServiceTest
     private Mock<ITrainRepository> _mockTrainRepository;
     private Mock<ICarriageTemplateRepository> _mockCarriageTemplateRepository;
     
-    private RouteSearchService _routeSearchService;
+    private CarriageService _carriageService;
     
     private PriceCalculationService _mockPriceCalculationService;
     private CarriageTemplateService _mockCarriageTemplateService;
     private CarriageSeatService _mockCarriageSeatService;
-    private TrainCarriageInitializer _trainCarriageInitializer = new TrainCarriageInitializer();
+    private readonly TrainCarriageInitializer _trainCarriageInitializer = new TrainCarriageInitializer();
 
     private TestDataContainer _testData;
 
@@ -33,7 +34,6 @@ public class RouteSearchServiceTest
     {
         _testData = GenerateTestData();
 
-        _mockStationRepository = new Mock<IStationRepository>();
         _mockAbstractRouteSegmentRepository = new Mock<IAbstractRouteSegmentRepository>();
         _mockConcreteRouteSegmentRepository = new Mock<IConcreteRouteSegmentRepository>();
         _mockAbstractRouteRepository = new Mock<IAbstractRouteRepository>();
@@ -52,12 +52,11 @@ public class RouteSearchServiceTest
         _mockPriceCalculationService = new PriceCalculationService(_mockConcreteRouteRepository.Object,
             _mockAbstractRouteRepository.Object, _mockAbstractRouteSegmentRepository.Object,
             _mockCarriageTemplateRepository.Object, _mockCarriageTemplateService);
-
+        
         ConfigureMocks();
 
-        _routeSearchService = new RouteSearchService(_mockStationRepository.Object,
-            _mockAbstractRouteSegmentRepository.Object, _mockConcreteRouteSegmentRepository.Object,
-            _mockPriceCalculationService, _mockCarriageSeatService);
+        _carriageService = new CarriageService(_mockCarriageSeatService, _mockPriceCalculationService,
+            _mockCarriageTemplateService);
     }
 
     private TestDataContainer GenerateTestData()
@@ -327,6 +326,13 @@ public class RouteSearchServiceTest
                 concreteRoutes.Add(route);
             }
         }
+        
+        container.ConcreteRouteBrestMinskDirectId = concreteRoutes[0].Id;
+        container.ConcreteRouteBrestMinskComplexId = concreteRoutes[2].Id;
+        container.ConcreteRouteMinskBrestDirectId = concreteRoutes[1].Id;
+        container.ConcreteRouteMinskBrestComplexId = concreteRoutes[3].Id;
+        container.ConcreteRouteBrestHomelComplexId = concreteRoutes[4].Id;
+        container.ConcreteRouteHomelBrestComplexId = concreteRoutes[5].Id;
 
         container.ConcreteRoutes.AddRange(concreteRoutes);
 
@@ -366,8 +372,7 @@ public class RouteSearchServiceTest
         container.ConcreteRouteSegments.AddRange(concreteRouteSegments);
 
         container.CarriageAvailabilities = new List<CarriageAvailability>();
-        var random = new Random();
-
+        
         var firstDayConcreteRouteIds = container.ConcreteRoutes
             .Where(cr => cr.RouteDepartureDate.Date == date)
             .Select(cr => cr.Id)
@@ -376,6 +381,8 @@ public class RouteSearchServiceTest
         var firstDayConcreteSegments = container.ConcreteRouteSegments
             .Where(cs => firstDayConcreteRouteIds.Contains(cs.ConcreteRouteId));
         
+        int idx = 0;
+
         foreach (var concreteSegment in firstDayConcreteSegments)
         {
             var concreteRoute = container.ConcreteRoutes.First(cr => cr.Id == concreteSegment.ConcreteRouteId);
@@ -389,14 +396,29 @@ public class RouteSearchServiceTest
                 case "TR3": currentTrainTypeId = trainTypeTr3Id; break;
                 default: continue;
             }
-
+            
             if (templatesByTrainTypeId.TryGetValue(currentTrainTypeId, out var relevantTemplates))
             {
                 foreach (var template in relevantTemplates)
                 {
+                    bool isSegmentEven = idx % 2 == 0;
                     var initialValues = new bool[template.TotalSeats];
-                    for (var i = 0; i < template.TotalSeats; i++)
-                        initialValues[i] = random.Next(0, 2) == 1;
+                    if (isSegmentEven)
+                    {
+                        for (int i = 0; i < template.TotalSeats; i++)
+                        {
+                            initialValues[i] = i % 2 == 0;
+                        }
+                    }
+                    else
+                    {
+                        int half = (template.TotalSeats + 1) / 2;
+                        for (int i = 0; i < template.TotalSeats; i++)
+                        {
+                            initialValues[i] = i < half;
+                        }
+                    }
+
                     var occupiedSeatsArray = new BitArray(initialValues);
 
                     var carriageAvailability = new CarriageAvailability
@@ -409,6 +431,8 @@ public class RouteSearchServiceTest
                     container.CarriageAvailabilities.Add(carriageAvailability);
                 }
             }
+
+            idx++;
         }
 
         return container;
@@ -416,14 +440,6 @@ public class RouteSearchServiceTest
 
     private void ConfigureMocks()
     {
-        // --- Настройка Station Repository ---
-        foreach (var station in _testData.Stations)
-            _mockStationRepository.Setup(repo => repo.GetByIdAsync(station.Id))
-                .ReturnsAsync(station);
-
-        _mockStationRepository.Setup(repo => repo.GetByIdAsync(It.IsNotIn(_testData.Stations.Select(s => s.Id))))
-            .ReturnsAsync((Station)null);
-
         // --- Настройка Abstract Route Segment Repository ---
         _mockAbstractRouteSegmentRepository
             .Setup(repo => repo.GetAbstractSegmentsByFromStationAsync(It.IsAny<Guid>())) 
@@ -533,82 +549,99 @@ public class RouteSearchServiceTest
     }
 
     [Test]
-    public async Task GetRouteSearchResultAsync_ValidInput_DirectRoute_ReturnsRouteSearchResult()
+    public async Task GetAllCarriagesShorInfoFromRoute_ValidInput()
     {
-        var fromStationId = _testData.BrestId;
-        var toStationId = _testData.MinskId;
-        var departureDate = DateTime.Now.AddDays(2);
-
-        var result = await _routeSearchService.GetRoutesAsync(fromStationId, toStationId, departureDate, true);
-
-        Assert.That(result.Count, Is.EqualTo(2), "Ожидалось найти ровно 2 маршрута.");
-        var result1 = result[0];
-        Assert.That(result1.TotalDuration, Is.EqualTo(TimeSpan.Zero.Add(TimeSpan.FromHours(3))),
-            "ожидаемое время поездки три часа");
-        Assert.That(result1.DirectRoutes.Count, Is.EqualTo(1), "Должен был быть найден маршрут без пересадки");
-        Assert.That(result1.MaximumTotalCost, Is.EqualTo(50m), "Стоимость маршрута должна быть 50");
-
-        var result2 = result[1];
-        Assert.That(result2.TotalDuration, Is.EqualTo(TimeSpan.Zero.Add(TimeSpan.FromMinutes(118))),
-            "ожидаемое время поездки 118 минут");
-        Assert.That(result2.DirectRoutes.Count, Is.EqualTo(1), "Должен был быть найден маршрут без пересадки");
-        Assert.That(result2.MinimalTotalCost, Is.EqualTo(38.85m), "Стоимость маршрута должна быть 38.85");
+        // one segment in path
+        var concreteRouteId = _testData.ConcreteRouteBrestMinskDirectId;
+        // train for route
+        var trainId = _testData.Trains.FirstOrDefault(x => x.Number == "TR1")!.TrainTypeId;
+        var trainTemplates = _testData.TemplatesByTrainTypeId[trainId].OrderBy(t => t.CarriageNumber).ToList();
+        var result = await _carriageService.GetAllCarriagesInfo(concreteRouteId, 1, 1);
+        Assert.That(result.Count, Is.EqualTo(8), "amount of carriages must be 8");
+        int idx = 0;
+        foreach (var shortInfo in result)
+        {
+            Assert.That(shortInfo.CarriageNumber, Is.EqualTo(++idx), "carriage number must be in increasing order");
+            Assert.That(shortInfo.AvailableSeats, Is.EqualTo((trainTemplates[idx - 1].TotalSeats +1 ) / 2), $"invalid amount of free seats in carriage {idx}");
+            Console.WriteLine(shortInfo.AvailableSeats);
+        }
     }
 
     [Test]
-    public async Task GetRouteSearchResultAsync_ValidInput_DirectRoute_NotFullRoute_ReturnsRouteSearchResult()
+    public async Task GetAllCarriagesDetailedInfoFromRoute_ValidInput()
     {
-        var fromStationId = _testData.ZhabinkaId;
-        var toStationId = _testData.BaranovichiId;
-        var departureDate = DateTime.Now.AddDays(2);
+        var concreteRouteId = _testData.ConcreteRouteBrestMinskDirectId;
+        // one segment in path
 
-        var result = await _routeSearchService.GetRoutesAsync(fromStationId, toStationId, departureDate, true);
+        var results = new List<DetailedCarriageInfoDto>();
+        for (int i = 0; i < 8; i++)
+        {
+            var carriageResult = await _carriageService.GetCarriageInfo(concreteRouteId, 1, 1, i + 1);
+            results.Add(carriageResult);
+            Console.WriteLine($"carriage {i + 1} --- total seats = {carriageResult.TotalSeats}");
+            foreach (var seat in carriageResult.AvailableSeats)
+            {
+                Console.WriteLine(seat);
+            }
 
-        Assert.That(result.Count, Is.EqualTo(1), "Ожидалось найти ровно 1 маршрут.");
-        var result1 = result[0];
-        Assert.That(result1.TotalDuration, Is.EqualTo(TimeSpan.Zero.Add(TimeSpan.FromMinutes(38))),
-            "ожидаемое время поездки 38 минут");
-        Assert.That(result1.DirectRoutes.Count, Is.EqualTo(1), "Должен был быть найден маршрут без пересадки");
-        Assert.That(result1.MinimalTotalCost, Is.EqualTo(31.5m), "Стоимость маршрута должна быть 31.5");
+            if (i % 2 == 0)
+            {
+                var badSeats = carriageResult.AvailableSeats.Where(x => x > (carriageResult.TotalSeats + 1) / 2);
+                Assert.That(badSeats.Count(), Is.EqualTo(0), $"bad seats found in carriage {i + 1}");
+            } 
+            else
+            {
+                var badSeats = carriageResult.AvailableSeats.Where(x => x % 2 == 0);
+                Assert.That(badSeats.Count(), Is.EqualTo(0), $"bad seats found in carriage {i + 1}");
+            }
+        }
+        
+        Assert.That(results.Count, Is.EqualTo(8), "amount of carriages must be 8");
     }
-}
+    
+    [Test]
+    public async Task GetAllCarriagesShorInfoFromRoute_FewSegments_ValidInput()
+    {
+        // three segments in path
+        var concreteRouteId = _testData.ConcreteRouteBrestHomelComplexId;
+        // train for route
+        var trainId = _testData.Trains.FirstOrDefault(x => x.Number == "TR3")!.TrainTypeId;
+        var trainTemplates = _testData.TemplatesByTrainTypeId[trainId].OrderBy(t => t.CarriageNumber).ToList();
+        var result = await _carriageService.GetAllCarriagesInfo(concreteRouteId, 1, 1);
+        Assert.That(result.Count, Is.EqualTo(3), "amount of carriages must be 3");
+        int idx = 0;
+        foreach (var shortInfo in result)
+        {
+            Assert.That(shortInfo.CarriageNumber, Is.EqualTo(++idx), "carriage number must be in increasing order");
+            Assert.That(shortInfo.AvailableSeats, Is.EqualTo((trainTemplates[idx - 1].TotalSeats +1 ) / 2), $"invalid amount of free seats in carriage {idx}");
+            Console.WriteLine(shortInfo.AvailableSeats);
+        }
+    }
 
-internal class TestDataContainer
-{
-    public List<Station> Stations { get; set; } = new();
-    public List<AbstractRoute> AbstractRoutes { get; set; } = new();
-    public List<AbstractRouteSegment> AbstractRouteSegments { get; set; } = new();
-    public List<ConcreteRoute> ConcreteRoutes { get; set; } = new();
-    public List<ConcreteRouteSegment> ConcreteRouteSegments { get; set; } = new();
-    public List<CarriageAvailability> CarriageAvailabilities { get; set; } = new();
-    
-    public List<TrainType> TrainTypes { get; set; } = new();
-    
-    public List<Train> Trains { get; set; } = new();
-    
-    public List<CarriageTemplate> CarriageTemplates { get; set; } = new();
-    
-    public Dictionary<Guid, List<CarriageTemplate>> TemplatesByTrainTypeId { get; set; } = new();
+    [Test]
+    public async Task GetAllCarriagesDetailedInfoFromRoute_FewSegments_ValidInput()
+    {
+        var concreteRouteId = _testData.ConcreteRouteBrestHomelComplexId;
+        // three segments in path
 
-    public Guid BrestId { get; set; }
-    public Guid ZhabinkaId { get; set; }
-    public Guid BaranovichiId { get; set; }
-    public Guid LuninetsId { get; set; }
-    public Guid MinskId { get; set; }
-    public Guid HomelId { get; set; }
+        var results = new List<DetailedCarriageInfoDto>();
+        for (int i = 0; i < 3; i++)
+        {
+            var carriageResult = await _carriageService.GetCarriageInfo(concreteRouteId, 1, 3, i + 1);
+            results.Add(carriageResult);
+            Console.WriteLine($"carriage {i + 1} --- total seats = {carriageResult.TotalSeats}");
+            foreach (var seat in carriageResult.AvailableSeats)
+            {
+                Console.WriteLine(seat);
+            }
 
-    public Guid AbstractRouteBrestMinskDirectId { get; set; }
-    public Guid AbstractRouteBrestMinskComplexId { get; set; }
-    public Guid AbstractRouteMinskBrestDirectId { get; set; }
-    public Guid AbstractRouteMinskBrestComplexId { get; set; }
-    public Guid AbstractRouteBrestHomelComplexId { get; set; }
-    public Guid AbstractRouteHomelBrestComplexId { get; set; }
-    
-    public Guid ConcreteRouteBrestMinskDirectId { get; set; }
-    public Guid ConcreteRouteBrestMinskComplexId { get; set; }
-    public Guid ConcreteRouteMinskBrestDirectId { get; set; }
-    public Guid ConcreteRouteMinskBrestComplexId { get; set; }
-    public Guid ConcreteRouteBrestHomelComplexId { get; set; }
-    public Guid ConcreteRouteHomelBrestComplexId { get; set; }
-    
+            var badSeats = carriageResult.AvailableSeats.Where(x => x > (carriageResult.TotalSeats + 1) / 2);
+            Assert.That(badSeats.Count(), Is.EqualTo(0), $"bad seats found in carriage {i + 1}"); 
+            badSeats = carriageResult.AvailableSeats.Where(x => x % 2 == 0);
+            Assert.That(badSeats.Count(), Is.EqualTo(0), $"bad seats found in carriage {i + 1}");
+        }
+        
+        Assert.That(results.Count, Is.EqualTo(3), "amount of carriages must be 8");
+    }
+
 }

@@ -9,8 +9,10 @@ namespace RailwayApp.Domain.Entities;
 public class UserAccount
 {
     [BsonId]
-    public string Email { get; set; } // key
-    
+    public Guid Id { get; set; } = Guid.NewGuid();
+
+    public string Email { get; set; }
+
     public string Surname { get; set; }
     public string Name { get; set; }
     public string? SecondName { get; set; }
@@ -23,7 +25,9 @@ public class UserAccount
     public Gender? Gender { get; set; }
     
     public string HashedPassword { get; set; }
+    
     public UserAccountStatus Status { get; set; }
+    public DateTime StatusChangedDate {get; set; }
     
     // public List<Ticket> Tickets { get; set; } = new List<Ticket>();    
 }

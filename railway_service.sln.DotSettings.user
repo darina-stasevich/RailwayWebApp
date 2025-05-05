@@ -7,5 +7,9 @@
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;NUnit3x::ABCAD450-7ABE-4EE1-818C-F78BB933CAC1::net8.0::Tests.RouteSearchServiceTest.GetRouteSearchResultAsync_ValidInput_DirectRoute_ReturnsRouteSearchResult&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::ABCAD450-7ABE-4EE1-818C-F78BB933CAC1::net8.0::Tests.RouteSearchServiceTest.GetRouteSearchResultAsync_ValidInput_DirectRoute_NotFullRoute_ReturnsRouteSearchResult&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::ABCAD450-7ABE-4EE1-818C-F78BB933CAC1::net8.0::Tests.CarriageServiceTest.GetAllCarriagesShorInfoFromRoute_ValidInput&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::ABCAD450-7ABE-4EE1-818C-F78BB933CAC1::net8.0::Tests.CarriageServiceTest.GetAllCarriagesDetailedInfoFromRoute_ValidInput&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::ABCAD450-7ABE-4EE1-818C-F78BB933CAC1::net8.0::Tests.CarriageServiceTest.GetAllCarriagesShorInfoFromRoute_FewSegments_ValidInput&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::ABCAD450-7ABE-4EE1-818C-F78BB933CAC1::net8.0::Tests.CarriageServiceTest.GetAllCarriagesDetailedInfoFromRoute_FewSegments_ValidInput&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
