@@ -55,7 +55,7 @@ public class RoutesController(IRouteSearchService routeSearchService, ILogger<Ro
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Unhandled exception occurred during route search for request: {RouteRequest}", requestJson);
+            logger.LogError(ex, "Unhandled exception occurred during route search for request: {RouteRequest}. {Message}", requestJson, ex.Message);
             return StatusCode(500, "Internal Server Error");
         }
     }

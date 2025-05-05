@@ -24,7 +24,7 @@ public class SchedulesController(ILogger<SchedulesController> logger,
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error getting schedule for route {concreteRouteId}", concreteRouteId);
+            logger.LogError(ex, "Error getting schedule for route {concreteRouteId}. {Message}", concreteRouteId, ex.Message);
             return StatusCode(500, "Internal Server Error");
         }
     }

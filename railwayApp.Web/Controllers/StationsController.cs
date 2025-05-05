@@ -34,7 +34,7 @@ public class StationsController(IStationService stationService
         {
             if (!ModelState.IsValid)
             {
-                logger.LogWarning("Некорректный запрос: {@Errors}", ModelState);
+                logger.LogWarning("Incorrect: {@Errors}", ModelState);
                 return BadRequest(ModelState);
             }
 
@@ -43,12 +43,12 @@ public class StationsController(IStationService stationService
         }
         catch (InvalidOperationException ex)
         {
-            logger.LogWarning(ex, "Ошибка создания станции: {Message}", ex.Message);
+            logger.LogWarning(ex, "Error creation station: {Message}", ex.Message);
             return Conflict(ex.Message);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Ошибка сервера при создании станции");
+            logger.LogError(ex, "Internal Server Error {Message}", ex.Message);
             return StatusCode(500, "Internal Server Error");
         }
     }

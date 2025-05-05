@@ -29,14 +29,32 @@ public class MongoDbUserAccountRepository : IUserAccountRepository
         return await _collection.Find(u => u.Email == email).FirstOrDefaultAsync();
     }
     
-    public async Task<string> CreateAsync(UserAccount user)
+    public async Task<Guid> CreateAsync(UserAccount user)
     {
         await _collection.InsertOneAsync(user);
-        return user.Email;
+        return user.Id;
     }
 
-    public async Task<UserAccount?> GetByUserAccountIdAsync(Guid id)
+    public async Task<UserAccount?> GetByIdAsync(Guid id)
     {
         return (await _collection.FindAsync(u => u.Id == id)).FirstOrDefault();
+    }
+
+    public async Task<UserAccount?> GetByEmailAsync(string email)
+    {
+        return (await _collection.FindAsync(u => u.Email == email)).FirstOrDefault();
+    }
+
+    public async Task<bool> UpdateAsync(Guid id, UserAccount user)
+    {
+        var filter = Builders<UserAccount>.Filter.Eq(u => u.Id, id);
+        var replaceResult = await _collection.ReplaceOneAsync(filter, user);
+        return replaceResult.IsAcknowledged && replaceResult.MatchedCount > 0;
+    }
+
+    public async Task<bool> DeleteAsync(Guid id)
+    {
+        var result = await _collection.DeleteOneAsync(u => u.Id == id);
+        return result.IsAcknowledged && result.DeletedCount > 0;
     }
 }

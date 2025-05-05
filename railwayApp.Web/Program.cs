@@ -6,6 +6,7 @@ using RailwayApp.Domain.Interfaces.IRepositories;
 using RailwayApp.Web.Controllers;
 using MongoDB.Driver;
 using RailwayApp.Application.Services;
+using RailwayApp.Application.Services.PasswordHashers;
 using RailwayApp.Domain.Entities;
 using RailwayApp.Domain.Interfaces;
 using RailwayApp.Domain.Interfaces.IServices;
@@ -39,6 +40,8 @@ builder.Services.AddScoped<ICarriageService, CarriageService>();
 builder.Services.AddScoped<ICarriageSeatService, CarriageSeatService>();
 builder.Services.AddScoped<ICarriageTemplateService, CarriageTemplateService>();
 builder.Services.AddScoped<IPriceCalculationService, PriceCalculationService>();
+builder.Services.AddScoped<IUserAccountService, UserAccountService>();
+builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
 
 builder.Services.AddMongoDb(builder.Configuration);
 /*

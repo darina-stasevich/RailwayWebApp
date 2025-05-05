@@ -5,7 +5,10 @@ namespace RailwayApp.Domain.Interfaces.IServices;
 
 public interface IUserAccountService
 {
-    Task<Guid> CreateUserAccountAsync(UserAccountDto userAccountDto);
-    Task<Guid> UpdateUserAccountAsync(Guid userAccountId, UserAccountDto userAccountDto);
-    Task<Guid> BlockUserAccountAsync(Guid userAccountId);
+    Task<Guid> CreateUserAccountAsync(CreateUserAccountRequest request);
+    Task<Guid> UpdateUserAccountAsync(Guid userAccountId, UpdateUserAccountRequest request);
+    Task<Guid> UpdateUserPasswordAsync(Guid userAccountId, ChangePasswordRequest request);
+    Task<Guid> DeleteUserAccountAsync(Guid userAccountId);
+    
+    
 }
