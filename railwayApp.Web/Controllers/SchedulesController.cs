@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RailwayApp.Domain.Interfaces.IServices;
 
-namespace railway_service.Controllers;
+namespace RailwayApp.Web.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

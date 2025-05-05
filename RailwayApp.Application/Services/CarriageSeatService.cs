@@ -1,4 +1,5 @@
 using System.Collections;
+using RailwayApp.Application.Models.Dto;
 using RailwayApp.Domain.Entities;
 using RailwayApp.Domain.Interfaces.IRepositories;
 using RailwayApp.Domain.Interfaces.IServices;
@@ -12,11 +13,18 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
     ICarriageAvailabilityRepository carriageAvailabilityRepository
     ) : ICarriageSeatService
 {
-    private async Task<IEnumerable<IGrouping<Guid,CarriageAvailability>>?> GetAllCarriageAvailabilitiesForRouteAsync(Guid concreteRouteId, int startSegmentNumber,
-        int endSegmentNumber)
+    private InfoRouteSegmentSearchDto MapInfoRouteSegment(InfoRouteSegmentSearchPerCarriageDto dto)
+    {
+        return new InfoRouteSegmentSearchDto{
+            ConcreteRouteId = dto.ConcreteRouteId,
+            StartSegmentNumber = dto.StartSegmentNumber,
+            EndSegmentNumber = dto.EndSegmentNumber
+        };
+    }
+    private async Task<IEnumerable<IGrouping<Guid,CarriageAvailability>>?> GetAllCarriageAvailabilitiesForRouteAsync(InfoRouteSegmentSearchDto dto)
     {
         // 1. Get concrete route    
-        var concreteRoute = await concreteRouteRepository.GetByIdAsync(concreteRouteId);
+        var concreteRoute = await concreteRouteRepository.GetByIdAsync(dto.ConcreteRouteId);
         if (concreteRoute == null)
         {
             throw new Exception("Concrete route not found");
@@ -33,12 +41,12 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
         var abstractRouteSegments =
             await abstractRouteSegmentRepository.GetAbstractSegmentsByRouteIdAsync(abstractRoute.Id);
         var relevantAbstractRouteSegments = abstractRouteSegments
-            .Where(s => s.SegmentNumber >= startSegmentNumber && s.SegmentNumber <= endSegmentNumber);
+            .Where(s => s.SegmentNumber >= dto.StartSegmentNumber && s.SegmentNumber <= dto.EndSegmentNumber);
         var segmentsHashSet = new HashSet<Guid>(relevantAbstractRouteSegments.Select(s => s.Id));
         
         // 4. Get relevant concrete route segments
         var relevantConcreteRouteSegments =
-            (await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(concreteRouteId))
+            (await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(dto.ConcreteRouteId))
             .Where(s => segmentsHashSet.Contains(s.AbstractSegmentId));
 
         // 5. get all availabilities for segments
@@ -56,9 +64,9 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
         return availabilityGroupedByCarriageTemplateId;
     }
     
-    public async Task<int> GetAvailableSeatsAmountAsync(Guid concreteRouteId, int startSegmentNumber, int endSegmentNumber)
+    public async Task<int> GetAvailableSeatsAmountAsync(InfoRouteSegmentSearchDto dto)
     {
-        var availabilityGroupedByCarriage = await GetAllCarriageAvailabilitiesForRouteAsync(concreteRouteId, startSegmentNumber, endSegmentNumber);
+        var availabilityGroupedByCarriage = await GetAllCarriageAvailabilitiesForRouteAsync(dto);
         if (availabilityGroupedByCarriage == null)
         {
             throw new Exception("No carriages found found");
@@ -93,11 +101,9 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
         return count;
     }
 
-    public async Task<Dictionary<Guid, int>> GetAvailableSeatCountsPerCarriageAsync(Guid concreteRouteId, int startSegmentNumber,
-        int endSegmentNumber)
+    public async Task<Dictionary<Guid, int>> GetAvailableSeatCountsPerCarriageAsync(InfoRouteSegmentSearchDto dto)
     {
-        var groupedCarriageAvailabilities = await GetAllCarriageAvailabilitiesForRouteAsync(
-            concreteRouteId, startSegmentNumber, endSegmentNumber);
+        var groupedCarriageAvailabilities = await GetAllCarriageAvailabilitiesForRouteAsync(dto);
 
         if (groupedCarriageAvailabilities == null)
         {
@@ -120,18 +126,17 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
         return availableSeatsPerCarriage;
     }
 
-    public async Task<List<int>> GetAvailableSeatsForCarriageAsync(Guid concreteRouteId, int startSegmentNumber, int endSegmentNumber,
-        Guid carriageTemplateId)
+    public async Task<List<int>> GetAvailableSeatsForCarriageAsync(InfoRouteSegmentSearchPerCarriageDto dto)
     {
         var groupedCarriageAvailabilities = await GetAllCarriageAvailabilitiesForRouteAsync(
-            concreteRouteId, startSegmentNumber, endSegmentNumber);
+            MapInfoRouteSegment(dto));
         if (groupedCarriageAvailabilities == null)
         {
             throw new Exception("Carriage availabilities not found");
         }
         
         var targetGroup = groupedCarriageAvailabilities
-            .FirstOrDefault(g => g.Key == carriageTemplateId);
+            .FirstOrDefault(g => g.Key == dto.CarriageTemplateId);
         if(targetGroup == null)
         {
             throw new ArgumentException("Carriage template not found");

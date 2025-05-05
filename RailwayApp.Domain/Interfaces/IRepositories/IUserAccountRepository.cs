@@ -6,6 +6,6 @@ public interface IUserAccountRepository
 {
     Task DeleteAllAsync();
     Task<string> CreateAsync(UserAccount user);
-    Task<UserAccount?> GetByEmailAsync(string email);
+    Task<UserAccount?> GetByUserAccountIdAsync(Guid id);
 
 }

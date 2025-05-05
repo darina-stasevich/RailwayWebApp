@@ -1,5 +1,6 @@
 using System.Collections;
 using Moq;
+using RailwayApp.Application.Models;
 using RailwayApp.Application.Services;
 using RailwayApp.Domain.Entities;
 using RailwayApp.Domain.Interfaces.Initializers;
@@ -539,7 +540,7 @@ public class RouteSearchServiceTest
         var toStationId = _testData.MinskId;
         var departureDate = DateTime.Now.AddDays(2);
 
-        var result = await _routeSearchService.GetRoutesAsync(fromStationId, toStationId, departureDate, true);
+        var result = await _routeSearchService.GetRoutesAsync(new RouteSearchRequest{FromStationId = fromStationId, ToStationId = toStationId, DepartureDate = departureDate, IsDirectRoute = true});
 
         Assert.That(result.Count, Is.EqualTo(2), "Ожидалось найти ровно 2 маршрута.");
         var result1 = result[0];
@@ -562,7 +563,7 @@ public class RouteSearchServiceTest
         var toStationId = _testData.BaranovichiId;
         var departureDate = DateTime.Now.AddDays(2);
 
-        var result = await _routeSearchService.GetRoutesAsync(fromStationId, toStationId, departureDate, true);
+        var result = await _routeSearchService.GetRoutesAsync(new RouteSearchRequest{FromStationId = fromStationId, ToStationId = toStationId, DepartureDate = departureDate, IsDirectRoute = true});
 
         Assert.That(result.Count, Is.EqualTo(1), "Ожидалось найти ровно 1 маршрут.");
         var result1 = result[0];

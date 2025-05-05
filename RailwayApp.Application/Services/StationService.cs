@@ -13,19 +13,19 @@ public class StationService(IStationRepository stationRepository) : IStationServ
         return await stationRepository.GetAllAsync();
     }
 
-    public async Task<Guid> CreateStationAsync(string name, string region)
+    public async Task<Guid> CreateStationAsync(CreateStationRequest request)
     {
-        var existingStation = await stationRepository.GetByNameAsync(name);
+        var existingStation = await stationRepository.GetByNameAsync(request.Name);
 
         if (existingStation != null)
         {
-            throw new InvalidOperationException($"Station {name} already exists");
+            throw new InvalidOperationException($"Station {request.Region} already exists");
         }
         
         var station = new Station 
         { 
-            Name = name,
-            Region = region
+            Name = request.Name,
+            Region = request.Region
         };
 
         var id = await stationRepository.CreateAsync(station);

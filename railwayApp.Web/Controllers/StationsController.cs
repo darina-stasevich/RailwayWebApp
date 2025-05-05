@@ -5,7 +5,7 @@ using RailwayApp.Domain.Entities;
 using RailwayApp.Domain.Interfaces.IRepositories;
 using RailwayApp.Domain.Interfaces.IServices;
 
-namespace railway_service.Controllers;
+namespace RailwayApp.Web.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -38,7 +38,7 @@ public class StationsController(IStationService stationService
                 return BadRequest(ModelState);
             }
 
-            var station = await stationService.CreateStationAsync(request.Name, request.Region);
+            var station = await stationService.CreateStationAsync(request);
             return CreatedAtAction(nameof(GetStations), station);
         }
         catch (InvalidOperationException ex)

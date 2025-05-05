@@ -10,7 +10,6 @@ public class UserAccount
 {
     [BsonId]
     public Guid Id { get; set; } = Guid.NewGuid();
-
     public string Email { get; set; }
 
     public string Surname { get; set; }
@@ -26,6 +25,7 @@ public class UserAccount
     
     public string HashedPassword { get; set; }
     
+    [BsonRepresentation(MongoDB.Bson.BsonType.String)]
     public UserAccountStatus Status { get; set; }
     public DateTime StatusChangedDate {get; set; }
     

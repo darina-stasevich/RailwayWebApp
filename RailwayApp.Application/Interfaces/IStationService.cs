@@ -7,5 +7,5 @@ namespace RailwayApp.Domain.Interfaces.IServices;
 public interface IStationService
 {
     Task<List<Station>> GetAllStationsAsync();
-    Task<Guid> CreateStationAsync(string name, string region);
+    Task<Guid> CreateStationAsync(CreateStationRequest request);
 }

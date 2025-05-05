@@ -1,5 +1,6 @@
 using Microsoft.VisualBasic;
 using RailwayApp.Application.Models;
+using RailwayApp.Application.Models.Dto;
 using RailwayApp.Domain.Interfaces.IRepositories;
 using RailwayApp.Domain.Interfaces.IServices;
 
@@ -33,20 +34,19 @@ public class PriceCalculationService(IConcreteRouteRepository concreteRouteRepos
         return price + transferCost;
     }
     
-    public async Task<decimal> CalculatePriceForCarriageAsync(Guid concreteRouteId, int startSegmentNumber, int endSegmentNumber,
-        Guid carriageTemplateId)
+    public async Task<decimal> CalculatePriceForCarriageAsync(InfoRouteSegmentSearchPerCarriageDto dto)
     {
-        var baseCost = await CalculateBasePriceAsync(concreteRouteId, startSegmentNumber, endSegmentNumber);
-        var carriageTemplate = await carriageTemplateRepository.GetByIdAsync(carriageTemplateId);
+        var baseCost = await CalculateBasePriceAsync(dto.ConcreteRouteId, dto.StartSegmentNumber, dto.EndSegmentNumber);
+        var carriageTemplate = await carriageTemplateRepository.GetByIdAsync(dto.CarriageTemplateId);
         if(carriageTemplate == null)
             throw new Exception("Carriage template not found");
         return baseCost * carriageTemplate.PriceMultiplier;
     }
 
-    public async Task<PriceRangeDto?> GetRoutePriceRangeAsync(Guid concreteRouteId, int startSegmentNumber, int endSegmentNumber)
+    public async Task<PriceRangeDto?> GetRoutePriceRangeAsync(InfoRouteSegmentSearchDto dto)
     {
-        var baseCost = await CalculateBasePriceAsync(concreteRouteId, startSegmentNumber, endSegmentNumber);
-        var carriageTemplates = await carriageTemplateService.GetCarriageTemplateForRouteAsync(concreteRouteId);
+        var baseCost = await CalculateBasePriceAsync(dto.ConcreteRouteId, dto.StartSegmentNumber, dto.EndSegmentNumber);
+        var carriageTemplates = await carriageTemplateService.GetCarriageTemplateForRouteAsync(dto.ConcreteRouteId);
        
         var priceRange = new PriceRangeDto
         {
@@ -64,10 +64,10 @@ public class PriceCalculationService(IConcreteRouteRepository concreteRouteRepos
         return priceRange;
     }
 
-    public async Task<Dictionary<Guid, decimal>> GetPricesForAllCarriageTypesAsync(Guid concreteRouteId, int startSegmentNumber, int endSegmentNumber)
+    public async Task<Dictionary<Guid, decimal>> GetPricesForAllCarriageTypesAsync(InfoRouteSegmentSearchDto dto)
     {
-        var baseCost = await CalculateBasePriceAsync(concreteRouteId, startSegmentNumber, endSegmentNumber);
-        var carriageTemplates = await carriageTemplateService.GetCarriageTemplateForRouteAsync(concreteRouteId);
+        var baseCost = await CalculateBasePriceAsync(dto.ConcreteRouteId, dto.StartSegmentNumber, dto.EndSegmentNumber);
+        var carriageTemplates = await carriageTemplateService.GetCarriageTemplateForRouteAsync(dto.ConcreteRouteId);
 
         var prices = new Dictionary<Guid, decimal>();
         foreach (var carriageTemplate in carriageTemplates)

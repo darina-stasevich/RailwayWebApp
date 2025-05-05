@@ -4,8 +4,7 @@ namespace RailwayApp.Domain.Interfaces.IServices;
 
 public interface ICarriageService
 {
-    Task<List<ShortCarriageInfoDto>> GetAllCarriagesInfo(Guid concreteRouteId, int startSegmentNumber, int endSegmentNumber);
+    Task<List<ShortCarriageInfoDto>> GetAllCarriagesInfo(CarriagesInfoRequest request);
 
-    Task<DetailedCarriageInfoDto> GetCarriageInfo(Guid concreteRouteId, int startSegmentNumber, int endSegmentNumber,
-        int carriageNumber);
+    Task<DetailedCarriageInfoDto> GetCarriageInfo(CarriageInfoRequest request);
 }

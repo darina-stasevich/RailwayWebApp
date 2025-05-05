@@ -10,7 +10,7 @@ public class MongoDbCarriageAvailabilityRepository : ICarriageAvailabilityReposi
 {
     private readonly IMongoCollection<CarriageAvailability> _collection;
     
-    public MongoDbCarriageAvailabilityRepository(IMongoClient client, IOptions<MongoDbSettings> settings)
+    public MongoDbCarriageAvailabilityRepository(IMongoClient client, IOptions<MongoDbSettings> settings) 
     {
         var database = client.GetDatabase(settings.Value.DatabaseName);
         _collection = database.GetCollection<CarriageAvailability>("CarriageAvailabilities");

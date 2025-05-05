@@ -24,15 +24,19 @@ public class MongoDbUserAccountRepository : IUserAccountRepository
         var deleteResult = await _collection.DeleteManyAsync(FilterDefinition<UserAccount>.Empty);
     }
 
-    public async Task<UserAccount> GetByEmailAsync(string email)
+    public async Task<UserAccount> GetByUserAccountIdAsync(string email)
     {
         return await _collection.Find(u => u.Email == email).FirstOrDefaultAsync();
     }
-
-
+    
     public async Task<string> CreateAsync(UserAccount user)
     {
         await _collection.InsertOneAsync(user);
         return user.Email;
+    }
+
+    public async Task<UserAccount?> GetByUserAccountIdAsync(Guid id)
+    {
+        return (await _collection.FindAsync(u => u.Id == id)).FirstOrDefault();
     }
 }

@@ -556,7 +556,7 @@ public class CarriageServiceTest
         // train for route
         var trainId = _testData.Trains.FirstOrDefault(x => x.Number == "TR1")!.TrainTypeId;
         var trainTemplates = _testData.TemplatesByTrainTypeId[trainId].OrderBy(t => t.CarriageNumber).ToList();
-        var result = await _carriageService.GetAllCarriagesInfo(concreteRouteId, 1, 1);
+        var result = await _carriageService.GetAllCarriagesInfo(new CarriagesInfoRequest{ ConcreteRouteId = concreteRouteId, StartSegmentNumber = 1, EndSegmentNumber = 1});
         Assert.That(result.Count, Is.EqualTo(8), "amount of carriages must be 8");
         int idx = 0;
         foreach (var shortInfo in result)
@@ -576,24 +576,16 @@ public class CarriageServiceTest
         var results = new List<DetailedCarriageInfoDto>();
         for (int i = 0; i < 8; i++)
         {
-            var carriageResult = await _carriageService.GetCarriageInfo(concreteRouteId, 1, 1, i + 1);
+            var carriageResult = await _carriageService.GetCarriageInfo(new CarriageInfoRequest{ConcreteRouteId = concreteRouteId, StartSegmentNumber = 1, EndSegmentNumber = 1, CarriageNumber = i + 1});
             results.Add(carriageResult);
             Console.WriteLine($"carriage {i + 1} --- total seats = {carriageResult.TotalSeats}");
             foreach (var seat in carriageResult.AvailableSeats)
             {
                 Console.WriteLine(seat);
             }
-
-            if (i % 2 == 0)
-            {
-                var badSeats = carriageResult.AvailableSeats.Where(x => x > (carriageResult.TotalSeats + 1) / 2);
-                Assert.That(badSeats.Count(), Is.EqualTo(0), $"bad seats found in carriage {i + 1}");
-            } 
-            else
-            {
-                var badSeats = carriageResult.AvailableSeats.Where(x => x % 2 == 0);
-                Assert.That(badSeats.Count(), Is.EqualTo(0), $"bad seats found in carriage {i + 1}");
-            }
+            
+            var badSeats = carriageResult.AvailableSeats.Where(x => x % 2 == 0);
+            Assert.That(badSeats.Count(), Is.EqualTo(0), $"bad seats found in carriage {i + 1}");
         }
         
         Assert.That(results.Count, Is.EqualTo(8), "amount of carriages must be 8");
@@ -607,7 +599,8 @@ public class CarriageServiceTest
         // train for route
         var trainId = _testData.Trains.FirstOrDefault(x => x.Number == "TR3")!.TrainTypeId;
         var trainTemplates = _testData.TemplatesByTrainTypeId[trainId].OrderBy(t => t.CarriageNumber).ToList();
-        var result = await _carriageService.GetAllCarriagesInfo(concreteRouteId, 1, 1);
+        var result = await _carriageService.GetAllCarriagesInfo(new CarriagesInfoRequest{
+            ConcreteRouteId = concreteRouteId, StartSegmentNumber = 1, EndSegmentNumber = 1 });
         Assert.That(result.Count, Is.EqualTo(3), "amount of carriages must be 3");
         int idx = 0;
         foreach (var shortInfo in result)
@@ -627,7 +620,7 @@ public class CarriageServiceTest
         var results = new List<DetailedCarriageInfoDto>();
         for (int i = 0; i < 3; i++)
         {
-            var carriageResult = await _carriageService.GetCarriageInfo(concreteRouteId, 1, 3, i + 1);
+            var carriageResult = await _carriageService.GetCarriageInfo(new CarriageInfoRequest{ ConcreteRouteId = concreteRouteId, StartSegmentNumber = 1, EndSegmentNumber = 3, CarriageNumber = i + 1});
             results.Add(carriageResult);
             Console.WriteLine($"carriage {i + 1} --- total seats = {carriageResult.TotalSeats}");
             foreach (var seat in carriageResult.AvailableSeats)

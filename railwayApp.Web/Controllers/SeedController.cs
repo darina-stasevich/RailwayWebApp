@@ -4,7 +4,7 @@ using RailwayApp.Domain.Entities;
 using RailwayApp.Domain.Interfaces.Initializers;
 using RailwayApp.Domain.Interfaces.IRepositories;
 
-namespace railway_service.Controllers;
+namespace RailwayApp.Web.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

@@ -22,18 +22,21 @@ public class Ticket
     [BsonId]
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid RouteId { get; set; } // concreteRoute
-    public string UserAccountEmail { get; set; }
+    public string UserAccountId { get; set; }
     
     public Guid StartSegmentId { get; set; }   // concreteRouteSegment
     public Guid EndSegmentId { get; set; }     // concreteRouteSegment
 
     public DateTime DepartureDate { get; set; }
     public decimal Price { get; set; }
-
+    
     public Guid PassengerDataId { get; set; }   // PassengerData
+    
     public int Carriage { get; set; }
     public int Seat { get; set; }
     public bool HasBedLinenSet  { get; set; }
+    
+    public DateTime PurchaseTime { get; set; }
         
     public TicketStatus Status { get; set; }
 }

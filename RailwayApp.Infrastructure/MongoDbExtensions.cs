@@ -1,3 +1,4 @@
+using System.Net.NetworkInformation;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using RailwayApp.Domain.Interfaces;
@@ -16,19 +17,37 @@ public static class MongoDbExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        
-        services.Configure<MongoDbSettings>(configuration.GetSection("MongoDbSettings"));
-
-        BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
-
-        services.AddSingleton<IMongoClient>(serviceProvider =>
+        try
         {
-            var settings = serviceProvider.GetRequiredService<IOptions<MongoDbSettings>>().Value;
-            return new MongoClient(settings.ConnectionString);
-        });
-        
-        services.AddRepositories();
-        return services;
+            services.Configure<MongoDbSettings>(configuration.GetSection("MongoDbSettings"));
+
+            BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
+
+            services.AddSingleton<IMongoClient>(serviceProvider =>
+            {
+                var settings = serviceProvider.GetRequiredService<IOptions<MongoDbSettings>>().Value;
+                var mongoClient = new MongoClient(settings.ConnectionString);
+                var db = mongoClient.GetDatabase("RailwayDB");
+                try
+                {
+                    db.RunCommand<BsonDocument>(new BsonDocument("ping", 1));
+                }
+                catch (Exception)
+                {
+                   Console.WriteLine("KHHUGHHUJHYDGHDGHRHJJHYJH"); 
+                }
+
+                return mongoClient;
+            });
+
+            services.AddRepositories();
+
+            return services;
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
     }
 
     private static IServiceCollection AddRepositories(this IServiceCollection services)

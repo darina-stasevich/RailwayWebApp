@@ -1,12 +1,13 @@
 using RailwayApp.Application.Models;
+using RailwayApp.Application.Models.Dto;
 
 namespace RailwayApp.Domain.Interfaces.IServices;
 
 public interface IPriceCalculationService
 {
-    Task<decimal> CalculatePriceForCarriageAsync(Guid concreteRouteId, int startSegmentNumber, int endSegmentNumber, Guid carriageTemplateId);
+    Task<decimal> CalculatePriceForCarriageAsync(InfoRouteSegmentSearchPerCarriageDto dto);
 
-    Task<PriceRangeDto?> GetRoutePriceRangeAsync(Guid concreteRouteId, int startSegmentNumber, int endSegmentNumber);
+    Task<PriceRangeDto?> GetRoutePriceRangeAsync(InfoRouteSegmentSearchDto dto);
     
-    Task<Dictionary<Guid, decimal>> GetPricesForAllCarriageTypesAsync(Guid concreteRouteId, int startSegmentNumber, int endSegmentNumber);
+    Task<Dictionary<Guid, decimal>> GetPricesForAllCarriageTypesAsync(InfoRouteSegmentSearchDto dto);
 }

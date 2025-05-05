@@ -6,6 +6,6 @@ public interface ITicketRepository
 {
     Task DeleteAllAsync();
     Task<Guid> CreateAsync(Ticket ticket);
-    Task<IEnumerable<Ticket>> GetByUserEmailAsync(string email);
+    Task<IEnumerable<Ticket>> GetByUserAccountIdAsync(Guid id);
     Task<Ticket> GetByIdAsync(Guid id);
 }

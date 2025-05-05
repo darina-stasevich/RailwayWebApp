@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using RailwayApp.Application.Models;
 using RailwayApp.Domain.Interfaces.IServices;
 
-namespace railway_service.Controllers;
+namespace RailwayApp.Web.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -13,12 +13,12 @@ public class RoutesController(IRouteSearchService routeSearchService, ILogger<Ro
     [ProducesResponseType(typeof(List<ComplexRouteDto>), 200)]
     [ProducesResponseType(typeof(ValidationProblemDetails), 400)] // Уточненный тип для ошибок валидации модели
     [ProducesResponseType(500)]
-    public async Task<ActionResult<List<ComplexRouteDto>>> SearchRoutes([FromBody] RouteRequest request)
+    public async Task<ActionResult<List<ComplexRouteDto>>> SearchRoutes([FromBody] RouteSearchRequest searchRequest)
     {
         string requestJson = "Error serializing request"; // Значение по умолчанию
         try
         {
-            requestJson = JsonSerializer.Serialize(request);
+            requestJson = JsonSerializer.Serialize(searchRequest);
         }
         catch (Exception ex) {
             logger.LogError(ex, "Failed to serialize RouteRequest for logging.");
@@ -26,9 +26,9 @@ public class RoutesController(IRouteSearchService routeSearchService, ILogger<Ro
 
         logger.LogInformation("Received route search request: {RouteRequest}", requestJson);
         
-        if (request.FromStationId == request.ToStationId)
+        if (searchRequest.FromStationId == searchRequest.ToStationId)
         {
-            ModelState.AddModelError(nameof(request.ToStationId), "from station id and to station id cannot be the same");
+            ModelState.AddModelError(nameof(searchRequest.ToStationId), "from station id and to station id cannot be the same");
             logger.LogWarning("Validation failed for route search request {requestJson}", requestJson);
             return ValidationProblem(ModelState);
         }
@@ -41,14 +41,9 @@ public class RoutesController(IRouteSearchService routeSearchService, ILogger<Ro
         try
         {
             logger.LogInformation("Calling RouteSearchService.GetRoutesAsync for FromStationId: {FromStationId}, ToStationId: {ToStationId}, DepartureDate: {DepartureDate}, IsDirect: {IsDirect}",
-                request.FromStationId, request.ToStationId, request.DepartureDate?.ToString("yyyy-MM-dd"), request.IsDirect);
+                searchRequest.FromStationId, searchRequest.ToStationId, searchRequest.DepartureDate.ToString("yyyy-MM-dd"), searchRequest.IsDirectRoute);
             
-            var routes = await routeSearchService.GetRoutesAsync(
-                request.FromStationId!.Value, 
-                request.ToStationId!.Value,      
-                request.DepartureDate!.Value.Date, 
-                request.IsDirect
-            );
+            var routes = await routeSearchService.GetRoutesAsync(searchRequest);
             
             logger.LogInformation("Successfully retrieved {RouteCount} routes for request: {RouteRequest}", routes.Count, requestJson);
             return Ok(routes);
