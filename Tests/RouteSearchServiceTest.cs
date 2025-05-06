@@ -1,4 +1,5 @@
 using System.Collections;
+using MongoDB.Driver.Linq;
 using Moq;
 using RailwayApp.Application.Models;
 using RailwayApp.Application.Services;
@@ -111,7 +112,7 @@ public class RouteSearchServiceTest
                 ActiveDays = "MTWHFSN",
                 TransferCost = 20,
                 HasBeddingOption = false,
-                DepartureTime = TimeSpan.Zero.Add(TimeSpan.FromHours(15))
+                DepartureTime = TimeSpan.FromHours(15)
             },
             new()
             {
@@ -120,7 +121,7 @@ public class RouteSearchServiceTest
                 ActiveDays = "MTWHFSN",
                 TransferCost = 15,
                 HasBeddingOption = true,
-                DepartureTime = TimeSpan.Zero.Add(TimeSpan.FromHours(9))
+                DepartureTime = TimeSpan.FromHours(9)
             },
             new()
             {
@@ -129,7 +130,7 @@ public class RouteSearchServiceTest
                 ActiveDays = "MTWHFSN",
                 TransferCost = 18,
                 HasBeddingOption = false,
-                DepartureTime = TimeSpan.Zero.Add(TimeSpan.FromHours(8).Add(TimeSpan.FromMinutes(22)))
+                DepartureTime = TimeSpan.FromHours(8).Add(TimeSpan.FromMinutes(22))
             },
             new()
             {
@@ -138,7 +139,7 @@ public class RouteSearchServiceTest
                 ActiveDays = "MTWHFSN",
                 TransferCost = 20,
                 HasBeddingOption = true,
-                DepartureTime = TimeSpan.Zero.Add(TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(05)))
+                DepartureTime = TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(05))
             },
             new()
             {
@@ -147,7 +148,7 @@ public class RouteSearchServiceTest
                 ActiveDays = "MTWHFSN",
                 TransferCost = 18,
                 HasBeddingOption = true,
-                DepartureTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(22)))
+                DepartureTime = TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(22))
             },
             new()
             {
@@ -156,7 +157,7 @@ public class RouteSearchServiceTest
                 ActiveDays = "MTWHFSN",
                 TransferCost = 20,
                 HasBeddingOption = true,
-                DepartureTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(22)))
+                DepartureTime =TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(22))
             }
         };
 
@@ -174,20 +175,20 @@ public class RouteSearchServiceTest
             {
                 AbstractRouteId = abstractRoutes[0].Id,
                 SegmentNumber = 1,
-                FromStationId = stations[0].Id,
-                ToStationId = stations[4].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(15)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18)),
+                FromStationId = stations[4].Id,
+                ToStationId = stations[0].Id,
+                FromTime = TimeSpan.FromHours(15),
+                ToTime = TimeSpan.FromHours(18),
                 SegmentCost = 5
             },
             new()
             {
                 AbstractRouteId = abstractRoutes[1].Id,
                 SegmentNumber = 1,
-                FromStationId = stations[4].Id,
-                ToStationId = stations[0].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(9)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(12)),
+                FromStationId = stations[0].Id,
+                ToStationId = stations[4].Id,
+                FromTime = TimeSpan.FromHours(9),
+                ToTime = TimeSpan.FromHours(12),
                 SegmentCost = 5
             },
             new()
@@ -196,8 +197,8 @@ public class RouteSearchServiceTest
                 SegmentNumber = 1,
                 FromStationId = stations[0].Id,
                 ToStationId = stations[1].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(8)).Add(TimeSpan.FromMinutes(22)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(8).Add(TimeSpan.FromMinutes(40))),
+                FromTime = TimeSpan.FromHours(8).Add(TimeSpan.FromMinutes(22)),
+                ToTime = TimeSpan.FromHours(8).Add(TimeSpan.FromMinutes(40)),
                 SegmentCost = (decimal)2.5
             },
             new()
@@ -206,8 +207,8 @@ public class RouteSearchServiceTest
                 SegmentNumber = 2,
                 FromStationId = stations[1].Id,
                 ToStationId = stations[2].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(8)).Add(TimeSpan.FromMinutes(42)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(9).Add(TimeSpan.FromMinutes(20))),
+                FromTime = TimeSpan.FromHours(8).Add(TimeSpan.FromMinutes(42)),
+                ToTime = TimeSpan.FromHours(9).Add(TimeSpan.FromMinutes(20)),
                 SegmentCost = 3
             },
             new()
@@ -216,8 +217,8 @@ public class RouteSearchServiceTest
                 SegmentNumber = 3,
                 FromStationId = stations[2].Id,
                 ToStationId = stations[4].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(9)).Add(TimeSpan.FromMinutes(30)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(10).Add(TimeSpan.FromMinutes(20))),
+                FromTime = TimeSpan.FromHours(9).Add(TimeSpan.FromMinutes(30)),
+                ToTime = TimeSpan.FromHours(10).Add(TimeSpan.FromMinutes(20)),
                 SegmentCost = 2.4m
             },
             new()
@@ -226,8 +227,8 @@ public class RouteSearchServiceTest
                 SegmentNumber = 3,
                 FromStationId = stations[1].Id,
                 ToStationId = stations[0].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18)).Add(TimeSpan.FromMinutes(22)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(40))),
+                FromTime = TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(22)),
+                ToTime = TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(40)),
                 SegmentCost = (decimal)2.5
             },
             new()
@@ -236,8 +237,8 @@ public class RouteSearchServiceTest
                 SegmentNumber = 2,
                 FromStationId = stations[2].Id,
                 ToStationId = stations[1].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(17)).Add(TimeSpan.FromMinutes(42)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(20))),
+                FromTime = TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(42)),
+                ToTime = TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(20)),
                 SegmentCost = 3
             },
             new()
@@ -246,8 +247,8 @@ public class RouteSearchServiceTest
                 SegmentNumber = 1,
                 FromStationId = stations[4].Id,
                 ToStationId = stations[2].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(17)).Add(TimeSpan.FromMinutes(05)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(40))),
+                FromTime = TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(05)),
+                ToTime = TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(40)),
                 SegmentCost = 2.4m
             },
 
@@ -257,8 +258,8 @@ public class RouteSearchServiceTest
                 SegmentNumber = 1,
                 FromStationId = stations[0].Id,
                 ToStationId = stations[1].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18)).Add(TimeSpan.FromMinutes(22)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(40))),
+                FromTime = TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(22)),
+                ToTime = TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(40)),
                 SegmentCost = (decimal)2.5
             },
             new()
@@ -267,8 +268,8 @@ public class RouteSearchServiceTest
                 SegmentNumber = 2,
                 FromStationId = stations[1].Id,
                 ToStationId = stations[3].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18)).Add(TimeSpan.FromMinutes(42)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(21).Add(TimeSpan.FromMinutes(20))),
+                FromTime = TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(42)),
+                ToTime = TimeSpan.FromHours(21).Add(TimeSpan.FromMinutes(20)),
                 SegmentCost = 3
             },
             new()
@@ -277,8 +278,8 @@ public class RouteSearchServiceTest
                 SegmentNumber = 3,
                 FromStationId = stations[3].Id,
                 ToStationId = stations[5].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(21)).Add(TimeSpan.FromMinutes(30)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(30).Add(TimeSpan.FromMinutes(20))),
+                FromTime = TimeSpan.FromHours(21).Add(TimeSpan.FromMinutes(30)),
+                ToTime = TimeSpan.FromHours(30).Add(TimeSpan.FromMinutes(20)),
                 SegmentCost = 2.4m
             },
             new()
@@ -287,8 +288,8 @@ public class RouteSearchServiceTest
                 SegmentNumber = 3,
                 FromStationId = stations[1].Id,
                 ToStationId = stations[0].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18)).Add(TimeSpan.FromMinutes(22)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(30).Add(TimeSpan.FromMinutes(40))),
+                FromTime = TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(22)),
+                ToTime = TimeSpan.FromHours(30).Add(TimeSpan.FromMinutes(40)),
                 SegmentCost = (decimal)2.5
             },
             new()
@@ -297,8 +298,8 @@ public class RouteSearchServiceTest
                 SegmentNumber = 2,
                 FromStationId = stations[3].Id,
                 ToStationId = stations[1].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(17)).Add(TimeSpan.FromMinutes(42)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(20))),
+                FromTime = TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(42)),
+                ToTime = TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(20)),
                 SegmentCost = 3
             },
             new()
@@ -307,8 +308,8 @@ public class RouteSearchServiceTest
                 SegmentNumber = 1,
                 FromStationId = stations[5].Id,
                 ToStationId = stations[3].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(17)).Add(TimeSpan.FromMinutes(05)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(40))),
+                FromTime = TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(05)),
+                ToTime = TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(40)),
                 SegmentCost = 2.4m
             }
         };
@@ -456,6 +457,14 @@ public class RouteSearchServiceTest
                 return matchingSegments;
             });
 
+        _mockAbstractRouteSegmentRepository
+            .Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>()))
+            .ReturnsAsync((Guid id) =>
+            {
+                var matchingSegment = _testData.AbstractRouteSegments.FirstOrDefault(s => s.Id == id);
+                return matchingSegment;
+            });
+
         // --- Настройка Abstract Route Repository ---
         _mockAbstractRouteRepository
             .Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>()))
@@ -544,13 +553,13 @@ public class RouteSearchServiceTest
 
         Assert.That(result.Count, Is.EqualTo(2), "Ожидалось найти ровно 2 маршрута.");
         var result1 = result[0];
-        Assert.That(result1.TotalDuration, Is.EqualTo(TimeSpan.Zero.Add(TimeSpan.FromHours(3))),
+        Assert.That(result1.TotalDuration, Is.EqualTo(TimeSpan.FromHours(3)),
             "ожидаемое время поездки три часа");
         Assert.That(result1.DirectRoutes.Count, Is.EqualTo(1), "Должен был быть найден маршрут без пересадки");
-        Assert.That(result1.MaximumTotalCost, Is.EqualTo(50m), "Стоимость маршрута должна быть 50");
+        Assert.That(result1.MaximumTotalCost, Is.EqualTo(40m), "Стоимость маршрута должна быть 40");
 
         var result2 = result[1];
-        Assert.That(result2.TotalDuration, Is.EqualTo(TimeSpan.Zero.Add(TimeSpan.FromMinutes(118))),
+        Assert.That(result2.TotalDuration, Is.EqualTo(TimeSpan.FromMinutes(118)),
             "ожидаемое время поездки 118 минут");
         Assert.That(result2.DirectRoutes.Count, Is.EqualTo(1), "Должен был быть найден маршрут без пересадки");
         Assert.That(result2.MinimalTotalCost, Is.EqualTo(38.85m), "Стоимость маршрута должна быть 38.85");
@@ -567,10 +576,56 @@ public class RouteSearchServiceTest
 
         Assert.That(result.Count, Is.EqualTo(1), "Ожидалось найти ровно 1 маршрут.");
         var result1 = result[0];
-        Assert.That(result1.TotalDuration, Is.EqualTo(TimeSpan.Zero.Add(TimeSpan.FromMinutes(38))),
+        Assert.That(result1.TotalDuration, Is.EqualTo(TimeSpan.FromMinutes(38)),
             "ожидаемое время поездки 38 минут");
         Assert.That(result1.DirectRoutes.Count, Is.EqualTo(1), "Должен был быть найден маршрут без пересадки");
         Assert.That(result1.MinimalTotalCost, Is.EqualTo(31.5m), "Стоимость маршрута должна быть 31.5");
+    }
+    
+    [Test]
+    public async Task GetRouteSearchResultAsync_ValidInput_NotDirectRoute_ReturnsRouteSearchResult()
+    {
+        var fromStationId = _testData.HomelId;
+        var toStationId = _testData.MinskId;
+        var departureDate = DateTime.Now.AddDays(2);
+
+        var result = await _routeSearchService.GetRoutesAsync(new RouteSearchRequest{FromStationId = fromStationId, ToStationId = toStationId, DepartureDate = departureDate, IsDirectRoute = false});
+        Assert.That(result.Count, Is.EqualTo(1), "Должен был быть найден один маршрут с пересадкой");
+        var route = result[0];
+        Assert.That(route.DirectRoutes.Count(), Is.EqualTo(2), "В найденном маршруте должна быть одна пересадка");
+        Assert.That(route.TotalDuration, Is.EqualTo(TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(15))), "Время в пути должно быть 17 часов 15 минут");
+    }
+
+    [Test]
+    public async Task GetRouteSearchResultAsync_ValidInput_NotDirectRoute_ReturnsDirectRouteResult()
+    {
+        var fromStationId = _testData.ZhabinkaId;
+        var toStationId = _testData.HomelId;
+        var departureDate = DateTime.Now.AddDays(2);
+        
+        var result = await _routeSearchService.GetRoutesAsync(new RouteSearchRequest{FromStationId = fromStationId, ToStationId = toStationId, DepartureDate = departureDate, IsDirectRoute = false});
+        Assert.That(result.Count, Is.EqualTo(1), "Должен был быть найден один маршрут с пересадкой");
+        var route = result[0];
+        Assert.That(route.DirectRoutes.Count(), Is.EqualTo(1), "В найденном маршруте должно не должно быть пересадок");
+        Assert.That(route.TotalDuration, Is.EqualTo(TimeSpan.FromHours(11).Add(TimeSpan.FromMinutes(38))), "Время в пути должно быть 17 часов 15 минут");
+
+    }
+    
+    [Test]
+    public async Task GetRouteSearchResultAsync_ValidInput_NotDirectRoute_ReturnsSomeRoutesResult()
+    {
+        var fromStationId = _testData.BaranovichiId;
+        var toStationId = _testData.HomelId;
+        var departureDate = DateTime.Now.AddDays(2);
+        
+        var result = await _routeSearchService.GetRoutesAsync(new RouteSearchRequest{FromStationId = fromStationId, ToStationId = toStationId, DepartureDate = departureDate, IsDirectRoute = false});
+        Assert.That(result.Count, Is.EqualTo(2), "Должен был быть найден два маршрута с пересадкой");
+        var route1 = result[0];
+        Assert.That(route1.DirectRoutes.Count(), Is.EqualTo(3), "В найденном маршруте должно должно быть 2 пересадки");
+        Assert.That(route1.TotalDuration, Is.EqualTo(TimeSpan.FromHours(20).Add(TimeSpan.FromMinutes(50))), "Время в пути должно быть 20 часов 50 минут");
+        var route2 = result[1];
+        Assert.That(route2.DirectRoutes.Count(), Is.EqualTo(2), "В найденном маршруте должно должно быть 1 пересадки");
+        Assert.That(route2.TotalDuration, Is.EqualTo(TimeSpan.FromHours(12).Add(TimeSpan.FromMinutes(38))), "Время в пути должно быть 12 часов 38 минут");
     }
 }
 

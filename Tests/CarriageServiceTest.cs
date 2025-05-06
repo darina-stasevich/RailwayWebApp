@@ -109,7 +109,7 @@ public class CarriageServiceTest
                 ActiveDays = "MTWHFSN",
                 TransferCost = 20,
                 HasBeddingOption = false,
-                DepartureTime = TimeSpan.Zero.Add(TimeSpan.FromHours(15))
+                DepartureTime = TimeSpan.FromHours(15)
             },
             new()
             {
@@ -118,7 +118,7 @@ public class CarriageServiceTest
                 ActiveDays = "MTWHFSN",
                 TransferCost = 15,
                 HasBeddingOption = true,
-                DepartureTime = TimeSpan.Zero.Add(TimeSpan.FromHours(9))
+                DepartureTime = TimeSpan.FromHours(9)
             },
             new()
             {
@@ -127,7 +127,7 @@ public class CarriageServiceTest
                 ActiveDays = "MTWHFSN",
                 TransferCost = 18,
                 HasBeddingOption = false,
-                DepartureTime = TimeSpan.Zero.Add(TimeSpan.FromHours(8).Add(TimeSpan.FromMinutes(22)))
+                DepartureTime = TimeSpan.FromHours(8).Add(TimeSpan.FromMinutes(22))
             },
             new()
             {
@@ -136,7 +136,7 @@ public class CarriageServiceTest
                 ActiveDays = "MTWHFSN",
                 TransferCost = 20,
                 HasBeddingOption = true,
-                DepartureTime = TimeSpan.Zero.Add(TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(05)))
+                DepartureTime = TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(05))
             },
             new()
             {
@@ -145,7 +145,7 @@ public class CarriageServiceTest
                 ActiveDays = "MTWHFSN",
                 TransferCost = 18,
                 HasBeddingOption = true,
-                DepartureTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(22)))
+                DepartureTime = TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(22))
             },
             new()
             {
@@ -154,7 +154,7 @@ public class CarriageServiceTest
                 ActiveDays = "MTWHFSN",
                 TransferCost = 20,
                 HasBeddingOption = true,
-                DepartureTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(22)))
+                DepartureTime = TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(22))
             }
         };
 
@@ -174,8 +174,8 @@ public class CarriageServiceTest
                 SegmentNumber = 1,
                 FromStationId = stations[0].Id,
                 ToStationId = stations[4].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(15)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18)),
+                FromTime = TimeSpan.FromHours(15),
+                ToTime = TimeSpan.FromHours(18),
                 SegmentCost = 5
             },
             new()
@@ -184,8 +184,8 @@ public class CarriageServiceTest
                 SegmentNumber = 1,
                 FromStationId = stations[4].Id,
                 ToStationId = stations[0].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(9)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(12)),
+                FromTime = TimeSpan.FromHours(9),
+                ToTime = TimeSpan.FromHours(12),
                 SegmentCost = 5
             },
             new()
@@ -194,8 +194,8 @@ public class CarriageServiceTest
                 SegmentNumber = 1,
                 FromStationId = stations[0].Id,
                 ToStationId = stations[1].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(8)).Add(TimeSpan.FromMinutes(22)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(8).Add(TimeSpan.FromMinutes(40))),
+                FromTime = TimeSpan.FromHours(8).Add(TimeSpan.FromMinutes(22)),
+                ToTime = TimeSpan.FromHours(8).Add(TimeSpan.FromMinutes(40)),
                 SegmentCost = (decimal)2.5
             },
             new()
@@ -204,8 +204,8 @@ public class CarriageServiceTest
                 SegmentNumber = 2,
                 FromStationId = stations[1].Id,
                 ToStationId = stations[2].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(8)).Add(TimeSpan.FromMinutes(42)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(9).Add(TimeSpan.FromMinutes(20))),
+                FromTime = TimeSpan.FromHours(8).Add(TimeSpan.FromMinutes(42)),
+                ToTime = TimeSpan.FromHours(9).Add(TimeSpan.FromMinutes(20)),
                 SegmentCost = 3
             },
             new()
@@ -214,8 +214,8 @@ public class CarriageServiceTest
                 SegmentNumber = 3,
                 FromStationId = stations[2].Id,
                 ToStationId = stations[4].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(9)).Add(TimeSpan.FromMinutes(30)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(10).Add(TimeSpan.FromMinutes(20))),
+                FromTime = TimeSpan.FromHours(9).Add(TimeSpan.FromMinutes(30)),
+                ToTime = TimeSpan.FromHours(10).Add(TimeSpan.FromMinutes(20)),
                 SegmentCost = 2.4m
             },
             new()
@@ -224,8 +224,8 @@ public class CarriageServiceTest
                 SegmentNumber = 3,
                 FromStationId = stations[1].Id,
                 ToStationId = stations[0].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18)).Add(TimeSpan.FromMinutes(22)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(40))),
+                FromTime = TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(22)),
+                ToTime = TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(40)),
                 SegmentCost = (decimal)2.5
             },
             new()
@@ -234,8 +234,8 @@ public class CarriageServiceTest
                 SegmentNumber = 2,
                 FromStationId = stations[2].Id,
                 ToStationId = stations[1].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(17)).Add(TimeSpan.FromMinutes(42)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(20))),
+                FromTime = TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(42)),
+                ToTime = TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(20)),
                 SegmentCost = 3
             },
             new()
@@ -244,8 +244,8 @@ public class CarriageServiceTest
                 SegmentNumber = 1,
                 FromStationId = stations[4].Id,
                 ToStationId = stations[2].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(17)).Add(TimeSpan.FromMinutes(05)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(40))),
+                FromTime = TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(05)),
+                ToTime = TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(40)),
                 SegmentCost = 2.4m
             },
 
@@ -255,8 +255,8 @@ public class CarriageServiceTest
                 SegmentNumber = 1,
                 FromStationId = stations[0].Id,
                 ToStationId = stations[1].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18)).Add(TimeSpan.FromMinutes(22)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(40))),
+                FromTime = TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(22)),
+                ToTime = TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(40)),
                 SegmentCost = (decimal)2.5
             },
             new()
@@ -265,8 +265,8 @@ public class CarriageServiceTest
                 SegmentNumber = 2,
                 FromStationId = stations[1].Id,
                 ToStationId = stations[3].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18)).Add(TimeSpan.FromMinutes(42)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(21).Add(TimeSpan.FromMinutes(20))),
+                FromTime = TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(42)),
+                ToTime = TimeSpan.FromHours(21).Add(TimeSpan.FromMinutes(20)),
                 SegmentCost = 3
             },
             new()
@@ -275,8 +275,8 @@ public class CarriageServiceTest
                 SegmentNumber = 3,
                 FromStationId = stations[3].Id,
                 ToStationId = stations[5].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(21)).Add(TimeSpan.FromMinutes(30)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(30).Add(TimeSpan.FromMinutes(20))),
+                FromTime = TimeSpan.FromHours(21).Add(TimeSpan.FromMinutes(30)),
+                ToTime = TimeSpan.FromHours(30).Add(TimeSpan.FromMinutes(20)),
                 SegmentCost = 2.4m
             },
             new()
@@ -285,8 +285,8 @@ public class CarriageServiceTest
                 SegmentNumber = 3,
                 FromStationId = stations[1].Id,
                 ToStationId = stations[0].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18)).Add(TimeSpan.FromMinutes(22)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(30).Add(TimeSpan.FromMinutes(40))),
+                FromTime = TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(22)),
+                ToTime = TimeSpan.FromHours(30).Add(TimeSpan.FromMinutes(40)),
                 SegmentCost = (decimal)2.5
             },
             new()
@@ -295,8 +295,8 @@ public class CarriageServiceTest
                 SegmentNumber = 2,
                 FromStationId = stations[3].Id,
                 ToStationId = stations[1].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(17)).Add(TimeSpan.FromMinutes(42)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(20))),
+                FromTime = TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(42)),
+                ToTime = TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(20)),
                 SegmentCost = 3
             },
             new()
@@ -305,8 +305,8 @@ public class CarriageServiceTest
                 SegmentNumber = 1,
                 FromStationId = stations[5].Id,
                 ToStationId = stations[3].Id,
-                FromTime = TimeSpan.Zero.Add(TimeSpan.FromHours(17)).Add(TimeSpan.FromMinutes(05)),
-                ToTime = TimeSpan.Zero.Add(TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(40))),
+                FromTime = TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(05)),
+                ToTime = TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(40)),
                 SegmentCost = 2.4m
             }
         };
