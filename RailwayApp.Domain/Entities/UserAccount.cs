@@ -6,7 +6,7 @@ namespace RailwayApp.Domain.Entities;
 // поставить email как index,
 // разобраться с Id
 
-public class UserAccount
+public class UserAccount : IEntity<Guid>
 {
     [BsonId]
     public Guid Id { get; set; } = Guid.NewGuid();

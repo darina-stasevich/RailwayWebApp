@@ -3,7 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace RailwayApp.Domain.Entities;
 
     
-public class Station
+public class Station : IEntity<Guid>
 {
     [BsonId]
     public Guid Id { get; set; } = Guid.NewGuid();

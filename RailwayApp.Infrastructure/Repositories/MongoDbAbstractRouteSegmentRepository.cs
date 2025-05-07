@@ -6,27 +6,9 @@ using RailwayApp.Domain.Interfaces.IRepositories;
 
 namespace RailwayApp.Infrastructure.Repositories;
 
-public class MongoDbAbstractRouteSegmentRepository : IAbstractRouteSegmentRepository
+public class MongoDbAbstractRouteSegmentRepository(IMongoClient client, IOptions<MongoDbSettings> settings)
+    : MongoDbGlobalRepository<AbstractRouteSegment, Guid>(client, settings, "AbstractRouteSegments"), IAbstractRouteSegmentRepository
 {
-    private readonly IMongoCollection<AbstractRouteSegment> _collection;
-    
-    public MongoDbAbstractRouteSegmentRepository(IMongoClient client, IOptions<MongoDbSettings> settings)
-    {
-        var database = client.GetDatabase(settings.Value.DatabaseName);
-        _collection = database.GetCollection<AbstractRouteSegment>("AbstractRouteSegments");
-    }
-    
-    public async Task DeleteAllAsync()
-    {
-        var deleteResult = await _collection.DeleteManyAsync(FilterDefinition<AbstractRouteSegment>.Empty);
-    }
-    
-    public async Task<Guid> CreateAsync(AbstractRouteSegment segment)
-    {
-        await _collection.InsertOneAsync(segment);
-        return segment.Id;
-    }
-
     public async Task<List<AbstractRouteSegment>> GetAbstractSegmentsByFromStationAsync(Guid fromStationId)
     {
         return (await _collection.FindAsync(s => s.FromStationId == fromStationId)).ToList();
@@ -40,10 +22,5 @@ public class MongoDbAbstractRouteSegmentRepository : IAbstractRouteSegmentReposi
     public async Task<List<AbstractRouteSegment>> GetAbstractSegmentsByRouteIdAsync(Guid routeId)
     {
         return (await _collection.FindAsync(s => s.AbstractRouteId == routeId)).ToList();
-    }
-
-    public async Task<AbstractRouteSegment?> GetByIdAsync(Guid id)
-    {
-        return await _collection.Find(s => s.Id == id).FirstOrDefaultAsync();
     }
 }

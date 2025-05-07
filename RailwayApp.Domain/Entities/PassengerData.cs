@@ -8,7 +8,7 @@ namespace RailwayApp.Domain.Entities;
 ///
 /// TicketId как связь с id билета
 /// </summary>
-public class PassengerData
+public class PassengerData : IEntity<Guid>
 {
     [BsonId]
     public Guid Id { get; set; } = Guid.NewGuid();

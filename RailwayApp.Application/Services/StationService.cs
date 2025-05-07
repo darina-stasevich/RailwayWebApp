@@ -10,7 +10,7 @@ public class StationService(IStationRepository stationRepository) : IStationServ
 {
     public async Task<List<Station>> GetAllStationsAsync()
     {
-        return await stationRepository.GetAllAsync();
+        return (await stationRepository.GetAllAsync()).ToList();
     }
 
     public async Task<Guid> CreateStationAsync(CreateStationRequest request)
@@ -28,7 +28,7 @@ public class StationService(IStationRepository stationRepository) : IStationServ
             Region = request.Region
         };
 
-        var id = await stationRepository.CreateAsync(station);
+        var id = await stationRepository.AddAsync(station);
         return id;
     }
 }

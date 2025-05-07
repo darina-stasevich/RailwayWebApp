@@ -2,11 +2,8 @@ using RailwayApp.Domain.Entities;
 
 namespace RailwayApp.Domain.Interfaces.IRepositories;
 
-public interface ICarriageAvailabilityRepository
+public interface ICarriageAvailabilityRepository : IGlobalRepository<CarriageAvailability, Guid>
 {
-    Task DeleteAllAsync();
-    Task<Guid> CreateAsync(CarriageAvailability carriageAvailability);
-    Task<CarriageAvailability?> GetByIdAsync(Guid id);
     Task<List<CarriageAvailability>> GetByConcreteSegmentIdAsync(Guid concreteSegmentId);
     
 }

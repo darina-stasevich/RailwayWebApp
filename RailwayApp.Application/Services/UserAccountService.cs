@@ -48,7 +48,7 @@ public class UserAccountService(IPasswordHasher passwordHasher,
         var passwordHash = await passwordHasher.HashPassword(request.Password);
         userAccount.HashedPassword = passwordHash;
         
-        return await userAccountRepository.CreateAsync(userAccount);
+        return await userAccountRepository.AddAsync(userAccount);
     }
 
     public async Task<Guid> UpdateUserAccountAsync(Guid userAccountId, UpdateUserAccountRequest request)
@@ -101,10 +101,8 @@ public class UserAccountService(IPasswordHasher passwordHasher,
         if(userAccount.Status == UserAccountStatus.Blocked)
             throw new UserServiceUserBlockedException(userAccountId);
 
-        var resultDelete = await userAccountRepository.DeleteAsync(userAccountId);
-        if (resultDelete == false)
-            throw new Exception("Deleting user account failed");
-
+        await userAccountRepository.DeleteAsync(userAccountId);
+        
         return userAccountId;
     }
 }

@@ -17,7 +17,7 @@ namespace RailwayApp.Domain.Entities;
 /// 
 /// TicketStatus как статус оплаты
 /// </summary>
-public class Ticket
+public class Ticket : IEntity<Guid>
 {
     [BsonId]
     public Guid Id { get; set; } = Guid.NewGuid();

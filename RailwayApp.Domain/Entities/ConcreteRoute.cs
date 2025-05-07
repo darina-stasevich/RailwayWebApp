@@ -6,7 +6,7 @@ namespace RailwayApp.Domain.Entities;
 // связь с сегментами
 // нужна ли связь с билетами?
 
-public class ConcreteRoute
+public class ConcreteRoute : IEntity<Guid>
 {
     [BsonId]
     public Guid Id { get; set; } = Guid.NewGuid();

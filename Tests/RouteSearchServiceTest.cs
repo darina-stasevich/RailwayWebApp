@@ -98,9 +98,9 @@ public class RouteSearchServiceTest
 
         container.Trains = new List<Train>
         {
-            new Train { Number = "TR1", TrainTypeId = trainTypeTr1Id },
-            new Train { Number = "TR2", TrainTypeId = trainTypeTr2Id },
-            new Train { Number = "TR3", TrainTypeId = trainTypeTr3Id }
+            new Train { Id = "TR1", TrainTypeId = trainTypeTr1Id },
+            new Train { Id = "TR2", TrainTypeId = trainTypeTr2Id },
+            new Train { Id = "TR3", TrainTypeId = trainTypeTr3Id }
         };
 
         var abstractRoutes = new List<AbstractRoute>
@@ -537,7 +537,7 @@ public class RouteSearchServiceTest
 
         // --- Настройка Train Repository ---
         _mockTrainRepository.Setup(repo => repo.GetByIdAsync(It.IsAny<string>()))
-            .ReturnsAsync((string id) => _testData.Trains.FirstOrDefault(t => t.Number == id));
+            .ReturnsAsync((string id) => _testData.Trains.FirstOrDefault(t => t.Id == id));
 
 
     }

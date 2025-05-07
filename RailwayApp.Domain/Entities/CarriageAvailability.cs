@@ -4,7 +4,7 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace RailwayApp.Domain.Entities;
 
 // ? добавить Id?
-public class CarriageAvailability
+public class CarriageAvailability : IEntity<Guid>
 {
     [BsonId]
     public Guid Id { get; set; }

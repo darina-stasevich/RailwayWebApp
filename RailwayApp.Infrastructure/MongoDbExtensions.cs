@@ -17,37 +17,21 @@ public static class MongoDbExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        try
+        services.Configure<MongoDbSettings>(configuration.GetSection("MongoDbSettings"));
+
+        BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
+
+        services.AddSingleton<IMongoClient>(serviceProvider =>
         {
-            services.Configure<MongoDbSettings>(configuration.GetSection("MongoDbSettings"));
+            var settings = serviceProvider.GetRequiredService<IOptions<MongoDbSettings>>().Value;
+            var mongoClient = new MongoClient(settings.ConnectionString);
+            return mongoClient;
+        });
 
-            BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
+        services.AddRepositories();
 
-            services.AddSingleton<IMongoClient>(serviceProvider =>
-            {
-                var settings = serviceProvider.GetRequiredService<IOptions<MongoDbSettings>>().Value;
-                var mongoClient = new MongoClient(settings.ConnectionString);
-                var db = mongoClient.GetDatabase("RailwayDB");
-                try
-                {
-                    db.RunCommand<BsonDocument>(new BsonDocument("ping", 1));
-                }
-                catch (Exception)
-                {
-                   Console.WriteLine("KHHUGHHUJHYDGHDGHRHJJHYJH"); 
-                }
-
-                return mongoClient;
-            });
-
-            services.AddRepositories();
-
-            return services;
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
+        return services;
+        
     }
 
     private static IServiceCollection AddRepositories(this IServiceCollection services)

@@ -2,9 +2,6 @@ using RailwayApp.Domain.Entities;
 
 namespace RailwayApp.Domain.Interfaces.IRepositories;
 
-public interface ITrainRepository
+public interface ITrainRepository : IGlobalRepository<Train, string>
 {
-    Task DeleteAllAsync();
-    Task<string> CreateAsync(Train train);
-    Task<Train?> GetByIdAsync(string id);
 }

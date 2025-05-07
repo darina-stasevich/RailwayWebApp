@@ -1,0 +1,12 @@
+namespace RailwayApp.Domain.Interfaces.IRepositories;
+
+public interface IGlobalRepository<TEntity, TId> where TEntity : class, IEntity<TId>
+{
+    Task<TEntity?> GetByIdAsync(TId id);
+    Task<IEnumerable<TEntity>> GetAllAsync();
+    Task<TId> AddAsync(TEntity entity);
+    Task AddRangeAsync(IEnumerable<TEntity> entities);
+    Task DeleteAsync(TId id);
+    Task<bool> ExistsAsync(TId id);
+    Task DeleteAllAsync();
+}

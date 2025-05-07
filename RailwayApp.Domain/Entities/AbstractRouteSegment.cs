@@ -6,7 +6,7 @@ namespace RailwayApp.Domain.Entities;
 /// Связь с абстрактным маршрутом по RouteId
 /// связь со станциями через FromStationId и ToStationId
 /// </summary>
-public class AbstractRouteSegment
+public class AbstractRouteSegment : IEntity<Guid>
 {
     [BsonId]
     public Guid Id { get; set; } = Guid.NewGuid();

@@ -44,9 +44,9 @@ public class SeedController(
             await trainTypeRepository.DeleteAllAsync();
 
             foreach (var carriageTemplate in _trainCarriageInitializer.CarriageTemplates)
-                await carriageTemplateRepository.CreateAsync(carriageTemplate);
+                await carriageTemplateRepository.AddAsync(carriageTemplate);
 
-            foreach (var type in _trainCarriageInitializer.TrainTypes) await trainTypeRepository.CreateAsync(type);
+            foreach (var type in _trainCarriageInitializer.TrainTypes) await trainTypeRepository.AddAsync(type);
 
             var stations = new List<Station>
             {
@@ -81,26 +81,26 @@ public class SeedController(
                     Region = "Гомельская"
                 }
             };
-            foreach (var station in stations) await stationRepository.CreateAsync(station);
+            foreach (var station in stations) await stationRepository.AddAsync(station);
             var trains = new List<Train>
             {
                 new()
                 {
-                    Number = "TR1",
+                    Id = "TR1",
                     TrainTypeId = _trainCarriageInitializer.TrainTypes[8].Id
                 },
                 new()
                 {
-                    Number = "TR2",
+                    Id = "TR2",
                     TrainTypeId = _trainCarriageInitializer.TrainTypes[9].Id
                 },
                 new()
                 {
-                    Number = "TR3",
+                    Id = "TR3",
                     TrainTypeId = _trainCarriageInitializer.TrainTypes[10].Id
                 }
             };
-            foreach (var train in trains) await trainRepository.CreateAsync(train);
+            foreach (var train in trains) await trainRepository.AddAsync(train);
 
             var abstractRoutes = new List<AbstractRoute>
             {
@@ -153,7 +153,7 @@ public class SeedController(
                     DepartureTime = TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(22))
                 }
             };
-            foreach (var route in abstractRoutes) abstractRouteRepository.CreateAsync(route);
+            foreach (var route in abstractRoutes) abstractRouteRepository.AddAsync(route);
             var abstractRouteSegments = new List<AbstractRouteSegment>
             {
                 new()
@@ -298,7 +298,7 @@ public class SeedController(
                     SegmentCost = 2.4m
                 }
             };
-            foreach (var segment in abstractRouteSegments) await abstractRouteSegmentRepository.CreateAsync(segment);
+            foreach (var segment in abstractRouteSegments) await abstractRouteSegmentRepository.AddAsync(segment);
 
             var concreteRoutes = new List<ConcreteRoute>();
             for (var i = 0; i < 7; i++)
@@ -313,7 +313,7 @@ public class SeedController(
                         RouteDepartureDate = date.Add(abstractRoute.DepartureTime)
                     };
                     Console.WriteLine($"time for concrete route is {route.RouteDepartureDate}");
-                    await concreteRouteRepository.CreateAsync(route);
+                    await concreteRouteRepository.AddAsync(route);
                     concreteRoutes.Add(route);
                 }
             }
@@ -352,7 +352,7 @@ public class SeedController(
                         ConcreteArrivalDate = date.Add(abstractRouteSegment.ToTime)
                     };
                     concreteRouteSegments.Add(routeSegment);
-                    await concreteRouteSegmentRepository.CreateAsync(routeSegment);
+                    await concreteRouteSegmentRepository.AddAsync(routeSegment);
                 }
             }
 
@@ -423,7 +423,7 @@ public class SeedController(
                         OccupiedSeats = occupiedSeatsArray
                     };
 
-                    var createdId = await carriageAvailabilityRepository.CreateAsync(carriageAvailability);
+                    var createdId = await carriageAvailabilityRepository.AddAsync(carriageAvailability);
                     carriageAvailabilities.Add(carriageAvailability); // Добавляем в локальный список (если нужно)
 
                     Console.WriteLine(

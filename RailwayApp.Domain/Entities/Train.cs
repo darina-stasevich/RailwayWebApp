@@ -10,9 +10,9 @@ namespace RailwayApp.Domain.Entities;
 /// CarriageTemplates для формата вагонов, хз зачем
 /// 
 /// </summary>
-public class Train
+public class Train : IEntity<string>
 {
     [BsonId]
-    public string Number { get; set; } // key
+    public string Id { get; set; } // key
     public Guid TrainTypeId { get; set; }
 }

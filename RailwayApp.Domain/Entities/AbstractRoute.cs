@@ -8,7 +8,7 @@ namespace RailwayApp.Domain.Entities;
 /// связь с сегментами через List<AbstractRouteSegment>
 /// </summary>
 
-public class AbstractRoute
+public class AbstractRoute : IEntity<Guid>
 {
     [BsonId]
     public Guid Id { get; set; } = Guid.NewGuid();

@@ -59,7 +59,7 @@ public class UserAccountServiceTest
         _mockUserAccountRepository.Setup(repo => repo.GetByEmailAsync(It.IsAny<string>()))
             .ReturnsAsync((string email) => _testData.UserAccounts.FirstOrDefault(u => u.Email == email));
 
-        _mockUserAccountRepository.Setup(repo => repo.CreateAsync(It.IsAny<UserAccount>()))
+        _mockUserAccountRepository.Setup(repo => repo.AddAsync(It.IsAny<UserAccount>()))
             .ReturnsAsync((UserAccount user) =>
             {
                 user.Id = Guid.NewGuid();

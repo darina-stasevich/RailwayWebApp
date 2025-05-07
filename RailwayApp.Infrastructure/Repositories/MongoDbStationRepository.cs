@@ -7,45 +7,18 @@ using RailwayApp.Domain.Interfaces.IRepositories;
 
 namespace RailwayApp.Infrastructure.Repositories;
 
-public class MongoDbStationRepository : IStationRepository
+public class MongoDbStationRepository (IMongoClient client, IOptions<MongoDbSettings> settings)
+    : MongoDbGlobalRepository<Station, Guid>(client, settings, "Stations"), IStationRepository
 { 
-    private readonly IMongoCollection<Station> _collection;
-    
-    public MongoDbStationRepository(IMongoClient client, IOptions<MongoDbSettings> settings)
-    {
-        
-        var database = client.GetDatabase(settings.Value.DatabaseName);
-        _collection = database.GetCollection<Station>("Stations");
-    }
-    public async Task DeleteAllAsync()
-    {
-        var deleteResult = await _collection.DeleteManyAsync(FilterDefinition<Station>.Empty);
-    }
-    
-    public async Task<Guid> CreateAsync(Station station)
-    {
-        await _collection.InsertOneAsync(station);
-        return station.Id;
-    }
 
     public async Task<Station?> GetByNameAsync(string name)
     {
         return (await _collection.FindAsync(s => s.Name == name)).FirstOrDefault();
-    }
-
-    public async Task<Station?> GetByIdAsync(Guid id)
-    {
-        return (await _collection.FindAsync(s => s.Id == id)).FirstOrDefault();
     }
     
     public async Task<List<Station>> GetByIdsAsync(List<Guid> ids)
     {
         var filter = Builders<Station>.Filter.In(s => s.Id, ids);
         return (await _collection.FindAsync(filter)).ToList();
-    }
-
-    public async Task<List<Station>> GetAllAsync()
-    {
-        return (await _collection.FindAsync(s => true)).ToList();
     }
 }

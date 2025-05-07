@@ -2,7 +2,7 @@ using RailwayApp.Domain.Statuses;
 
 namespace RailwayApp.Domain.Entities;
 
-public class CarriageTemplate
+public class CarriageTemplate : IEntity<Guid>
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid TrainTypeId { get; set; } // to connect with TrainType

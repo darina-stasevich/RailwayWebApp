@@ -95,9 +95,9 @@ public class CarriageServiceTest
 
         container.Trains = new List<Train>
         {
-            new Train { Number = "TR1", TrainTypeId = trainTypeTr1Id },
-            new Train { Number = "TR2", TrainTypeId = trainTypeTr2Id },
-            new Train { Number = "TR3", TrainTypeId = trainTypeTr3Id }
+            new Train { Id = "TR1", TrainTypeId = trainTypeTr1Id },
+            new Train { Id = "TR2", TrainTypeId = trainTypeTr2Id },
+            new Train { Id = "TR3", TrainTypeId = trainTypeTr3Id }
         };
 
         var abstractRoutes = new List<AbstractRoute>
@@ -543,7 +543,7 @@ public class CarriageServiceTest
 
         // --- Настройка Train Repository ---
         _mockTrainRepository.Setup(repo => repo.GetByIdAsync(It.IsAny<string>()))
-            .ReturnsAsync((string id) => _testData.Trains.FirstOrDefault(t => t.Number == id));
+            .ReturnsAsync((string id) => _testData.Trains.FirstOrDefault(t => t.Id == id));
 
 
     }
@@ -554,7 +554,7 @@ public class CarriageServiceTest
         // one segment in path
         var concreteRouteId = _testData.ConcreteRouteBrestMinskDirectId;
         // train for route
-        var trainId = _testData.Trains.FirstOrDefault(x => x.Number == "TR1")!.TrainTypeId;
+        var trainId = _testData.Trains.FirstOrDefault(x => x.Id == "TR1")!.TrainTypeId;
         var trainTemplates = _testData.TemplatesByTrainTypeId[trainId].OrderBy(t => t.CarriageNumber).ToList();
         var result = await _carriageService.GetAllCarriagesInfo(new CarriagesInfoRequest{ ConcreteRouteId = concreteRouteId, StartSegmentNumber = 1, EndSegmentNumber = 1});
         Assert.That(result.Count, Is.EqualTo(8), "amount of carriages must be 8");
@@ -597,7 +597,7 @@ public class CarriageServiceTest
         // three segments in path
         var concreteRouteId = _testData.ConcreteRouteBrestHomelComplexId;
         // train for route
-        var trainId = _testData.Trains.FirstOrDefault(x => x.Number == "TR3")!.TrainTypeId;
+        var trainId = _testData.Trains.FirstOrDefault(x => x.Id == "TR3")!.TrainTypeId;
         var trainTemplates = _testData.TemplatesByTrainTypeId[trainId].OrderBy(t => t.CarriageNumber).ToList();
         var result = await _carriageService.GetAllCarriagesInfo(new CarriagesInfoRequest{
             ConcreteRouteId = concreteRouteId, StartSegmentNumber = 1, EndSegmentNumber = 1 });

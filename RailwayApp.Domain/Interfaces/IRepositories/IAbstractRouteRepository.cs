@@ -2,9 +2,6 @@ using RailwayApp.Domain.Entities;
 
 namespace RailwayApp.Domain.Interfaces.IRepositories;
 
-public interface IAbstractRouteRepository
+public interface IAbstractRouteRepository : IGlobalRepository<AbstractRoute, Guid>
 {
-    Task DeleteAllAsync();
-    Task<Guid> CreateAsync(AbstractRoute route);
-    Task<AbstractRoute?> GetByIdAsync(Guid id);
 }
