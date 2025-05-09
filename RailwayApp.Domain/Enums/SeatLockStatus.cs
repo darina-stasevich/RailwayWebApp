@@ -3,7 +3,7 @@ namespace RailwayApp.Domain.Statuses;
 public enum SeatLockStatus
 {
     Active,
-    Expired,
     Completed,
+    Processing,
     Cancelled
 }

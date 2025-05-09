@@ -7,5 +7,6 @@ public interface ISeatLockRepository : IGenericRepository<SeatLock, Guid>
 {
     Task<IEnumerable<SeatLock>> GetByRouteIdAsync(Guid ConcreteRouteId);
     Task<bool> UpdateStatusAsync(Guid seatLockId, SeatLockStatus status);
+    Task<bool> UpdateExpirationTimeAsync(Guid seatLockId, DateTime newExpirationDateUtc);
 
 }

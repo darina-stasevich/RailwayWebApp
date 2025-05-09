@@ -22,15 +22,16 @@ public class Ticket : IEntity<Guid>
     [BsonId]
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid RouteId { get; set; } // concreteRoute
-    public string UserAccountId { get; set; }
+    public Guid UserAccountId { get; set; }
     
-    public Guid StartSegmentId { get; set; }   // concreteRouteSegment
-    public Guid EndSegmentId { get; set; }     // concreteRouteSegment
+    public int StartSegmentNumber { get; set; }   // concreteRouteSegment
+    public int EndSegmentNumber { get; set; }     // concreteRouteSegment
 
     public DateTime DepartureDate { get; set; }
+    public DateTime ArrivalDate { get; set; }
     public decimal Price { get; set; }
     
-    public Guid PassengerDataId { get; set; }   // PassengerData
+    public PassengerData PassengerData { get; set; }   // PassengerData
     
     public int Carriage { get; set; }
     public int Seat { get; set; }

@@ -168,7 +168,10 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
     private async Task<IEnumerable<Tuple<Guid, int> > > GetBookedSeats(InfoRouteSegmentSearchDto dto)
     {
         var seatLocks = await seatLockRepository.GetByRouteIdAsync(dto.ConcreteRouteId);
-        var seatLockInfos = seatLocks.Where(slis => slis.Status == SeatLockStatus.Active).Select(sli => sli.LockedSeatInfos);
+        var seatLockInfos = seatLocks
+            .Where(slis => slis.Status == SeatLockStatus.Active)
+            .Where(slis => slis.ExpirationTimeUtc > DateTime.UtcNow)
+            .Select(sli => sli.LockedSeatInfos);
         var lockedSeatsInfos = seatLockInfos
             .SelectMany(sli => sli)
             .Where(s => s.ConcreteRouteId == dto.ConcreteRouteId);
@@ -183,7 +186,10 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
     private async Task<IEnumerable<int> > GetBookedSeatsPerCarriage(InfoRouteSegmentSearchPerCarriageDto dto)
     {
         var seatLocks = await seatLockRepository.GetByRouteIdAsync(dto.ConcreteRouteId);
-        var seatLockInfos = seatLocks.Where(slis => slis.Status == SeatLockStatus.Active).Select(sli => sli.LockedSeatInfos);
+        var seatLockInfos = seatLocks
+            .Where(slis => slis.Status == SeatLockStatus.Active)
+            .Where(slis => slis.ExpirationTimeUtc > DateTime.UtcNow)
+            .Select(sli => sli.LockedSeatInfos);
         var lockedSeatsInfos = seatLockInfos
             .SelectMany(sli => sli)
             .Where(s => s.ConcreteRouteId == dto.ConcreteRouteId)

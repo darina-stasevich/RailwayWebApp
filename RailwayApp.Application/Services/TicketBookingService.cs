@@ -12,22 +12,33 @@ namespace RailwayApp.Application.Services;
 public class TicketBookingService(ICarriageSeatService carriageSeatService,
     IUserAccountRepository userAccountRepository,
     ISeatLockRepository seatLockRepository,
-    ICarriageTemplateService carriageTemplateService) : ITicketBookingService
+    ICarriageTemplateService carriageTemplateService,
+    IPriceCalculationService priceCalculationService,
+    IScheduleService scheduleService) : ITicketBookingService
 { 
     public static readonly TimeSpan ReservationTime = TimeSpan.FromMinutes(20);
     private InfoSeatSearchDto MapInfoSeatSearchDto(BookSeatRequest dto, CarriageTemplate carriageTemplate)
     {
-
         return new InfoSeatSearchDto
         {
             CarriageTemplateId = carriageTemplate.Id,
             ConcreteRouteId = dto.ConcreteRouteId,
             EndSegmentNumber = dto.EndSegmentNumber,
             SeatNumber = dto.SeatNumber,
-            StartSegmentNumber = dto.StartSegmentNumber
+            StartSegmentNumber = dto.StartSegmentNumber,
         };
     }
-    
+
+    private InfoRouteSegmentSearchPerCarriageDto MapInfoRouteSegmentSearchPerCarriageDto(Guid carriageTemplateId, BookSeatRequest seatRequest)
+    {
+        return new InfoRouteSegmentSearchPerCarriageDto
+        {
+            CarriageTemplateId = carriageTemplateId,
+            ConcreteRouteId = seatRequest.ConcreteRouteId,
+            StartSegmentNumber = seatRequest.StartSegmentNumber,
+            EndSegmentNumber = seatRequest.EndSegmentNumber
+        };
+    }
     public async Task<Guid> BookPlaces(Guid userAccountId, List<BookSeatRequest> request)
     {
         var userAccount = await userAccountRepository.GetByIdAsync(userAccountId);
@@ -53,20 +64,36 @@ public class TicketBookingService(ICarriageSeatService carriageSeatService,
 
             if (carriageTemplate == null)
             {
-                throw new Exception("carriage template not found");
+                throw new CarriageTemplateNotFoundException($"carriage template with number {seatRequest.CarriageNumber} not found for route {seatRequest.ConcreteRouteId}");
             }
             if (await carriageSeatService.IsSeatAvailable(MapInfoSeatSearchDto(seatRequest, carriageTemplate)) == false)
             {
-                throw new TicketBookingServiceSeatNotAvailableException($"{seatRequest.SeatNumber}");
+                throw new TicketBookingServiceSeatNotAvailableException(
+                    $"Seat {seatRequest.SeatNumber} is not available for ConcreteRouteId {seatRequest.ConcreteRouteId}, " +
+                    $"StartSegmentNumber {seatRequest.StartSegmentNumber}, EndSegmentNumber {seatRequest.EndSegmentNumber}");
             }
 
+            var price = await priceCalculationService.CalculatePriceForCarriageAsync(MapInfoRouteSegmentSearchPerCarriageDto(carriageTemplate.Id, seatRequest));
+            var departureDate =
+                await scheduleService.GetDepartureDateForSegment(seatRequest.ConcreteRouteId,
+                    seatRequest.StartSegmentNumber);
+            var arrivalDate =
+                await scheduleService.GetArrivalDateForSegment(seatRequest.ConcreteRouteId,
+                    seatRequest.EndSegmentNumber);
             lockedSeatInfo.Add(new LockedSeatInfo
             {
                 CarriageTemplateId = carriageTemplate.Id,
                 ConcreteRouteId = seatRequest.ConcreteRouteId,
                 EndSegmentNumber = seatRequest.EndSegmentNumber,
                 SeatNumber = seatRequest.SeatNumber,
-                StartSegmentNumber = seatRequest.StartSegmentNumber
+                StartSegmentNumber = seatRequest.StartSegmentNumber,
+                HasBedLinenSet = seatRequest.HasBedLinenSet,
+                PassengerData = seatRequest.PassengerData,
+                
+                Carriage = carriageTemplate.CarriageNumber,
+                DepartureDateUtc = departureDate,
+                ArrivalDateUtc = arrivalDate,
+                Price = price
             });
         }
 
@@ -104,15 +131,5 @@ public class TicketBookingService(ICarriageSeatService carriageSeatService,
 
         var updateResult = await seatLockRepository.UpdateStatusAsync(seatLockId, SeatLockStatus.Cancelled);
         return updateResult;
-    }
-
-    public Task BuyTickets()
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task CancelTickets()
-    {
-        throw new NotImplementedException();
     }
 }

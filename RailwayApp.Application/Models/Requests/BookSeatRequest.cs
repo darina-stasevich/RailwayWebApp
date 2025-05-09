@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using RailwayApp.Domain.Entities;
 
 namespace RailwayApp.Application.Models;
 
@@ -18,4 +19,8 @@ public class BookSeatRequest
     
     [Required(ErrorMessage = "seat number is required")]
     public int SeatNumber { get; set; }
+    public bool HasBedLinenSet { get; set; } = false;
+    
+    [Required(ErrorMessage = "passenger data is required")]
+    public PassengerData PassengerData { get; set; }
 }

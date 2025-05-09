@@ -22,10 +22,18 @@ public class MongoDbSeatLockRepository(IMongoClient client, IOptions<MongoDbSett
     public async Task<bool> UpdateStatusAsync(Guid seatLockId, SeatLockStatus status)
     {
         var filter = Builders<SeatLock>.Filter.Eq(u => u.Id, seatLockId);
-
         var update = Builders<SeatLock>.Update
             .Set(s => s.Status, status);
+        var updateResult = await _collection.UpdateOneAsync(filter, update);
 
+        return updateResult.IsAcknowledged && updateResult.MatchedCount > 0;
+    }
+
+    public async Task<bool> UpdateExpirationTimeAsync(Guid seatLockId, DateTime newExpirationDateUtc)
+    {
+        var filter = Builders<SeatLock>.Filter.Eq(u => u.Id, seatLockId);
+        var update = Builders<SeatLock>.Update
+            .Set(s => s.ExpirationTimeUtc, newExpirationDateUtc);
         var updateResult = await _collection.UpdateOneAsync(filter, update);
 
         return updateResult.IsAcknowledged && updateResult.MatchedCount > 0;
