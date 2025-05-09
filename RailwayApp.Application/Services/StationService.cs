@@ -8,9 +8,9 @@ namespace RailwayApp.Application.Services;
 
 public class StationService(IStationRepository stationRepository) : IStationService
 {
-    public async Task<List<Station>> GetAllStationsAsync()
+    public async Task<IEnumerable<Station>> GetAllStationsAsync()
     {
-        return (await stationRepository.GetAllAsync()).ToList();
+        return await stationRepository.GetAllAsync();
     }
 
     public async Task<Guid> CreateStationAsync(CreateStationRequest request)

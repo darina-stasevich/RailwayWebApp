@@ -9,7 +9,7 @@ public class CarriageTemplateService(IConcreteRouteRepository concreteRouteRepos
     ITrainRepository trainRepository,
     ICarriageTemplateRepository carriageTemplateRepository) : ICarriageTemplateService
 {
-    public async Task<List<CarriageTemplate>> GetCarriageTemplateForRouteAsync(Guid concreteRouteId)
+    public async Task<IEnumerable<CarriageTemplate>> GetCarriageTemplateForRouteAsync(Guid concreteRouteId)
     {
         var concreteRoute = await concreteRouteRepository.GetByIdAsync(concreteRouteId);
         if (concreteRoute == null)
@@ -31,7 +31,7 @@ public class CarriageTemplateService(IConcreteRouteRepository concreteRouteRepos
         
         var carriageTemplates =
             await carriageTemplateRepository.GetByTrainTypeIdAsync(train.TrainTypeId);
-        if (carriageTemplates == null || carriageTemplates.Count == 0)
+        if (carriageTemplates == null || !carriageTemplates.Any())
         {
             throw new Exception("Carriage templates not found");
         }

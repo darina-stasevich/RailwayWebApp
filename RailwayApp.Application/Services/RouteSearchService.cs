@@ -39,7 +39,7 @@ public class RouteSearchService(IStationRepository stationRepository,
         };
     }
     
-    public async Task<List<ComplexRouteDto>> GetRoutesAsync(RouteSearchRequest request)
+    public async Task<IEnumerable<ComplexRouteDto>> GetRoutesAsync(RouteSearchRequest request)
     {
         var fromStation = stationRepository.GetByIdAsync(request.FromStationId).Result;
         if (fromStation == null)
@@ -51,11 +51,11 @@ public class RouteSearchService(IStationRepository stationRepository,
         {
             throw new ArgumentException("To station not found");
         }
-        if(request.DepartureDate - DateTime.Today > TimeSpan.FromDays(30))
+        if(request.DepartureDate - DateTime.UtcNow.Date > TimeSpan.FromDays(30))
         {
             throw new ArgumentException("Departure date cannot be more than 30 days in the future");
         }
-        if(request.DepartureDate - DateTime.Today < TimeSpan.FromDays(0))
+        if(request.DepartureDate < DateTime.UtcNow.Date)
         {
             throw new ArgumentException("Departure date cannot be in the past");
         }
@@ -70,7 +70,7 @@ public class RouteSearchService(IStationRepository stationRepository,
         }
     }
     
-    private async Task<List<ComplexRouteDto>> GetDirectRoutes(Station fromStation, Station toStation, DateTime departureDate)
+    private async Task<IEnumerable<ComplexRouteDto>> GetDirectRoutes(Station fromStation, Station toStation, DateTime departureDate)
     {
         // 1. Find abstract route segments that start in fromStation
         var startAbstractRouteSegments =
@@ -214,7 +214,7 @@ public class RouteSearchService(IStationRepository stationRepository,
         return directRouteDto;
     }
     
-    private async Task<List<ComplexRouteDto>> GetComplexRoutes(Station fromStation, Station toStation, DateTime departureDate)
+    private async Task<IEnumerable<ComplexRouteDto>> GetComplexRoutes(Station fromStation, Station toStation, DateTime departureDate)
     {
         // 1. Find abstract route segments that start in fromStation
         var startAbstractRouteSegments =

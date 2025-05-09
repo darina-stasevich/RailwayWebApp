@@ -7,7 +7,7 @@ using RailwayApp.Domain.Interfaces.IRepositories;
 namespace RailwayApp.Infrastructure.Repositories;
 
 public class MongoDbTrainTypeRepository(IMongoClient client, IOptions<MongoDbSettings> settings)
-    : MongoDbGlobalRepository<TrainType, Guid>(client, settings, "TrainTypes"), ITrainTypeRepository
+    : MongoDbGenericRepository<TrainType, Guid>(client, settings, "TrainTypes"), ITrainTypeRepository
 {
    
 }

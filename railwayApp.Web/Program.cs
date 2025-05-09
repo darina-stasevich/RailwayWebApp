@@ -42,6 +42,7 @@ builder.Services.AddScoped<ICarriageTemplateService, CarriageTemplateService>();
 builder.Services.AddScoped<IPriceCalculationService, PriceCalculationService>();
 builder.Services.AddScoped<IUserAccountService, UserAccountService>();
 builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
+builder.Services.AddScoped<ITicketBookingService, TicketBookingService>();
 
 builder.Services.AddMongoDb(builder.Configuration);
 /*

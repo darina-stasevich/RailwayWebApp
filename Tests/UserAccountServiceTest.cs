@@ -68,8 +68,12 @@ public class UserAccountServiceTest
             });
 
         _mockUserAccountRepository.Setup(repo => repo.DeleteAsync(It.IsAny<Guid>()))
-            .ReturnsAsync((Guid id) => _testData.UserAccounts.FirstOrDefault(u => u.Id == id) != null &&
-                                       _testData.UserAccounts.Remove(_testData.UserAccounts.First(u => u.Id == id)));
+            .Returns((Guid id) =>
+            {
+                var result = _testData.UserAccounts.FirstOrDefault(u => u.Id == id) != null &&
+                       _testData.UserAccounts.Remove(_testData.UserAccounts.First(u => u.Id == id));
+                return Task.CompletedTask;
+            });
         _mockUserAccountRepository.Setup(repo => repo.UpdateAsync(It.IsAny<Guid>(), It.IsAny<UserAccount>()))
             .ReturnsAsync((Guid IDictionary, UserAccount userAccount) =>
             {

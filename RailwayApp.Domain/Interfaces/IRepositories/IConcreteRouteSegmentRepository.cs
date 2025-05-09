@@ -2,9 +2,9 @@ using RailwayApp.Domain.Entities;
 
 namespace RailwayApp.Domain.Interfaces.IRepositories;
 
-public interface IConcreteRouteSegmentRepository : IGlobalRepository<ConcreteRouteSegment, Guid>
+public interface IConcreteRouteSegmentRepository : IGenericRepository<ConcreteRouteSegment, Guid>
 {
     Task<ConcreteRouteSegment?> GetConcreteSegmentByAbstractSegmentIdAsync(Guid abstractRouteSegmentId, DateTime departureDate);
-    Task<List<ConcreteRouteSegment>> GetConcreteSegmentsByAbstractSegmentIdAsync(Guid abstractSegmentId);
-    Task<List<ConcreteRouteSegment>> GetConcreteSegmentsByConcreteRouteIdAsync(Guid concreteRouteId);
+    Task<IEnumerable<ConcreteRouteSegment>> GetConcreteSegmentsByAbstractSegmentIdAsync(Guid abstractSegmentId);
+    Task<IEnumerable<ConcreteRouteSegment>> GetConcreteSegmentsByConcreteRouteIdAsync(Guid concreteRouteId);
 }

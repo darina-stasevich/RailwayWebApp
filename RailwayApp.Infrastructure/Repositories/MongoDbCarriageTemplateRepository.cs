@@ -7,10 +7,10 @@ using RailwayApp.Domain.Interfaces.IRepositories;
 namespace RailwayApp.Infrastructure.Repositories;
 
 public class MongoDbCarriageTemplateRepository(IMongoClient client, IOptions<MongoDbSettings> settings)
-    : MongoDbGlobalRepository<CarriageTemplate, Guid>(client, settings, "CarriageTemplates"), ICarriageTemplateRepository
+    : MongoDbGenericRepository<CarriageTemplate, Guid>(client, settings, "CarriageTemplates"), ICarriageTemplateRepository
 {
-    public async Task<List<CarriageTemplate>?> GetByTrainTypeIdAsync(Guid trainTypeId)
+    public async Task<IEnumerable<CarriageTemplate>?> GetByTrainTypeIdAsync(Guid trainTypeId)
     {
-        return (await _collection.FindAsync(t => t.TrainTypeId == trainTypeId)).ToList();
+        return await _collection.Find(t => t.TrainTypeId == trainTypeId).ToListAsync();
     }
 }

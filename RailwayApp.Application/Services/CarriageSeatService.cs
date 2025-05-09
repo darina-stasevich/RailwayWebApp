@@ -1,8 +1,10 @@
 using System.Collections;
+using MongoDB.Driver.Linq;
 using RailwayApp.Application.Models.Dto;
 using RailwayApp.Domain.Entities;
 using RailwayApp.Domain.Interfaces.IRepositories;
 using RailwayApp.Domain.Interfaces.IServices;
+using RailwayApp.Domain.Statuses;
 
 namespace RailwayApp.Application.Services;
 
@@ -10,7 +12,8 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
     IAbstractRouteRepository abstractRouteRepository,
     IAbstractRouteSegmentRepository abstractRouteSegmentRepository,
     IConcreteRouteSegmentRepository concreteRouteSegmentRepository,
-    ICarriageAvailabilityRepository carriageAvailabilityRepository
+    ICarriageAvailabilityRepository carriageAvailabilityRepository,
+    ISeatLockRepository seatLockRepository
     ) : ICarriageSeatService
 {
     private InfoRouteSegmentSearchDto MapInfoRouteSegment(InfoRouteSegmentSearchPerCarriageDto dto)
@@ -63,31 +66,7 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
 
         return availabilityGroupedByCarriageTemplateId;
     }
-    
-    public async Task<int> GetAvailableSeatsAmountAsync(InfoRouteSegmentSearchDto dto)
-    {
-        var availabilityGroupedByCarriage = await GetAllCarriageAvailabilitiesForRouteAsync(dto);
-        if (availabilityGroupedByCarriage == null)
-        {
-            throw new Exception("No carriages found found");
-        }
-        
-        int totalAvailableSeats = 0;
 
-        foreach (var group in availabilityGroupedByCarriage)
-        {
-            var groupList = group.ToList();
-            var mask = new BitArray(groupList[0].OccupiedSeats);
-            for (int i = 1; i < groupList.Count; i++)
-            {
-                mask = mask.And(groupList[i].OccupiedSeats);
-            }
-
-            totalAvailableSeats += CountSetBits(mask);
-        }
-
-        return totalAvailableSeats;
-    }
     private int CountSetBits(BitArray bitArray)
     {
         int count = 0;
@@ -101,6 +80,48 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
         return count;
     }
 
+    public async Task<int> GetAvailableSeatsAmountAsync(InfoRouteSegmentSearchDto dto)
+    {
+        var availabilityGroupedByCarriage = await GetAllCarriageAvailabilitiesForRouteAsync(dto);
+        if (availabilityGroupedByCarriage == null)
+        {
+            throw new Exception("No carriages found found");
+        }
+        
+        int totalAvailableSeats = 0;
+
+        var bookedLockedSeats = await GetBookedSeats(dto);
+        var bookedLockedSeatsHashSet = new HashSet<Tuple<Guid, int>>();
+        if(bookedLockedSeats.Count() != 0)
+        {
+            bookedLockedSeatsHashSet = new HashSet<Tuple<Guid, int>>(bookedLockedSeats);
+        }
+        
+        foreach (var group in availabilityGroupedByCarriage)
+        {
+            var groupList = group.ToList();
+            var mask = new BitArray(groupList[0].OccupiedSeats);
+            for (int i = 1; i < groupList.Count; i++)
+            {
+                mask = mask.And(groupList[i].OccupiedSeats);
+            }
+
+            if (bookedLockedSeats != null)
+            {
+                for (int i = 0; i < mask.Count; i++)
+                {
+                    totalAvailableSeats += bookedLockedSeatsHashSet.Contains(new Tuple<Guid, int>(group.Key, i + 1)) ? 0 : 1;
+                }
+            }
+            else
+                totalAvailableSeats += CountSetBits(mask);
+        }
+
+        
+        
+        return totalAvailableSeats;
+    }
+
     public async Task<Dictionary<Guid, int>> GetAvailableSeatCountsPerCarriageAsync(InfoRouteSegmentSearchDto dto)
     {
         var groupedCarriageAvailabilities = await GetAllCarriageAvailabilitiesForRouteAsync(dto);
@@ -108,6 +129,13 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
         if (groupedCarriageAvailabilities == null)
         {
             throw new Exception("Carriage availabilities not found");
+        }
+        
+        var bookedLockedSeats = await GetBookedSeats(dto);
+        var bookedLockedSeatsHashSet = new HashSet<Tuple<Guid, int>>();
+        if(bookedLockedSeats.Count() != 0)
+        {
+            bookedLockedSeatsHashSet = new HashSet<Tuple<Guid, int>>(bookedLockedSeats);
         }
         
         var availableSeatsPerCarriage = new Dictionary<Guid, int>();
@@ -120,14 +148,56 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
                 mask = mask.And(groupList[i].OccupiedSeats);
             }
 
-            availableSeatsPerCarriage[group.Key] = CountSetBits(mask);
+            int totalAvailableSeats = 0;
+            if (bookedLockedSeats.Count() != 0)
+            {
+                for (int i = 0; i < mask.Count; i++)
+                {
+                    totalAvailableSeats += bookedLockedSeatsHashSet.Contains(new Tuple<Guid, int>(group.Key, i + 1)) ? 0 : 1;
+                }
+            }
+            else
+                totalAvailableSeats += CountSetBits(mask);
+            
+            availableSeatsPerCarriage[group.Key] = totalAvailableSeats;
         }
 
         return availableSeatsPerCarriage;
     }
 
-    public async Task<List<int>> GetAvailableSeatsForCarriageAsync(InfoRouteSegmentSearchPerCarriageDto dto)
+    private async Task<IEnumerable<Tuple<Guid, int> > > GetBookedSeats(InfoRouteSegmentSearchDto dto)
     {
+        var seatLocks = await seatLockRepository.GetByRouteIdAsync(dto.ConcreteRouteId);
+        var seatLockInfos = seatLocks.Where(slis => slis.Status == SeatLockStatus.Active).Select(sli => sli.LockedSeatInfos);
+        var lockedSeatsInfos = seatLockInfos
+            .SelectMany(sli => sli)
+            .Where(s => s.ConcreteRouteId == dto.ConcreteRouteId);
+        var bookedLockedSeats = lockedSeatsInfos
+            .Where(s => s.StartSegmentNumber <= dto.EndSegmentNumber && s.EndSegmentNumber >= dto.StartSegmentNumber)
+            .Select(x => new Tuple<Guid, int>(x.CarriageTemplateId, x.SeatNumber));
+        
+        return bookedLockedSeats;
+
+    }
+    
+    private async Task<IEnumerable<int> > GetBookedSeatsPerCarriage(InfoRouteSegmentSearchPerCarriageDto dto)
+    {
+        var seatLocks = await seatLockRepository.GetByRouteIdAsync(dto.ConcreteRouteId);
+        var seatLockInfos = seatLocks.Where(slis => slis.Status == SeatLockStatus.Active).Select(sli => sli.LockedSeatInfos);
+        var lockedSeatsInfos = seatLockInfos
+            .SelectMany(sli => sli)
+            .Where(s => s.ConcreteRouteId == dto.ConcreteRouteId)
+            .Where(s => s.CarriageTemplateId == dto.CarriageTemplateId);
+        var bookedLockedSeats = lockedSeatsInfos
+            .Where(s => s.StartSegmentNumber <= dto.EndSegmentNumber && s.EndSegmentNumber >= dto.StartSegmentNumber)
+            .Select(x => x.SeatNumber);
+        
+        return bookedLockedSeats;
+
+    }
+    public async Task<IEnumerable<int>> GetAvailableSeatsForCarriageAsync(InfoRouteSegmentSearchPerCarriageDto dto)
+    {
+        // 1. get grouped carriage availabilities
         var groupedCarriageAvailabilities = await GetAllCarriageAvailabilitiesForRouteAsync(
             MapInfoRouteSegment(dto));
         if (groupedCarriageAvailabilities == null)
@@ -142,12 +212,14 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
             throw new ArgumentException("Carriage template not found");
         }
 
+        // 2. calculate mask of seats which are not paid during the given segment range
         var mask = targetGroup.First().OccupiedSeats;
         foreach (var carriageAvailability in targetGroup)
         {
             mask = mask.And(carriageAvailability.OccupiedSeats);
         }
         
+        // 3. get list of not paid seats
         var availableSeats = new List<int>();
         for(int i = 0; i < mask.Count; i++)
         {
@@ -156,13 +228,32 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
                 availableSeats.Add(i + 1);
             }
         }
+        
+        // 4. get active seatLocks for given route 
+        
+        var bookedLockedSeats = await GetBookedSeatsPerCarriage(dto);
+        var bookedLockedSeatsHashSet = new HashSet<int>(bookedLockedSeats);
+        var fullAvailableSeats = availableSeats.Select(x => x).Where(x => !bookedLockedSeatsHashSet.Contains(x));
+        
+        return fullAvailableSeats;
 
-        return availableSeats;
     }
 
-    public Task<bool> IsSeatAvailable(Guid concreteRouteId, int startSegmentNumber, int endSegmentNumber, int carriageNumber,
-        int seatNumber)
+    private InfoRouteSegmentSearchPerCarriageDto MapInfoRouteSegmentSearchPerCarriageDto(InfoSeatSearchDto dto)
     {
-        throw new NotImplementedException();
+        return new InfoRouteSegmentSearchPerCarriageDto
+        {
+            CarriageTemplateId = dto.CarriageTemplateId,
+            ConcreteRouteId = dto.ConcreteRouteId,
+            EndSegmentNumber = dto.EndSegmentNumber,
+            StartSegmentNumber = dto.StartSegmentNumber
+        };
+    }
+     
+    public async Task<bool> IsSeatAvailable(InfoSeatSearchDto dto)
+    {
+        var seatSearchDto = MapInfoRouteSegmentSearchPerCarriageDto(dto);
+        var notPayedSeats = await GetAvailableSeatsForCarriageAsync(seatSearchDto);
+        return notPayedSeats.Contains(dto.SeatNumber);
     }
 }

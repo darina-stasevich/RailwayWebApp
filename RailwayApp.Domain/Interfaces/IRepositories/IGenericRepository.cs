@@ -1,6 +1,6 @@
 namespace RailwayApp.Domain.Interfaces.IRepositories;
 
-public interface IGlobalRepository<TEntity, TId> where TEntity : class, IEntity<TId>
+public interface IGenericRepository<TEntity, TId> where TEntity : class, IEntity<TId>
 {
     Task<TEntity?> GetByIdAsync(TId id);
     Task<IEnumerable<TEntity>> GetAllAsync();

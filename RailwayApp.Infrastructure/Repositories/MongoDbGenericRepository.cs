@@ -6,11 +6,11 @@ using RailwayApp.Domain.Interfaces.IRepositories;
 
 namespace RailwayApp.Infrastructure.Repositories;
 
-public abstract class MongoDbGlobalRepository<TEntity, TId> : IGlobalRepository<TEntity, TId> where TEntity : class, IEntity<TId>
+public abstract class MongoDbGenericRepository<TEntity, TId> : IGenericRepository<TEntity, TId> where TEntity : class, IEntity<TId>
 {
     protected readonly IMongoCollection<TEntity> _collection;
     
-    public MongoDbGlobalRepository(IMongoClient client, IOptions<MongoDbSettings> settings, string collectionName)
+    public MongoDbGenericRepository(IMongoClient client, IOptions<MongoDbSettings> settings, string collectionName)
     {
         if (string.IsNullOrWhiteSpace(collectionName))
             throw new ArgumentNullException(nameof(collectionName), "collection name is whitespace or null");
@@ -27,7 +27,7 @@ public abstract class MongoDbGlobalRepository<TEntity, TId> : IGlobalRepository<
 
     public async Task<IEnumerable<TEntity>> GetAllAsync()
     {
-        return (await _collection.FindAsync(FilterDefinition<TEntity>.Empty)).ToList();
+        return await _collection.Find(FilterDefinition<TEntity>.Empty).ToListAsync();
     }
 
     public async Task<TId> AddAsync(TEntity entity)

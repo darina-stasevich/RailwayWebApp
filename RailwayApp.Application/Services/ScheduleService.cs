@@ -28,7 +28,7 @@ public class ScheduleService(IConcreteRouteSegmentRepository concreteRouteSegmen
         
         // 3. Get concrete segments by concreteRouteId
         var concreteRouteSegments = await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(concreteRouteId);
-        if (concreteRouteSegments == null || concreteRouteSegments.Count == 0)
+        if (concreteRouteSegments == null || concreteRouteSegments.Count() == 0)
         {
             throw new Exception("No concrete route segments found.");
         }
@@ -36,17 +36,18 @@ public class ScheduleService(IConcreteRouteSegmentRepository concreteRouteSegmen
 
         // 4. Get abstract segments by abstractRouteId
         var abstractRouteSegments = await abstractRouteSegmentRepository.GetAbstractSegmentsByRouteIdAsync(abstractRoute.Id);
-        if (abstractRouteSegments == null || abstractRouteSegments.Count == 0)
+        var routeSegments = abstractRouteSegments.ToList();
+        if (abstractRouteSegments == null || routeSegments.Count == 0)
         {
             throw new Exception("No abstract route segments found.");
         }
         
-        var abstractRouteSegmentsDictionary = abstractRouteSegments.ToDictionary(x => x.Id);
-        var stationIds = abstractRouteSegments.Select(x => x.ToStationId).Append(abstractRouteSegments[0].FromStationId);
+        var abstractRouteSegmentsDictionary = routeSegments.ToDictionary(x => x.Id);
+        var stationIds = routeSegments.Select(x => x.ToStationId).Append(routeSegments[0].FromStationId);
 
         // 5. Get stations
         var stations = await stationRepository.GetByIdsAsync(stationIds.ToList());
-        if (stations == null || stations.Count == 0)
+        if (stations == null || stations.Count() == 0)
         {
             throw new Exception("No stations found.");
         }

@@ -2,7 +2,7 @@ using RailwayApp.Domain.Entities;
 
 namespace RailwayApp.Domain.Interfaces.IRepositories;
 
-public interface ICarriageTemplateRepository : IGlobalRepository<CarriageTemplate, Guid>
+public interface ICarriageTemplateRepository : IGenericRepository<CarriageTemplate, Guid>
 {
-    Task<List<CarriageTemplate>?> GetByTrainTypeIdAsync(Guid trainTypeId);
+    Task<IEnumerable<CarriageTemplate>?> GetByTrainTypeIdAsync(Guid trainTypeId);
 }

@@ -32,7 +32,7 @@ public class CarriageService(ICarriageSeatService carriageSeatService,
             EndSegmentNumber = request.EndSegmentNumber
         };
     }
-    public async Task<List<ShortCarriageInfoDto>> GetAllCarriagesInfo(CarriagesInfoRequest request)
+    public async Task<IEnumerable<ShortCarriageInfoDto>> GetAllCarriagesInfo(CarriagesInfoRequest request)
     {
         if(request.StartSegmentNumber > request.EndSegmentNumber)
             throw new ArgumentException("Start segment number must be less than end segment number");
@@ -59,7 +59,7 @@ public class CarriageService(ICarriageSeatService carriageSeatService,
             carriagesInfo.Add(dto);
         }
 
-        return carriagesInfo.OrderBy(d => d.CarriageNumber).ToList();
+        return carriagesInfo.OrderBy(d => d.CarriageNumber);
     }
 
     public async Task<DetailedCarriageInfoDto> GetCarriageInfo(CarriageInfoRequest request)
@@ -89,7 +89,7 @@ public class CarriageService(ICarriageSeatService carriageSeatService,
             CarriageNumber = carriageTemplate.CarriageNumber,
             LayoutIdentifier = carriageTemplate.LayoutIdentifier,
             TotalSeats = carriageTemplate.TotalSeats,
-            AvailableSeats = availableSeats,
+            AvailableSeats = availableSeats.ToList(),
             Cost = price
         };
 

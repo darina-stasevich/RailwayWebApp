@@ -7,22 +7,21 @@ using RailwayApp.Domain.Interfaces.IRepositories;
 namespace RailwayApp.Infrastructure.Repositories;
 
 public class MongoDbConcreteRouteSegmentRepository(IMongoClient client, IOptions<MongoDbSettings> settings)
-    : MongoDbGlobalRepository<ConcreteRouteSegment, Guid>(client, settings, "ConcreteRouteSegments"), IConcreteRouteSegmentRepository
+    : MongoDbGenericRepository<ConcreteRouteSegment, Guid>(client, settings, "ConcreteRouteSegments"), IConcreteRouteSegmentRepository
 {
     public async Task<ConcreteRouteSegment?> GetConcreteSegmentByAbstractSegmentIdAsync(Guid abstractRouteSegmentId, DateTime departureDate)
     {
-        var result = await _collection.FindAsync(s =>
-            s.AbstractSegmentId == abstractRouteSegmentId && s.ConcreteDepartureDate.Date == departureDate.Date);
-        return result.FirstOrDefault();
+        return await _collection.Find(s =>
+            s.AbstractSegmentId == abstractRouteSegmentId && s.ConcreteDepartureDate.Date == departureDate.Date).FirstOrDefaultAsync();
     }
 
-    public async Task<List<ConcreteRouteSegment>> GetConcreteSegmentsByAbstractSegmentIdAsync(Guid abstractSegmentId)
+    public async Task<IEnumerable<ConcreteRouteSegment>> GetConcreteSegmentsByAbstractSegmentIdAsync(Guid abstractSegmentId)
     {
-        return (await _collection.FindAsync(s => s.AbstractSegmentId == abstractSegmentId)).ToList();
+        return await _collection.Find(s => s.AbstractSegmentId == abstractSegmentId).ToListAsync();
     }
 
-    public async Task<List<ConcreteRouteSegment>> GetConcreteSegmentsByConcreteRouteIdAsync(Guid concreteRouteId)
+    public async Task<IEnumerable<ConcreteRouteSegment>> GetConcreteSegmentsByConcreteRouteIdAsync(Guid concreteRouteId)
     {
-        return (await _collection.FindAsync(s => s.ConcreteRouteId == concreteRouteId)).ToList();
+        return await _collection.Find(s => s.ConcreteRouteId == concreteRouteId).ToListAsync();
     }
 }

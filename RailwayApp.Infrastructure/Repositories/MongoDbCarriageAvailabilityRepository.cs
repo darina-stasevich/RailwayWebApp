@@ -7,10 +7,10 @@ using RailwayApp.Domain.Interfaces.IRepositories;
 namespace RailwayApp.Infrastructure.Repositories;
 
 public class MongoDbCarriageAvailabilityRepository(IMongoClient client, IOptions<MongoDbSettings> settings)
-    : MongoDbGlobalRepository<CarriageAvailability, Guid>(client, settings, "CarriageAvailabilities"), ICarriageAvailabilityRepository
+    : MongoDbGenericRepository<CarriageAvailability, Guid>(client, settings, "CarriageAvailabilities"), ICarriageAvailabilityRepository
 {
-    public Task<List<CarriageAvailability>> GetByConcreteSegmentIdAsync(Guid concreteSegmentId)
+    public async Task<IEnumerable<CarriageAvailability>> GetByConcreteSegmentIdAsync(Guid concreteSegmentId)
     {
-        return _collection.Find(x => x.ConcreteRouteSegmentId == concreteSegmentId).ToListAsync();
+        return await _collection.Find(x => x.ConcreteRouteSegmentId == concreteSegmentId).ToListAsync();
     }
 }

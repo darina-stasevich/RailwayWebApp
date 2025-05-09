@@ -4,5 +4,5 @@ namespace RailwayApp.Domain.Interfaces.IServices;
 
 public interface IRouteSearchService
 {
-    Task<List<ComplexRouteDto>> GetRoutesAsync(RouteSearchRequest request);
+    Task<IEnumerable<ComplexRouteDto>> GetRoutesAsync(RouteSearchRequest request);
 }

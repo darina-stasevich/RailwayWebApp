@@ -10,7 +10,7 @@ using RailwayApp.Domain.Interfaces.IRepositories;
 namespace RailwayApp.Infrastructure.Repositories;
 
 public class MongoDbTicketRepository(IMongoClient client, IOptions<MongoDbSettings> settings)
-    : MongoDbGlobalRepository<Ticket, Guid>(client, settings, "Tickets"), ITicketRepository
+    : MongoDbGenericRepository<Ticket, Guid>(client, settings, "Tickets"), ITicketRepository
 {
     public async Task<IEnumerable<Ticket>> GetByUserAccountIdAsync(Guid id)
     {

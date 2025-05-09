@@ -45,7 +45,7 @@ public class RoutesController(IRouteSearchService routeSearchService, ILogger<Ro
             
             var routes = await routeSearchService.GetRoutesAsync(searchRequest);
             
-            logger.LogInformation("Successfully retrieved {RouteCount} routes for request: {RouteRequest}", routes.Count, requestJson);
+            logger.LogInformation("Successfully retrieved {RouteCount} routes for request: {RouteRequest}", routes.Count(), requestJson);
             return Ok(routes);
         }
         catch (ArgumentException ex)

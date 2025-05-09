@@ -2,8 +2,8 @@ using RailwayApp.Domain.Entities;
 
 namespace RailwayApp.Domain.Interfaces.IRepositories;
 
-public interface ICarriageAvailabilityRepository : IGlobalRepository<CarriageAvailability, Guid>
+public interface ICarriageAvailabilityRepository : IGenericRepository<CarriageAvailability, Guid>
 {
-    Task<List<CarriageAvailability>> GetByConcreteSegmentIdAsync(Guid concreteSegmentId);
+    Task<IEnumerable<CarriageAvailability>> GetByConcreteSegmentIdAsync(Guid concreteSegmentId);
     
 }

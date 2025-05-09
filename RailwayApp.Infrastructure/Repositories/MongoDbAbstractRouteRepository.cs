@@ -7,6 +7,6 @@ using RailwayApp.Domain.Interfaces.IRepositories;
 namespace RailwayApp.Infrastructure.Repositories;
 
 public class MongoDbAbstractRouteRepository(IMongoClient client, IOptions<MongoDbSettings> settings)
-    : MongoDbGlobalRepository<AbstractRoute, Guid>(client, settings, "AbstractRoutes"), IAbstractRouteRepository
+    : MongoDbGenericRepository<AbstractRoute, Guid>(client, settings, "AbstractRoutes"), IAbstractRouteRepository
 {
 }

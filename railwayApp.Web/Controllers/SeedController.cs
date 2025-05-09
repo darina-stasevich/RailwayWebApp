@@ -36,8 +36,8 @@ public class SeedController(
             await concreteRouteSegmentRepository.DeleteAllAsync();
             await abstractRouteSegmentRepository.DeleteAllAsync();
             await stationRepository.DeleteAllAsync();
-            //await ticketRepository.DeleteAllAsync();
-            //await userAccountRepository.DeleteAllAsync();
+            await ticketRepository.DeleteAllAsync();
+            await userAccountRepository.DeleteAllAsync();
             await concreteRouteRepository.DeleteAllAsync();
             await abstractRouteRepository.DeleteAllAsync();
             await trainRepository.DeleteAllAsync();
@@ -300,19 +300,41 @@ public class SeedController(
             };
             foreach (var segment in abstractRouteSegments) await abstractRouteSegmentRepository.AddAsync(segment);
 
+            var applicationLocalTimeZone = TimeZoneInfo.CreateCustomTimeZone(
+                "AppFixedUTC+3",
+                TimeSpan.FromHours(3),
+                "App Fixed UTC+3",
+                "App Fixed UTC+3"
+            );
+
             var concreteRoutes = new List<ConcreteRoute>();
             for (var i = 0; i < 7; i++)
             {
-                var date = DateTime.Now.Date;
-                date = date.AddDays(i);
+                var todayInApplicationLocalTimeZone =
+                    TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, applicationLocalTimeZone).Date;
+                var operationDate =
+                    todayInApplicationLocalTimeZone.AddDays(i); // Это DateOnly по сути, в локальном времени приложения
+
                 foreach (var abstractRoute in abstractRoutes)
                 {
+                    var localDepartureDateTime = new DateTime(operationDate.Year, operationDate.Month,
+                        operationDate.Day,
+                        abstractRoute.DepartureTime.Hours,
+                        abstractRoute.DepartureTime.Minutes,
+                        abstractRoute.DepartureTime.Seconds,
+                        DateTimeKind.Unspecified);
+
+                    var utcDepartureDateTime =
+                        TimeZoneInfo.ConvertTimeToUtc(localDepartureDateTime, applicationLocalTimeZone);
+
                     var route = new ConcreteRoute
                     {
                         AbstractRouteId = abstractRoute.Id,
-                        RouteDepartureDate = date.Add(abstractRoute.DepartureTime)
+                        RouteDepartureDate = utcDepartureDateTime
                     };
-                    Console.WriteLine($"time for concrete route is {route.RouteDepartureDate}");
+
+                    Console.WriteLine(
+                        $"Local departure time is {localDepartureDateTime}, Stored UTC departure time is {route.RouteDepartureDate}");
                     await concreteRouteRepository.AddAsync(route);
                     concreteRoutes.Add(route);
                 }
@@ -321,35 +343,66 @@ public class SeedController(
             var concreteRouteSegments = new List<ConcreteRouteSegment>();
             for (var i = 0; i < 7; i++)
             {
-                var date = DateTime.Now.Date;
-                date = date.AddDays(i);
+                var todayInApplicationLocalTimeZone =
+                    TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, applicationLocalTimeZone).Date;
+                var operationDate = todayInApplicationLocalTimeZone.AddDays(i);
+
                 for (var j = 0; j < abstractRouteSegments.Count; j++)
                 {
                     var abstractRouteSegment = abstractRouteSegments[j];
-                    var concreteRouteIndex = i * 6;
+
+                    var concreteRouteIndex = i * 6; 
                     if (j % 14 == 0)
                         concreteRouteIndex += 0;
                     else if (j % 14 == 1)
                         concreteRouteIndex += 1;
-                    else if (j % 14 <= 4)
+                    else if (j % 14 <= 4) 
                         concreteRouteIndex += 2;
-                    else if (j % 14 <= 7)
+                    else if (j % 14 <= 7) 
                         concreteRouteIndex += 3;
                     else if (j % 14 <= 10)
                         concreteRouteIndex += 4;
                     else if (j % 14 <= 13)
                         concreteRouteIndex += 5;
-                    else
-                        concreteRouteIndex = 6;
-                    Console.WriteLine("concreteRouteIndex is " + concreteRouteIndex);
-                    Console.WriteLine("abstractRouteSegment is " + abstractRouteSegments.Count);
-                    Console.WriteLine(concreteRoutes.Count);
+                    if (concreteRouteIndex >= concreteRoutes.Count || concreteRouteIndex < 0)
+                    {
+                        Console.WriteLine(
+                            $"Error: concreteRouteIndex {concreteRouteIndex} is out of bounds for concreteRoutes (Count: {concreteRoutes.Count}). Skipping segment.");
+                        continue;
+                    }
+
+                    var localDepartureDateTime = new DateTime(
+                        operationDate.Year, operationDate.Month, operationDate.Day,
+                        abstractRouteSegment.FromTime.Hours,
+                        abstractRouteSegment.FromTime.Minutes,
+                        abstractRouteSegment.FromTime.Seconds,
+                        DateTimeKind
+                            .Unspecified);
+
+                    var utcDepartureDateTime =
+                        TimeZoneInfo.ConvertTimeToUtc(localDepartureDateTime, applicationLocalTimeZone);
+
+                    var arrivalOperationDate = operationDate; 
+
+                    if (abstractRouteSegment.ToTime < abstractRouteSegment.FromTime)
+                        arrivalOperationDate = operationDate.AddDays(1);
+
+                    var localArrivalDateTime = new DateTime(
+                        arrivalOperationDate.Year, arrivalOperationDate.Month, arrivalOperationDate.Day,
+                        abstractRouteSegment.ToTime.Hours,
+                        abstractRouteSegment.ToTime.Minutes,
+                        abstractRouteSegment.ToTime.Seconds,
+                        DateTimeKind.Unspecified);
+                    
+                    var utcArrivalDateTime =
+                        TimeZoneInfo.ConvertTimeToUtc(localArrivalDateTime, applicationLocalTimeZone);
+
                     var routeSegment = new ConcreteRouteSegment
                     {
                         AbstractSegmentId = abstractRouteSegment.Id,
                         ConcreteRouteId = concreteRoutes[concreteRouteIndex].Id,
-                        ConcreteDepartureDate = date.Add(abstractRouteSegment.FromTime),
-                        ConcreteArrivalDate = date.Add(abstractRouteSegment.ToTime)
+                        ConcreteDepartureDate = utcDepartureDateTime, // Сохраняем UTC
+                        ConcreteArrivalDate = utcArrivalDateTime // Сохраняем UTC
                     };
                     concreteRouteSegments.Add(routeSegment);
                     await concreteRouteSegmentRepository.AddAsync(routeSegment);

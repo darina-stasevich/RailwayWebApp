@@ -28,7 +28,7 @@ public class CarriagesController(ICarriageService carriageService,
             
             var carriages = await carriageService.GetAllCarriagesInfo(request);
             
-            logger.LogInformation("Successfully retrieved {CarriageCount} carriages for request: {CarriageRequest}", carriages.Count, JsonSerializer.Serialize(request));
+            logger.LogInformation("Successfully retrieved {CarriageCount} carriages for request: {CarriageRequest}", carriages.Count(), JsonSerializer.Serialize(request));
             return Ok(carriages);
         }
         catch (ArgumentException ex)
@@ -39,7 +39,7 @@ public class CarriagesController(ICarriageService carriageService,
         catch (Exception ex)
         {
             logger.LogError(ex, "Unhandled exception occured {message}", ex.Message);
-            return StatusCode(StatusCodes.Status404NotFound, "Internal Server Error");
+            return StatusCode(StatusCodes.Status404NotFound, ex.Message);
         }
         
     }

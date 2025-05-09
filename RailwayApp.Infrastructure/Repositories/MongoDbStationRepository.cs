@@ -8,17 +8,17 @@ using RailwayApp.Domain.Interfaces.IRepositories;
 namespace RailwayApp.Infrastructure.Repositories;
 
 public class MongoDbStationRepository (IMongoClient client, IOptions<MongoDbSettings> settings)
-    : MongoDbGlobalRepository<Station, Guid>(client, settings, "Stations"), IStationRepository
+    : MongoDbGenericRepository<Station, Guid>(client, settings, "Stations"), IStationRepository
 { 
 
     public async Task<Station?> GetByNameAsync(string name)
     {
-        return (await _collection.FindAsync(s => s.Name == name)).FirstOrDefault();
+        return await _collection.Find(s => s.Name == name).FirstOrDefaultAsync();
     }
     
-    public async Task<List<Station>> GetByIdsAsync(List<Guid> ids)
+    public async Task<IEnumerable<Station>> GetByIdsAsync(List<Guid> ids)
     {
         var filter = Builders<Station>.Filter.In(s => s.Id, ids);
-        return (await _collection.FindAsync(filter)).ToList();
+        return await _collection.Find(filter).ToListAsync();
     }
 }

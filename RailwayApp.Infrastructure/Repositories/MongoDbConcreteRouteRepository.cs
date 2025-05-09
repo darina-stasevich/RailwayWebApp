@@ -7,6 +7,6 @@ using RailwayApp.Domain.Interfaces.IRepositories;
 namespace RailwayApp.Infrastructure.Repositories;
 
 public class MongoDbConcreteRouteRepository(IMongoClient client, IOptions<MongoDbSettings> settings)
-    : MongoDbGlobalRepository<ConcreteRoute, Guid>(client, settings, "ConcreteRoutes"), IConcreteRouteRepository
+    : MongoDbGenericRepository<ConcreteRoute, Guid>(client, settings, "ConcreteRoutes"), IConcreteRouteRepository
 {
 }

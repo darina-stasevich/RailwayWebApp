@@ -1,3 +1,4 @@
+using System.Collections;
 using RailwayApp.Application.Models.Dto;
 using RailwayApp.Domain.Entities;
 
@@ -7,6 +8,6 @@ public interface ICarriageSeatService
 {
      Task<int> GetAvailableSeatsAmountAsync(InfoRouteSegmentSearchDto dto);
      Task<Dictionary<Guid, int>> GetAvailableSeatCountsPerCarriageAsync(InfoRouteSegmentSearchDto dto);
-     Task<List<int>> GetAvailableSeatsForCarriageAsync(InfoRouteSegmentSearchPerCarriageDto dto);
-     Task<bool> IsSeatAvailable(Guid concreteRouteId, int startSegmentNumber, int endSegmentNumber, int carriageNumber, int seatNumber);
+     Task<IEnumerable<int>> GetAvailableSeatsForCarriageAsync(InfoRouteSegmentSearchPerCarriageDto dto);
+     Task<bool> IsSeatAvailable(InfoSeatSearchDto dto);
 }

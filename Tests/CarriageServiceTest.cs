@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Runtime.Serialization;
+using MongoDB.Driver.Linq;
 using Moq;
 using RailwayApp.Application.Models;
 using RailwayApp.Application.Services;
 using RailwayApp.Domain.Entities;
 using RailwayApp.Domain.Interfaces.Initializers;
 using RailwayApp.Domain.Interfaces.IRepositories;
+using RailwayApp.Domain.Statuses;
 
 namespace Tests;
 
@@ -19,6 +21,7 @@ public class CarriageServiceTest
     private Mock<ICarriageAvailabilityRepository> _mockCarriageAvailabilityRepository;
     private Mock<ITrainRepository> _mockTrainRepository;
     private Mock<ICarriageTemplateRepository> _mockCarriageTemplateRepository;
+    private Mock<ISeatLockRepository> _mockSeatLockRepository;
     
     private CarriageService _carriageService;
     
@@ -41,10 +44,11 @@ public class CarriageServiceTest
         _mockCarriageAvailabilityRepository = new Mock<ICarriageAvailabilityRepository>();
         _mockTrainRepository = new Mock<ITrainRepository>();
         _mockCarriageTemplateRepository = new Mock<ICarriageTemplateRepository>();
+        _mockSeatLockRepository = new Mock<ISeatLockRepository>();
 
         _mockCarriageSeatService = new CarriageSeatService(_mockConcreteRouteRepository.Object, _mockAbstractRouteRepository.Object,
             _mockAbstractRouteSegmentRepository.Object, _mockConcreteRouteSegmentRepository.Object,
-            _mockCarriageAvailabilityRepository.Object);
+            _mockCarriageAvailabilityRepository.Object, _mockSeatLockRepository.Object);
         
         _mockCarriageTemplateService = new CarriageTemplateService(_mockConcreteRouteRepository.Object,
             _mockAbstractRouteRepository.Object, _mockTrainRepository.Object, _mockCarriageTemplateRepository.Object);
@@ -545,7 +549,13 @@ public class CarriageServiceTest
         _mockTrainRepository.Setup(repo => repo.GetByIdAsync(It.IsAny<string>()))
             .ReturnsAsync((string id) => _testData.Trains.FirstOrDefault(t => t.Id == id));
 
-
+        // --- Настройка Seat Lock Repository
+        _mockSeatLockRepository.Setup(repo => repo.GetByRouteIdAsync(It.IsAny<Guid>()))
+            .ReturnsAsync((Guid id) =>
+            {
+                return _testData.SeatLocks.Where(sl =>
+                    sl.LockedSeatInfos.Any(lsi => lsi.ConcreteRouteId == id));
+            });
     }
 
     [Test]
@@ -606,7 +616,7 @@ public class CarriageServiceTest
         foreach (var shortInfo in result)
         {
             Assert.That(shortInfo.CarriageNumber, Is.EqualTo(++idx), "carriage number must be in increasing order");
-            Assert.That(shortInfo.AvailableSeats, Is.EqualTo((trainTemplates[idx - 1].TotalSeats +1 ) / 2), $"invalid amount of free seats in carriage {idx}");
+            Assert.That(shortInfo.AvailableSeats, Is.EqualTo((trainTemplates[idx - 1].TotalSeats +1 )/2), $"invalid amount of free seats in carriage {idx}");
             Console.WriteLine(shortInfo.AvailableSeats);
         }
     }
