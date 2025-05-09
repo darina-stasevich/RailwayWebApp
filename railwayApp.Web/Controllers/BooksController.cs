@@ -23,7 +23,7 @@ public class BooksController(ITicketBookingService ticketBookingService,
             return ValidationProblem(ModelState);
         }
 
-        var userAccountId = Guid.Parse("dd656aed-f0f0-4c09-b97b-79ba6a01c1c7"); // replace with normal claim
+        var userAccountId = Guid.Parse("212ac631-4f3d-4010-adfd-e4123d569a91"); // replace with normal claim
 
         try
         {
@@ -62,7 +62,7 @@ public class BooksController(ITicketBookingService ticketBookingService,
     [HttpPost("cancelBooks")]
     public async Task<ActionResult<bool>> CancelBookSeats([FromBody] Guid seatlockId)
     {
-        var userAccountId = Guid.Parse("dd656aed-f0f0-4c09-b97b-79ba6a01c1c7"); // replace with normal claim
+        var userAccountId = Guid.Parse("212ac631-4f3d-4010-adfd-e4123d569a91"); // replace with normal claim
 
         try
         {

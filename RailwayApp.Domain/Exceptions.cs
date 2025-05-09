@@ -30,3 +30,5 @@ public class PaymentServicePaymentFailedException(Guid seatLockId) :
 public class SeatLockException(string message) : Exception(message);
 public class SeatLockExpiredException(Guid id) : SeatLockException($"SeatLock {id} not found or expired");
 public class SeatLockNotActiveException(Guid id) : SeatLockException($"SeatLock {id} not active");
+
+public class CarriageAvailabilityUpdateService(string message) : Exception(message);

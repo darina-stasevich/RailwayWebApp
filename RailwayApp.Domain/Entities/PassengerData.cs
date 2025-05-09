@@ -10,8 +10,6 @@ namespace RailwayApp.Domain.Entities;
 /// </summary>
 public class PassengerData
 {
-    public Guid TicketId { get; set; }
-    
     public string Surname { get; set; }
     public string FirstName { get; set; }
     public string? SecondName { get; set; }

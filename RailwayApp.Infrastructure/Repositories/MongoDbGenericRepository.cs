@@ -19,10 +19,18 @@ public abstract class MongoDbGenericRepository<TEntity, TId> : IGenericRepositor
         _collection = database.GetCollection<TEntity>(collectionName);
     }
     
-    public async Task<TEntity?> GetByIdAsync(TId id)
+    public async Task<TEntity?> GetByIdAsync(TId id, IClientSessionHandle? session = null)
     {
         var filter = Builders<TEntity>.Filter.Eq("_id", id);
-        return await _collection.Find(filter).FirstOrDefaultAsync();
+
+        if (session == null)
+        {
+            return await _collection.Find(filter).FirstOrDefaultAsync();
+        }
+        else
+        {
+            return await _collection.Find(session, filter).FirstOrDefaultAsync();
+        }
     }
 
     public async Task<IEnumerable<TEntity>> GetAllAsync()

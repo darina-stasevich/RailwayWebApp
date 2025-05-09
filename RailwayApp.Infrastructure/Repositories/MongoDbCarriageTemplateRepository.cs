@@ -9,8 +9,12 @@ namespace RailwayApp.Infrastructure.Repositories;
 public class MongoDbCarriageTemplateRepository(IMongoClient client, IOptions<MongoDbSettings> settings)
     : MongoDbGenericRepository<CarriageTemplate, Guid>(client, settings, "CarriageTemplates"), ICarriageTemplateRepository
 {
-    public async Task<IEnumerable<CarriageTemplate>?> GetByTrainTypeIdAsync(Guid trainTypeId)
+    public async Task<IEnumerable<CarriageTemplate>?> GetByTrainTypeIdAsync(Guid trainTypeId, IClientSessionHandle? session = null)
     {
-        return await _collection.Find(t => t.TrainTypeId == trainTypeId).ToListAsync();
+        var filter = Builders<CarriageTemplate>.Filter.Eq(u => u.TrainTypeId, trainTypeId);
+        if (session != null)
+            return await _collection.Find(session, filter).ToListAsync();
+        else
+            return await _collection.Find(filter).ToListAsync();
     }
 }

@@ -341,79 +341,7 @@ public class SeedController(
             }
 
             var concreteRouteSegments = new List<ConcreteRouteSegment>();
-            /*for (var i = 0; i < 7; i++)
-            {
-                var todayInApplicationLocalTimeZone =
-                    TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, applicationLocalTimeZone).Date;
-                var operationDate = todayInApplicationLocalTimeZone.AddDays(i);
-
-                for (var j = 0; j < abstractRouteSegments.Count; j++)
-                {
-                    var abstractRouteSegment = abstractRouteSegments[j];
-
-                    var concreteRouteIndex = i * 6; 
-                    if (j % 14 == 0)
-                        concreteRouteIndex += 0;
-                    else if (j % 14 == 1)
-                        concreteRouteIndex += 1;
-                    else if (j % 14 <= 4) 
-                        concreteRouteIndex += 2;
-                    else if (j % 14 <= 7) 
-                        concreteRouteIndex += 3;
-                    else if (j % 14 <= 10)
-                        concreteRouteIndex += 4;
-                    else if (j % 14 <= 13)
-                        concreteRouteIndex += 5;
-                    if (concreteRouteIndex >= concreteRoutes.Count || concreteRouteIndex < 0)
-                    {
-                        Console.WriteLine(
-                            $"Error: concreteRouteIndex {concreteRouteIndex} is out of bounds for concreteRoutes (Count: {concreteRoutes.Count}). Skipping segment.");
-                        continue;
-                    }
-
-                    abstractRouteSegment.FromTime;
-                    abstractRouteSegment.ToTime;
-                    
-                    var localDepartureDateTime = new DateTime(
-                        operationDate.Year, operationDate.Month, operationDate.Day,
-                        abstractRouteSegment.FromTime.Hours,
-                        abstractRouteSegment.FromTime.Minutes,
-                        abstractRouteSegment.FromTime.Seconds,
-                        DateTimeKind
-                            .Unspecified);
-
-                    var utcDepartureDateTime =
-                        TimeZoneInfo.ConvertTimeToUtc(localDepartureDateTime, applicationLocalTimeZone);
-
-                    var arrivalOperationDate = operationDate; 
-
-                    if (abstractRouteSegment.ToTime < abstractRouteSegment.FromTime)
-                        arrivalOperationDate = operationDate.AddDays(1);
-
-                    var localArrivalDateTime = new DateTime(
-                        arrivalOperationDate.Year, arrivalOperationDate.Month, arrivalOperationDate.Day,
-                        abstractRouteSegment.ToTime.Hours,
-                        abstractRouteSegment.ToTime.Minutes,
-                        abstractRouteSegment.ToTime.Seconds,
-                        DateTimeKind.Unspecified);
-                    
-                    var utcArrivalDateTime =
-                        TimeZoneInfo.ConvertTimeToUtc(localArrivalDateTime, applicationLocalTimeZone);
-
-                    var routeSegment = new ConcreteRouteSegment
-                    {
-                        AbstractSegmentId = abstractRouteSegment.Id,
-                        ConcreteRouteId = concreteRoutes[concreteRouteIndex].Id,
-                        ConcreteDepartureDate = utcDepartureDateTime, // Сохраняем UTC
-                        ConcreteArrivalDate = utcArrivalDateTime, // Сохраняем UTC
-                        FromStationId = abstractRouteSegment.FromStationId,
-                        ToStationId = abstractRouteSegment.ToStationId,
-                        SegmentNumber = abstractRouteSegment.SegmentNumber
-                    };
-                    concreteRouteSegments.Add(routeSegment);
-                    await concreteRouteSegmentRepository.AddAsync(routeSegment);
-                }
-            }*/
+           
             for (var i = 0; i < 7; i++)
             {
                 var date = DateTime.Now.Date;
@@ -462,7 +390,7 @@ public class SeedController(
 
             var random = new Random();
             var carriageAvailabilities = new List<CarriageAvailability>();
-            var firstDayConcreteSegments = concreteRouteSegments.Take(14);
+            var firstDayConcreteSegments = concreteRouteSegments.Skip(14).Take(14);
             foreach (var concreteRouteSegment in firstDayConcreteSegments)
             {
                 var concreteRoute = concreteRoutes.FirstOrDefault(cr => cr.Id == concreteRouteSegment.ConcreteRouteId);

@@ -15,27 +15,43 @@ public class MongoDbSeatLockRepository(IMongoClient client, IOptions<MongoDbSett
         var filter = Builders<SeatLock>.Filter.ElemMatch(
             sl => sl.LockedSeatInfos,
             lsi => lsi.ConcreteRouteId == concreteRouteId);
-        
+
         return await _collection.Find(filter).ToListAsync();
     }
 
-    public async Task<bool> UpdateStatusAsync(Guid seatLockId, SeatLockStatus status)
+    public async Task<bool> UpdateStatusAsync(Guid seatLockId, SeatLockStatus status, IClientSessionHandle? session = null)
     {
         var filter = Builders<SeatLock>.Filter.Eq(u => u.Id, seatLockId);
-        var update = Builders<SeatLock>.Update
-            .Set(s => s.Status, status);
-        var updateResult = await _collection.UpdateOneAsync(filter, update);
+        UpdateResult? updateResult = null;
+        if (session == null)
+        {
+            var update = Builders<SeatLock>.Update
+                .Set(s => s.Status, status);
+            updateResult = await _collection.UpdateOneAsync(filter, update);
+        }
+        else
+        {
+            var update = Builders<SeatLock>.Update
+                .Set(s => s.Status, status);
+            updateResult = await _collection.UpdateOneAsync(session, filter, update);
+        }
 
         return updateResult.IsAcknowledged && updateResult.MatchedCount > 0;
     }
 
-    public async Task<bool> UpdateExpirationTimeAsync(Guid seatLockId, DateTime newExpirationDateUtc)
+    public async Task<bool> PrepareForProcessingAsync(Guid seatLockId, DateTime newExpirationTime, SeatLockStatus newStatus, SeatLockStatus expectedCurrentStatus, IClientSessionHandle session)
     {
-        var filter = Builders<SeatLock>.Filter.Eq(u => u.Id, seatLockId);
-        var update = Builders<SeatLock>.Update
-            .Set(s => s.ExpirationTimeUtc, newExpirationDateUtc);
-        var updateResult = await _collection.UpdateOneAsync(filter, update);
+        var filter = Builders<SeatLock>.Filter.And(
+            Builders<SeatLock>.Filter.Eq(sl => sl.Id, seatLockId),
+            Builders<SeatLock>.Filter.Eq(sl => sl.Status, expectedCurrentStatus)
+        );
 
-        return updateResult.IsAcknowledged && updateResult.MatchedCount > 0;
+        var update = Builders<SeatLock>.Update
+            .Set(sl => sl.Status, newStatus)
+            .Set(sl => sl.ExpirationTimeUtc, newExpirationTime);
+
+        var result = await _collection.UpdateOneAsync(session, filter, update);
+        return result.IsAcknowledged && result.ModifiedCount > 0;
     }
+
 }

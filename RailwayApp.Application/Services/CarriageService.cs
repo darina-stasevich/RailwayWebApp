@@ -1,4 +1,6 @@
 using System.Security.Principal;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 using RailwayApp.Application.Models;
 using RailwayApp.Application.Models.Dto;
 using RailwayApp.Domain.Entities;
@@ -9,7 +11,9 @@ namespace RailwayApp.Application.Services;
 
 public class CarriageService(ICarriageSeatService carriageSeatService,
     IPriceCalculationService priceCalculationService,
-    ICarriageTemplateService carriageTemplateService
+    ICarriageTemplateService carriageTemplateService,
+    IConcreteRouteSegmentRepository concreteRouteSegmentRepository,
+    ICarriageAvailabilityRepository carriageAvailabilityRepository
     ) : ICarriageService
 { 
     private InfoRouteSegmentSearchPerCarriageDto MapInfoRouteSegmentPerCarriageSearch(CarriageInfoRequest request, Guid carriageTemplateId)
@@ -95,4 +99,27 @@ public class CarriageService(ICarriageSeatService carriageSeatService,
 
         return detailedCarriageDto;
     }
+
+    public async Task<IEnumerable<CarriageAvailability>> GetCarriageAvailabilitiesForSeat(OccupiedSeatDto dto, IClientSessionHandle session)
+    {
+        var allConcreteRouteSegments =
+            await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(dto.ConcreteRouteId, session);
+        var concreteRouteSegments = allConcreteRouteSegments.Where(s =>
+            s.SegmentNumber >= dto.StartSegmentNumber && s.SegmentNumber <= dto.EndSegmentNumber);
+
+        var carriageAvailabilities = new List<CarriageAvailability>();
+        foreach (var segment in concreteRouteSegments)
+        {
+            var carriageAvailability = await 
+                carriageAvailabilityRepository.GetByConcreteSegmentIdAndTemplateIdAsync(segment.Id,
+                    dto.CarriageTemplateId, session);
+            carriageAvailabilities.Add(carriageAvailability);
+        }
+
+        return carriageAvailabilities;
+    }
 }
+
+/*
+ 
+*/

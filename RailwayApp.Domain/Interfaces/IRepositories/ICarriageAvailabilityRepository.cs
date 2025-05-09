@@ -1,3 +1,4 @@
+using MongoDB.Driver;
 using RailwayApp.Domain.Entities;
 
 namespace RailwayApp.Domain.Interfaces.IRepositories;
@@ -5,5 +6,9 @@ namespace RailwayApp.Domain.Interfaces.IRepositories;
 public interface ICarriageAvailabilityRepository : IGenericRepository<CarriageAvailability, Guid>
 {
     Task<IEnumerable<CarriageAvailability>> GetByConcreteSegmentIdAsync(Guid concreteSegmentId);
-    
+
+    Task<CarriageAvailability> GetByConcreteSegmentIdAndTemplateIdAsync(Guid segmentId, Guid carriageTemplateId,
+        IClientSessionHandle session);
+
+    Task<bool> UpdateOccupiedSeats(IEnumerable<CarriageAvailability> carriageAvailabilities, IClientSessionHandle session);
 }

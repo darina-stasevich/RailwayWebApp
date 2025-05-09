@@ -10,4 +10,5 @@ public interface ICarriageSeatService
      Task<Dictionary<Guid, int>> GetAvailableSeatCountsPerCarriageAsync(InfoRouteSegmentSearchDto dto);
      Task<IEnumerable<int>> GetAvailableSeatsForCarriageAsync(InfoRouteSegmentSearchPerCarriageDto dto);
      Task<bool> IsSeatAvailable(InfoSeatSearchDto dto);
+     
 }

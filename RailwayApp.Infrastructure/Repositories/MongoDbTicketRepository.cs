@@ -12,6 +12,11 @@ namespace RailwayApp.Infrastructure.Repositories;
 public class MongoDbTicketRepository(IMongoClient client, IOptions<MongoDbSettings> settings)
     : MongoDbGenericRepository<Ticket, Guid>(client, settings, "Tickets"), ITicketRepository
 {
+    public async Task AddRange(IEnumerable<Ticket> tickets, IClientSessionHandle session)
+    {
+        await _collection.InsertManyAsync(session, tickets);
+    }
+
     public async Task<IEnumerable<Ticket>> GetByUserAccountIdAsync(Guid id)
     {
         return await _collection.Find(t => t.Id == id).ToListAsync();

@@ -20,9 +20,12 @@ public class MongoDbConcreteRouteSegmentRepository(IMongoClient client, IOptions
         return await _collection.Find(s => s.AbstractSegmentId == abstractSegmentId).ToListAsync();
     }
 
-    public async Task<IEnumerable<ConcreteRouteSegment>> GetConcreteSegmentsByConcreteRouteIdAsync(Guid concreteRouteId)
+    public async Task<IEnumerable<ConcreteRouteSegment>> GetConcreteSegmentsByConcreteRouteIdAsync(Guid concreteRouteId, IClientSessionHandle? session = null)
     {
-        return await _collection.Find(s => s.ConcreteRouteId == concreteRouteId).ToListAsync();
+        if(session == null)
+            return await _collection.Find(s => s.ConcreteRouteId == concreteRouteId).ToListAsync();
+        else
+            return await _collection.Find(session, s => s.ConcreteRouteId == concreteRouteId).ToListAsync();
     }
     
     public async Task<IEnumerable<ConcreteRouteSegment>> GetConcreteSegmentsByFromStationAsync(Guid fromStationId)
