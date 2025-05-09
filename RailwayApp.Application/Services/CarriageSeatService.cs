@@ -15,7 +15,7 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
     ICarriageAvailabilityRepository carriageAvailabilityRepository,
     ISeatLockRepository seatLockRepository
     ) : ICarriageSeatService
-{
+{ 
     private InfoRouteSegmentSearchDto MapInfoRouteSegment(InfoRouteSegmentSearchPerCarriageDto dto)
     {
         return new InfoRouteSegmentSearchDto{
@@ -26,33 +26,11 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
     }
     private async Task<IEnumerable<IGrouping<Guid,CarriageAvailability>>?> GetAllCarriageAvailabilitiesForRouteAsync(InfoRouteSegmentSearchDto dto)
     {
-        // 1. Get concrete route    
-        var concreteRoute = await concreteRouteRepository.GetByIdAsync(dto.ConcreteRouteId);
-        if (concreteRoute == null)
-        {
-            throw new Exception("Concrete route not found");
-        }
-
-        // 2. Get relevant abstract route
-        var abstractRoute = await abstractRouteRepository.GetByIdAsync(concreteRoute.AbstractRouteId);
-        if (abstractRoute == null)
-        {
-            throw new Exception("Abstract route not found");
-        }
+        var concreteRouteSegments =
+            await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(dto.ConcreteRouteId);
+        var relevantConcreteRouteSegments = concreteRouteSegments.Where(s =>
+            s.SegmentNumber >= dto.StartSegmentNumber && s.SegmentNumber <= dto.EndSegmentNumber);
         
-        // 3. Get relevant abstract route segments (has segment numbers)
-        var abstractRouteSegments =
-            await abstractRouteSegmentRepository.GetAbstractSegmentsByRouteIdAsync(abstractRoute.Id);
-        var relevantAbstractRouteSegments = abstractRouteSegments
-            .Where(s => s.SegmentNumber >= dto.StartSegmentNumber && s.SegmentNumber <= dto.EndSegmentNumber);
-        var segmentsHashSet = new HashSet<Guid>(relevantAbstractRouteSegments.Select(s => s.Id));
-        
-        // 4. Get relevant concrete route segments
-        var relevantConcreteRouteSegments =
-            (await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(dto.ConcreteRouteId))
-            .Where(s => segmentsHashSet.Contains(s.AbstractSegmentId));
-
-        // 5. get all availabilities for segments
         var allAvailabilities = new List<CarriageAvailability>();
         foreach (var routeSegment in relevantConcreteRouteSegments)
         {

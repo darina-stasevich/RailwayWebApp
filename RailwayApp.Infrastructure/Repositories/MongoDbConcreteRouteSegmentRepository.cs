@@ -24,4 +24,15 @@ public class MongoDbConcreteRouteSegmentRepository(IMongoClient client, IOptions
     {
         return await _collection.Find(s => s.ConcreteRouteId == concreteRouteId).ToListAsync();
     }
+    
+    public async Task<IEnumerable<ConcreteRouteSegment>> GetConcreteSegmentsByFromStationAsync(Guid fromStationId)
+    {
+        return await _collection.Find(s => s.FromStationId == fromStationId).ToListAsync();
+    }
+
+    public async Task<IEnumerable<ConcreteRouteSegment>> GetConcreteSegmentsByToStationAsync(Guid toStationId)
+    {
+        return await _collection.Find(s => s.ToStationId == toStationId).ToListAsync();
+    }
+
 }

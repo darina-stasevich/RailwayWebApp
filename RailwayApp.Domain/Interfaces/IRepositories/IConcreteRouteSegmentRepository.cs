@@ -7,4 +7,6 @@ public interface IConcreteRouteSegmentRepository : IGenericRepository<ConcreteRo
     Task<ConcreteRouteSegment?> GetConcreteSegmentByAbstractSegmentIdAsync(Guid abstractRouteSegmentId, DateTime departureDate);
     Task<IEnumerable<ConcreteRouteSegment>> GetConcreteSegmentsByAbstractSegmentIdAsync(Guid abstractSegmentId);
     Task<IEnumerable<ConcreteRouteSegment>> GetConcreteSegmentsByConcreteRouteIdAsync(Guid concreteRouteId);
+    Task<IEnumerable<ConcreteRouteSegment>> GetConcreteSegmentsByFromStationAsync(Guid fromStationId);
+    Task<IEnumerable<ConcreteRouteSegment>> GetConcreteSegmentsByToStationAsync(Guid toStationId);
 }

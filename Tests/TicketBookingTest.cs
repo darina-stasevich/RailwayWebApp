@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Diagnostics;
+using MongoDB.Driver.Linq;
 using Moq;
 using RailwayApp.Application.Models;
 using RailwayApp.Application.Services;
@@ -22,12 +23,14 @@ public class TicketBookingTest
     private Mock<ICarriageTemplateRepository> _mockCarriageTemplateRepository;
     private Mock<ISeatLockRepository> _mockSeatLockRepository;
     private Mock<IUserAccountRepository> _mockUserAccountRepository;
+    private Mock<IStationRepository> _mockStationRepository;
 
     private TicketBookingService _ticketBookingService;
 
     private PriceCalculationService _mockPriceCalculationService;
     private CarriageTemplateService _mockCarriageTemplateService;
     private CarriageSeatService _mockCarriageSeatService;
+    private ScheduleService _mockScheduleService;
     private readonly TrainCarriageInitializer _trainCarriageInitializer = new TrainCarriageInitializer();
 
     private TestDataContainer _testData;
@@ -46,6 +49,7 @@ public class TicketBookingTest
         _mockCarriageTemplateRepository = new Mock<ICarriageTemplateRepository>();
         _mockSeatLockRepository = new Mock<ISeatLockRepository>();
         _mockUserAccountRepository = new Mock<IUserAccountRepository>();
+        _mockStationRepository = new Mock<IStationRepository>();
 
         _mockCarriageSeatService = new CarriageSeatService(_mockConcreteRouteRepository.Object,
             _mockAbstractRouteRepository.Object,
@@ -59,11 +63,12 @@ public class TicketBookingTest
             _mockAbstractRouteRepository.Object, _mockAbstractRouteSegmentRepository.Object,
             _mockCarriageTemplateRepository.Object, _mockCarriageTemplateService);
 
+        _mockScheduleService = new ScheduleService(_mockConcreteRouteSegmentRepository.Object,
+            _mockAbstractRouteSegmentRepository.Object, _mockAbstractRouteRepository.Object,
+            _mockConcreteRouteRepository.Object, _mockStationRepository.Object);
         ConfigureMocks();
 
-        _ticketBookingService = new TicketBookingService(_mockCarriageSeatService, _mockUserAccountRepository.Object,
-            _mockSeatLockRepository.Object,
-            _mockCarriageTemplateService);
+        _ticketBookingService = new TicketBookingService(_mockCarriageSeatService, _mockUserAccountRepository.Object, _mockSeatLockRepository.Object, _mockCarriageTemplateService, _mockPriceCalculationService, _mockScheduleService);
     }
 
     private TestDataContainer GenerateTestData()
@@ -370,7 +375,10 @@ public class TicketBookingTest
                     AbstractSegmentId = abstractRouteSegment.Id,
                     ConcreteRouteId = concreteRoutes[concreteRouteIndex].Id,
                     ConcreteDepartureDate = newDate.Add(abstractRouteSegment.FromTime),
-                    ConcreteArrivalDate = newDate.Add(abstractRouteSegment.ToTime)
+                    ConcreteArrivalDate = newDate.Add(abstractRouteSegment.ToTime),
+                    FromStationId = abstractRouteSegment.FromStationId,
+                    ToStationId = abstractRouteSegment.ToStationId,
+                    SegmentNumber = abstractRouteSegment.SegmentNumber
                 };
                 concreteRouteSegments.Add(routeSegment);
             }
@@ -453,6 +461,10 @@ public class TicketBookingTest
 
     private void ConfigureMocks()
     {
+        // --- Настройка Station Repository
+        _mockStationRepository
+            .Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>()))
+            .ReturnsAsync((Guid id) => { return _testData.Stations.FirstOrDefault(x => x.Id == id);});
         // --- Настройка User Account Repository
         _mockUserAccountRepository
             .Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>()))
@@ -539,6 +551,24 @@ public class TicketBookingTest
                     .Where(cs => cs.ConcreteRouteId == concreteRouteId)
                     .ToList();
                 return matchingSegments;
+            });
+        
+        _mockConcreteRouteSegmentRepository
+            .Setup(repo => repo.GetConcreteSegmentsByFromStationAsync(It.IsAny<Guid>()))
+            .ReturnsAsync((Guid id) =>
+            {
+                var matchingElements = _testData.ConcreteRouteSegments
+                    .Where(cs => cs.FromStationId == id).ToList();
+                return matchingElements;
+            });
+        
+        _mockConcreteRouteSegmentRepository
+            .Setup(repo => repo.GetConcreteSegmentsByToStationAsync(It.IsAny<Guid>()))
+            .ReturnsAsync((Guid id) =>
+            {
+                var matchingElements = _testData.ConcreteRouteSegments
+                    .Where(cs => cs.ToStationId == id).ToList();
+                return matchingElements;
             });
 
         // --- Настройка Carriage Availability Repository ---

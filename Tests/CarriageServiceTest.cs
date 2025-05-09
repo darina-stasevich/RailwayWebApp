@@ -367,7 +367,10 @@ public class CarriageServiceTest
                     AbstractSegmentId = abstractRouteSegment.Id,
                     ConcreteRouteId = concreteRoutes[concreteRouteIndex].Id,
                     ConcreteDepartureDate = newDate.Add(abstractRouteSegment.FromTime),
-                    ConcreteArrivalDate = newDate.Add(abstractRouteSegment.ToTime)
+                    ConcreteArrivalDate = newDate.Add(abstractRouteSegment.ToTime),
+                    FromStationId = abstractRouteSegment.FromStationId,
+                    ToStationId = abstractRouteSegment.ToStationId,
+                    SegmentNumber = abstractRouteSegment.SegmentNumber
                 };
                 concreteRouteSegments.Add(routeSegment);
             }
@@ -527,6 +530,24 @@ public class CarriageServiceTest
                 return matchingSegments;
             });
 
+        _mockConcreteRouteSegmentRepository
+            .Setup(repo => repo.GetConcreteSegmentsByFromStationAsync(It.IsAny<Guid>()))
+            .ReturnsAsync((Guid id) =>
+            {
+                var matchingElements = _testData.ConcreteRouteSegments
+                    .Where(cs => cs.FromStationId == id).ToList();
+                return matchingElements;
+            });
+        
+        _mockConcreteRouteSegmentRepository
+            .Setup(repo => repo.GetConcreteSegmentsByToStationAsync(It.IsAny<Guid>()))
+            .ReturnsAsync((Guid id) =>
+            {
+                var matchingElements = _testData.ConcreteRouteSegments
+                    .Where(cs => cs.ToStationId == id).ToList();
+                return matchingElements;
+            });
+        
         // --- Настройка Carriage Availability Repository ---
         _mockCarriageAvailabilityRepository
             .Setup(repo => repo.GetByConcreteSegmentIdAsync(It.IsAny<Guid>()))

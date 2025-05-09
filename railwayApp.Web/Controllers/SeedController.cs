@@ -341,7 +341,7 @@ public class SeedController(
             }
 
             var concreteRouteSegments = new List<ConcreteRouteSegment>();
-            for (var i = 0; i < 7; i++)
+            /*for (var i = 0; i < 7; i++)
             {
                 var todayInApplicationLocalTimeZone =
                     TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, applicationLocalTimeZone).Date;
@@ -371,6 +371,9 @@ public class SeedController(
                         continue;
                     }
 
+                    abstractRouteSegment.FromTime;
+                    abstractRouteSegment.ToTime;
+                    
                     var localDepartureDateTime = new DateTime(
                         operationDate.Year, operationDate.Month, operationDate.Day,
                         abstractRouteSegment.FromTime.Hours,
@@ -402,7 +405,47 @@ public class SeedController(
                         AbstractSegmentId = abstractRouteSegment.Id,
                         ConcreteRouteId = concreteRoutes[concreteRouteIndex].Id,
                         ConcreteDepartureDate = utcDepartureDateTime, // Сохраняем UTC
-                        ConcreteArrivalDate = utcArrivalDateTime // Сохраняем UTC
+                        ConcreteArrivalDate = utcArrivalDateTime, // Сохраняем UTC
+                        FromStationId = abstractRouteSegment.FromStationId,
+                        ToStationId = abstractRouteSegment.ToStationId,
+                        SegmentNumber = abstractRouteSegment.SegmentNumber
+                    };
+                    concreteRouteSegments.Add(routeSegment);
+                    await concreteRouteSegmentRepository.AddAsync(routeSegment);
+                }
+            }*/
+            for (var i = 0; i < 7; i++)
+            {
+                var date = DateTime.Now.Date;
+                date = date.AddDays(i);
+                for (var j = 0; j < abstractRouteSegments.Count; j++)
+                {
+                    var abstractRouteSegment = abstractRouteSegments[j];
+                    var concreteRouteIndex = i * 6;
+                    if (j % 14 == 0)
+                        concreteRouteIndex += 0;
+                    else if (j % 14 == 1)
+                        concreteRouteIndex += 1;
+                    else if (j % 14 <= 4)
+                        concreteRouteIndex += 2;
+                    else if (j % 14 <= 7)
+                        concreteRouteIndex += 3;
+                    else if (j % 14 <= 10)
+                        concreteRouteIndex += 4;
+                    else if (j % 14 <= 13)
+                        concreteRouteIndex += 5;
+                    else
+                        concreteRouteIndex = 6;
+                    
+                    var routeSegment = new ConcreteRouteSegment
+                    {
+                        AbstractSegmentId = abstractRouteSegment.Id,
+                        ConcreteRouteId = concreteRoutes[concreteRouteIndex].Id,
+                        ConcreteDepartureDate = date.Add(abstractRouteSegment.FromTime),
+                        ConcreteArrivalDate = date.Add(abstractRouteSegment.ToTime),
+                        FromStationId = abstractRouteSegment.FromStationId,
+                        ToStationId = abstractRouteSegment.ToStationId,
+                        SegmentNumber = abstractRouteSegment.SegmentNumber
                     };
                     concreteRouteSegments.Add(routeSegment);
                     await concreteRouteSegmentRepository.AddAsync(routeSegment);

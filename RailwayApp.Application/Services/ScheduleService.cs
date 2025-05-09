@@ -28,25 +28,16 @@ public class ScheduleService(IConcreteRouteSegmentRepository concreteRouteSegmen
         }
         
         // 3. Get concrete segments by concreteRouteId
-        var concreteRouteSegments = await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(concreteRouteId);
-        if (concreteRouteSegments == null || concreteRouteSegments.Count() == 0)
+        var concreteRouteSegments = (await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(concreteRouteId)).ToList();
+        if (concreteRouteSegments == null || concreteRouteSegments.Count == 0)
         {
             throw new Exception("No concrete route segments found.");
         }
-        var sortedRouteSegments = concreteRouteSegments.OrderBy(x => x.ConcreteDepartureDate).ToList();
 
-        // 4. Get abstract segments by abstractRouteId
-        var abstractRouteSegments = await abstractRouteSegmentRepository.GetAbstractSegmentsByRouteIdAsync(abstractRoute.Id);
-        var routeSegments = abstractRouteSegments.ToList();
-        if (abstractRouteSegments == null || routeSegments.Count == 0)
-        {
-            throw new Exception("No abstract route segments found.");
-        }
+        // 4. Get stations
         
-        var abstractRouteSegmentsDictionary = routeSegments.ToDictionary(x => x.Id);
-        var stationIds = routeSegments.Select(x => x.ToStationId).Append(routeSegments[0].FromStationId);
+        var stationIds = concreteRouteSegments.Select(x => x.ToStationId).Append(concreteRouteSegments[0].FromStationId);
 
-        // 5. Get stations
         var stations = await stationRepository.GetByIdsAsync(stationIds.ToList());
         if (stations == null || stations.Count() == 0)
         {
@@ -62,8 +53,8 @@ public class ScheduleService(IConcreteRouteSegmentRepository concreteRouteSegmen
             {
                 DepartureDate = concreteRouteSegment.ConcreteDepartureDate,
                 ArrivalDate = concreteRouteSegment.ConcreteArrivalDate,
-                FromStation = stationsDictionary[abstractRouteSegmentsDictionary[concreteRouteSegment.AbstractSegmentId].FromStationId],
-                ToStation = stationsDictionary[abstractRouteSegmentsDictionary[concreteRouteSegment.AbstractSegmentId].ToStationId]
+                FromStation = stationsDictionary[concreteRouteSegment.FromStationId],
+                ToStation = stationsDictionary[concreteRouteSegment.ToStationId]
             };
             segmentScheduleDtos.Add(segmentScheduleDto);
         }
