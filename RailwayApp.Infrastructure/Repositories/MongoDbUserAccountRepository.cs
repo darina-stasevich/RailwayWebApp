@@ -9,10 +9,6 @@ namespace RailwayApp.Infrastructure.Repositories;
 public class MongoDbUserAccountRepository(IMongoClient client, IOptions<MongoDbSettings> settings)
     : MongoDbGenericRepository<UserAccount, Guid>(client, settings, "UserAccounts"), IUserAccountRepository
 {
-    public async Task<UserAccount> GetByUserAccountIdAsync(string email)
-    {
-        return await _collection.Find(u => u.Email == email).FirstOrDefaultAsync();
-    }
 
     public async Task<UserAccount?> GetByEmailAsync(string email)
     {

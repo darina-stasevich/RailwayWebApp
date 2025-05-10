@@ -25,6 +25,8 @@ public class UserAccount : IEntity<Guid>
     [BsonRepresentation(MongoDB.Bson.BsonType.String)]
     public UserAccountStatus Status { get; set; }
     
+    [BsonRepresentation(MongoDB.Bson.BsonType.String)]
+    public UserRole Role { get; set; } = UserRole.Client;
     public DateTime StatusChangedDate {get; set; }
     
     // public List<Ticket> Tickets { get; set; } = new List<Ticket>();    

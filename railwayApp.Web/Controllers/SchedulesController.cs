@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RailwayApp.Domain.Interfaces.IServices;
 
@@ -5,6 +6,7 @@ namespace RailwayApp.Web.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Client")]
 public class SchedulesController(ILogger<SchedulesController> logger,
     IScheduleService scheduleService) : ControllerBase
 {

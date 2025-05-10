@@ -1,15 +1,19 @@
 using System.Net.Security;
+using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RailwayApp.Application.Models;
 using RailwayApp.Domain;
 using RailwayApp.Domain.Interfaces.IServices;
+using RailwayApp.Domain.Statuses;
 
 namespace RailwayApp.Web.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Client")]
 public class BooksController(ITicketBookingService ticketBookingService,
     ILogger<BooksController> logger) : ControllerBase
 {
@@ -23,8 +27,10 @@ public class BooksController(ITicketBookingService ticketBookingService,
             return ValidationProblem(ModelState);
         }
 
-        var userAccountId = Guid.Parse("212ac631-4f3d-4010-adfd-e4123d569a91"); // replace with normal claim
-
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdString, out Guid userAccountId)) 
+            return Unauthorized("User ID claim is missing or invalid.");
+        
         try
         {
             var requestJson = JsonSerializer.Serialize(requests);
@@ -62,8 +68,10 @@ public class BooksController(ITicketBookingService ticketBookingService,
     [HttpPost("cancelBooks")]
     public async Task<ActionResult<bool>> CancelBookSeats(Guid seatLockId)
     {
-        var userAccountId = Guid.Parse("212ac631-4f3d-4010-adfd-e4123d569a91"); // replace with normal claim
-
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdString, out Guid userAccountId)) 
+            return Unauthorized("User ID claim is missing or invalid.");
+        
         try
         {
             logger.LogInformation("try to cancel seat lock {seatLockId}", seatLockId);

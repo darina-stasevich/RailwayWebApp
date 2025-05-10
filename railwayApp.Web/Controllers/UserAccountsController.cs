@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RailwayApp.Application.Models;
 using RailwayApp.Domain;
@@ -66,6 +68,7 @@ public class UserAccountsController(IUserAccountService userAccountService,
     }*/
 
     [HttpPut("me")]
+    [Authorize(Roles = "Client")]
     public async Task<IActionResult> UpdateUserAccount([FromBody] UpdateUserAccountRequest request)
     {
         if (!ModelState.IsValid)
@@ -74,7 +77,9 @@ public class UserAccountsController(IUserAccountService userAccountService,
             return BadRequest(ModelState);
         }
 
-        var id = Guid.Parse("0af57bc9-0f1a-4836-8fcb-697e14df1c9f");
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdString, out Guid id)) 
+            return Unauthorized("User ID claim is missing or invalid.");
         
         try
         {
@@ -95,6 +100,7 @@ public class UserAccountsController(IUserAccountService userAccountService,
     }
 
     [HttpPut("me/password")]
+    [Authorize(Roles = "Client")]
     public async Task<IActionResult> UpdateUserAccount([FromBody] ChangePasswordRequest request)
     {
         if (!ModelState.IsValid)
@@ -103,8 +109,10 @@ public class UserAccountsController(IUserAccountService userAccountService,
             return BadRequest(ModelState);
         }
         
-        var id = Guid.Parse("0af57bc9-0f1a-4836-8fcb-697e14df1c9f");
-        
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdString, out Guid id)) 
+            return Unauthorized("User ID claim is missing or invalid.");
+
         try
         {
             var userAccountId = await userAccountService.UpdateUserPasswordAsync(id, request);
@@ -124,8 +132,13 @@ public class UserAccountsController(IUserAccountService userAccountService,
     }
     
     [HttpDelete("me")]
-    public async Task<IActionResult> DeleteUserAccount(Guid id)
+    [Authorize(Roles = "Client")]
+    public async Task<IActionResult> DeleteUserAccount()
     {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdString, out Guid id)) 
+            return Unauthorized("User ID claim is missing or invalid.");
+        
         try
         {
             await userAccountService.DeleteUserAccountAsync(id);

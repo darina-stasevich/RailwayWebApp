@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RailwayApp.Domain;
 using RailwayApp.Domain.Entities;
@@ -7,12 +9,16 @@ namespace RailwayApp.Web.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Client")]
 public class TicketsController(ILogger<TicketsController> logger, ITicketService ticketService) : ControllerBase
 {
     [HttpPost("active")]
     public async Task<ActionResult<IEnumerable<Ticket>>> GetActiveTickets()
     {
-        var userAccountId = Guid.Parse("212ac631-4f3d-4010-adfd-e4123d569a91"); // replace with normal claim
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdString, out Guid userAccountId)) 
+            return Unauthorized("User ID claim is missing or invalid.");
+        
         try
         {
             var tickets = await ticketService.GetActiveTickets(userAccountId);
@@ -39,7 +45,10 @@ public class TicketsController(ILogger<TicketsController> logger, ITicketService
     [HttpPost("cancelled")]
     public async Task<ActionResult<IEnumerable<Ticket>>> GetCancelledTickets()
     {
-        var userAccountId = Guid.Parse("212ac631-4f3d-4010-adfd-e4123d569a91"); // replace with normal claim
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdString, out Guid userAccountId)) 
+            return Unauthorized("User ID claim is missing or invalid.");
+
         try
         {
             var tickets = await ticketService.GetCancelledTickets(userAccountId);
@@ -66,7 +75,10 @@ public class TicketsController(ILogger<TicketsController> logger, ITicketService
     [HttpPost("expired")]
     public async Task<ActionResult<IEnumerable<Ticket>>> GetExpiredTickets()
     {
-        var userAccountId = Guid.Parse("212ac631-4f3d-4010-adfd-e4123d569a91"); // replace with normal claim
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdString, out Guid userAccountId)) 
+            return Unauthorized("User ID claim is missing or invalid.");
+
         try
         {
             var tickets = await ticketService.GetExpiredTickets(userAccountId);

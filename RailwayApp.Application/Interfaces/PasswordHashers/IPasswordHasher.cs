@@ -4,5 +4,5 @@ public interface IPasswordHasher
 {
     public Task<string> HashPassword(string password);
 
-    public Task<bool> VerifyHashedPassword(string hashedPassword, string providedPassword);
+    public bool VerifyHashedPassword(string hashedPassword, string providedPassword);
 }

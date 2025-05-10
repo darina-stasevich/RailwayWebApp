@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RailwayApp.Domain;
 using RailwayApp.Domain.Entities;
@@ -8,13 +10,16 @@ namespace RailwayApp.Web.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Client")]
 public class PaymentsController(IPaymentService paymentService, ILogger<PaymentsController> logger) : ControllerBase
 {
     [HttpPost("pay")]
     public async Task<ActionResult<List<Ticket>>> PaySeatLock(Guid seatLockId)
     {
-        var userAccountId = Guid.Parse("212ac631-4f3d-4010-adfd-e4123d569a91"); // replace with normal claim
-
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdString, out Guid userAccountId)) 
+            return Unauthorized("User ID claim is missing or invalid.");
+        
         try
         {
             var paymentResult = await paymentService.PayTickets(userAccountId, seatLockId);
@@ -49,8 +54,10 @@ public class PaymentsController(IPaymentService paymentService, ILogger<Payments
     [HttpPost("cancelPay")]
     public async Task<ActionResult<List<Ticket>>> CancelPayTicket(Guid ticketId)
     {
-        var userAccountId = Guid.Parse("212ac631-4f3d-4010-adfd-e4123d569a91"); // replace with normal claim
-
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdString, out Guid userAccountId)) 
+            return Unauthorized("User ID claim is missing or invalid.");
+        
         try
         {
             var cancelPaymentResult = await paymentService.CancelTicket(userAccountId, ticketId);

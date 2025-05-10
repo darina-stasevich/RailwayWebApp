@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RailwayApp.Application.Models;
 using RailwayApp.Domain.Interfaces.IServices;
@@ -7,6 +8,7 @@ namespace RailwayApp.Web.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Client")]
 public class RoutesController(IRouteSearchService routeSearchService, ILogger<RoutesController> logger) : ControllerBase
 {
     [HttpPost("search")]
