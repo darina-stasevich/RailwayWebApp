@@ -18,9 +18,9 @@ public class MongoDbTicketRepository(IMongoClient client, IOptions<MongoDbSettin
         await _collection.InsertManyAsync(session, tickets);
     }
 
-    public async Task<IEnumerable<Ticket>> GetByUserAccountIdAsync(Guid id)
+    public async Task<IEnumerable<Ticket>> GetByUserAccountIdAsync(Guid userAccountId)
     {
-        return await _collection.Find(t => t.Id == id).ToListAsync();
+        return await _collection.Find(t => t.UserAccountId == userAccountId).ToListAsync();
     }
 
     public async Task<bool> UpdateStatusAsync(Guid id, TicketStatus status, IClientSessionHandle session)

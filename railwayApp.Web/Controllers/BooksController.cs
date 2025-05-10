@@ -60,15 +60,15 @@ public class BooksController(ITicketBookingService ticketBookingService,
     }
 
     [HttpPost("cancelBooks")]
-    public async Task<ActionResult<bool>> CancelBookSeats([FromBody] Guid seatlockId)
+    public async Task<ActionResult<bool>> CancelBookSeats(Guid seatLockId)
     {
         var userAccountId = Guid.Parse("212ac631-4f3d-4010-adfd-e4123d569a91"); // replace with normal claim
 
         try
         {
-            logger.LogInformation("try to cancel seat lock {seatLockId}", seatlockId);
-            var result = await ticketBookingService.CancelBookPlaces(userAccountId, seatlockId);
-            logger.LogInformation("cancel of lock {seatLockId} successful", seatlockId);
+            logger.LogInformation("try to cancel seat lock {seatLockId}", seatLockId);
+            var result = await ticketBookingService.CancelBookPlaces(userAccountId, seatLockId);
+            logger.LogInformation("cancel of lock {seatLockId} successful", seatLockId);
             return result;
 
         }

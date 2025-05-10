@@ -44,6 +44,7 @@ builder.Services.AddScoped<IRouteSearchService, RouteSearchService>();
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
 builder.Services.AddScoped<IStationService, StationService>();
 builder.Services.AddScoped<ITicketBookingService, TicketBookingService>();
+builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddScoped<IUserAccountService, UserAccountService>();
 
 builder.Services.AddMongoDb(builder.Configuration);

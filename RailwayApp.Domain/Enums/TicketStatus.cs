@@ -3,5 +3,6 @@ namespace RailwayApp.Domain.Statuses;
 public enum TicketStatus
 {
     Payed,
-    Cancelled
+    Cancelled,
+    Expired
 }
