@@ -9,9 +9,12 @@ namespace RailwayApp.Infrastructure.Repositories;
 public class MongoDbCarriageAvailabilityRepository(IMongoClient client, IOptions<MongoDbSettings> settings)
     : MongoDbGenericRepository<CarriageAvailability, Guid>(client, settings, "CarriageAvailabilities"), ICarriageAvailabilityRepository
 {
-    public async Task<IEnumerable<CarriageAvailability>> GetByConcreteSegmentIdAsync(Guid concreteSegmentId)
+    public async Task<IEnumerable<CarriageAvailability>> GetByConcreteSegmentIdAsync(Guid concreteSegmentId, IClientSessionHandle? session = null)
     {
-        return await _collection.Find(x => x.ConcreteRouteSegmentId == concreteSegmentId).ToListAsync();
+        if(session == null)
+            return await _collection.Find(x => x.ConcreteRouteSegmentId == concreteSegmentId).ToListAsync();
+        else
+            return await _collection.Find(session, x => x.ConcreteRouteSegmentId == concreteSegmentId).ToListAsync();
     }
 
     public async Task<CarriageAvailability> GetByConcreteSegmentIdAndTemplateIdAsync(Guid segmentId, Guid carriageTemplateId,

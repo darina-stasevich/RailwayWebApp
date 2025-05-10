@@ -38,9 +38,12 @@ public abstract class MongoDbGenericRepository<TEntity, TId> : IGenericRepositor
         return await _collection.Find(FilterDefinition<TEntity>.Empty).ToListAsync();
     }
 
-    public async Task<TId> AddAsync(TEntity entity)
+    public async Task<TId> AddAsync(TEntity entity, IClientSessionHandle? session = null)
     {
-        await _collection.InsertOneAsync(entity);
+        if(session == null)
+            await _collection.InsertOneAsync(entity);
+        else
+            await _collection.InsertOneAsync(session, entity);
         return entity.Id;
     }
 

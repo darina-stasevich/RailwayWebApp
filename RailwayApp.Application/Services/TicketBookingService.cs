@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using MongoDB.Driver;
 using RailwayApp.Application.Models;
 using RailwayApp.Application.Models.Dto;
 using RailwayApp.Domain;
@@ -9,7 +10,8 @@ using RailwayApp.Domain.Statuses;
 
 namespace RailwayApp.Application.Services;
 
-public class TicketBookingService(ICarriageSeatService carriageSeatService,
+public class TicketBookingService(IMongoClient mongoClient,
+    ICarriageSeatService carriageSeatService,
     IUserAccountRepository userAccountRepository,
     ISeatLockRepository seatLockRepository,
     ICarriageTemplateService carriageTemplateService,
@@ -41,95 +43,126 @@ public class TicketBookingService(ICarriageSeatService carriageSeatService,
     }
     public async Task<Guid> BookPlaces(Guid userAccountId, List<BookSeatRequest> request)
     {
-        var userAccount = await userAccountRepository.GetByIdAsync(userAccountId);
-        if (userAccount == null)
+        using var session = await mongoClient.StartSessionAsync();
+        try
         {
-            throw new UserServiceUserNotFoundException(userAccountId);
-        }
+            session.StartTransaction(new TransactionOptions(
+                readConcern: ReadConcern.Snapshot,
+                writeConcern: WriteConcern.WMajority));
+            
+            var userAccount = await userAccountRepository.GetByIdAsync(userAccountId, session);
+            if (userAccount == null)
+                throw new UserServiceUserNotFoundException(userAccountId);
 
-        if (userAccount.Status == UserAccountStatus.Blocked)
-        {
-            throw new UserServiceUserBlockedException(userAccountId);
-        }
+            if (userAccount.Status == UserAccountStatus.Blocked)
+                throw new UserServiceUserBlockedException(userAccountId);
 
-        var lockedSeatInfo = new List<LockedSeatInfo>();
-        
-        foreach (var seatRequest in request)
-        {
-            var carriageTemplates =
-                await carriageTemplateService.GetCarriageTemplateForRouteAsync(seatRequest.ConcreteRouteId);
+            var lockedSeatInfo = new List<LockedSeatInfo>();
 
-            var carriageTemplate =
-                carriageTemplates.FirstOrDefault(x => x.CarriageNumber == seatRequest.CarriageNumber);
-
-            if (carriageTemplate == null)
+            foreach (var seatRequest in request)
             {
-                throw new CarriageTemplateNotFoundException($"carriage template with number {seatRequest.CarriageNumber} not found for route {seatRequest.ConcreteRouteId}");
+                var carriageTemplates =
+                    await carriageTemplateService.GetCarriageTemplateForRouteAsync(seatRequest.ConcreteRouteId, session);
+
+                var carriageTemplate =
+                    carriageTemplates.FirstOrDefault(x => x.CarriageNumber == seatRequest.CarriageNumber);
+
+                if (carriageTemplate == null)
+                {
+                    throw new CarriageTemplateNotFoundException(
+                        $"carriage template with number {seatRequest.CarriageNumber} not found for route {seatRequest.ConcreteRouteId}");
+                }
+
+                if (await carriageSeatService.IsSeatAvailable(MapInfoSeatSearchDto(seatRequest, carriageTemplate), session) ==
+                    false)
+                {
+                    throw new TicketBookingServiceSeatNotAvailableException(
+                        $"Seat {seatRequest.SeatNumber} is not available for ConcreteRouteId {seatRequest.ConcreteRouteId}, " +
+                        $"StartSegmentNumber {seatRequest.StartSegmentNumber}, EndSegmentNumber {seatRequest.EndSegmentNumber}");
+                }
+
+                var price = await priceCalculationService.CalculatePriceForCarriageAsync(
+                    MapInfoRouteSegmentSearchPerCarriageDto(carriageTemplate.Id, seatRequest), session);
+                var departureDate =
+                    await scheduleService.GetDepartureDateForSegment(seatRequest.ConcreteRouteId,
+                        seatRequest.StartSegmentNumber, session);
+                var arrivalDate =
+                    await scheduleService.GetArrivalDateForSegment(seatRequest.ConcreteRouteId,
+                        seatRequest.EndSegmentNumber, session);
+                lockedSeatInfo.Add(new LockedSeatInfo
+                {
+                    CarriageTemplateId = carriageTemplate.Id,
+                    ConcreteRouteId = seatRequest.ConcreteRouteId,
+                    EndSegmentNumber = seatRequest.EndSegmentNumber,
+                    SeatNumber = seatRequest.SeatNumber,
+                    StartSegmentNumber = seatRequest.StartSegmentNumber,
+                    HasBedLinenSet = seatRequest.HasBedLinenSet,
+                    PassengerData = seatRequest.PassengerData,
+
+                    Carriage = carriageTemplate.CarriageNumber,
+                    DepartureDateUtc = departureDate,
+                    ArrivalDateUtc = arrivalDate,
+                    Price = price
+                });
             }
-            if (await carriageSeatService.IsSeatAvailable(MapInfoSeatSearchDto(seatRequest, carriageTemplate)) == false)
-            {
-                throw new TicketBookingServiceSeatNotAvailableException(
-                    $"Seat {seatRequest.SeatNumber} is not available for ConcreteRouteId {seatRequest.ConcreteRouteId}, " +
-                    $"StartSegmentNumber {seatRequest.StartSegmentNumber}, EndSegmentNumber {seatRequest.EndSegmentNumber}");
-            }
 
-            var price = await priceCalculationService.CalculatePriceForCarriageAsync(MapInfoRouteSegmentSearchPerCarriageDto(carriageTemplate.Id, seatRequest));
-            var departureDate =
-                await scheduleService.GetDepartureDateForSegment(seatRequest.ConcreteRouteId,
-                    seatRequest.StartSegmentNumber);
-            var arrivalDate =
-                await scheduleService.GetArrivalDateForSegment(seatRequest.ConcreteRouteId,
-                    seatRequest.EndSegmentNumber);
-            lockedSeatInfo.Add(new LockedSeatInfo
+            var seatLock = new SeatLock
             {
-                CarriageTemplateId = carriageTemplate.Id,
-                ConcreteRouteId = seatRequest.ConcreteRouteId,
-                EndSegmentNumber = seatRequest.EndSegmentNumber,
-                SeatNumber = seatRequest.SeatNumber,
-                StartSegmentNumber = seatRequest.StartSegmentNumber,
-                HasBedLinenSet = seatRequest.HasBedLinenSet,
-                PassengerData = seatRequest.PassengerData,
-                
-                Carriage = carriageTemplate.CarriageNumber,
-                DepartureDateUtc = departureDate,
-                ArrivalDateUtc = arrivalDate,
-                Price = price
-            });
+                CreatedAtTimeUtc = DateTime.UtcNow,
+                ExpirationTimeUtc = DateTime.UtcNow.Add(ReservationTime),
+                Status = SeatLockStatus.Active,
+                LockedSeatInfos = lockedSeatInfo,
+                UserAccountId = userAccountId
+            };
+            await seatLockRepository.AddAsync(seatLock, session);
+            await session.CommitTransactionAsync();
+            return seatLock.Id;
         }
-
-        var seatLock = new SeatLock
+        catch (Exception ex)
         {
-            CreatedAtTimeUtc = DateTime.UtcNow,
-            ExpirationTimeUtc = DateTime.UtcNow.Add(ReservationTime),
-            Status = SeatLockStatus.Active,
-            LockedSeatInfos = lockedSeatInfo,
-            UserAccountId = userAccountId
-        };
-        await seatLockRepository.AddAsync(seatLock);
-        return seatLock.Id;
+            if(session.IsInTransaction)
+                await session.AbortTransactionAsync();
+            throw;
+        }
     }
 
     public async Task<bool> CancelBookPlaces(Guid userAccountId, Guid seatLockId)
     {
-        var userAccount = await userAccountRepository.GetByIdAsync(userAccountId);
-        if (userAccount == null)
+        using var session = await mongoClient.StartSessionAsync();
+        try
         {
-            throw new UserServiceUserNotFoundException(userAccountId);
-        }
+            session.StartTransaction(new TransactionOptions(
+                readConcern: ReadConcern.Snapshot,
+                writeConcern: WriteConcern.WMajority));
 
-        if (userAccount.Status == UserAccountStatus.Blocked)
+
+            var userAccount = await userAccountRepository.GetByIdAsync(userAccountId, session);
+            if (userAccount == null)
+            {
+                throw new UserServiceUserNotFoundException(userAccountId);
+            }
+
+            if (userAccount.Status == UserAccountStatus.Blocked)
+            {
+                throw new UserServiceUserBlockedException(userAccountId);
+            }
+
+
+            var seatLock = await seatLockRepository.GetByIdAsync(seatLockId, session);
+            if (seatLock == null)
+            {
+                throw new TicketBookingServiceSeatLockNotFoundException(seatLockId);
+            }
+
+            var updateResult = await seatLockRepository.UpdateStatusAsync(seatLockId, SeatLockStatus.Cancelled, session);
+            await session.CommitTransactionAsync();
+            return updateResult;
+        }
+        catch (Exception ex)
         {
-            throw new UserServiceUserBlockedException(userAccountId);
+            if(session.IsInTransaction)
+                await session.AbortTransactionAsync();
+            throw;
         }
-
-        
-        var seatLock = await seatLockRepository.GetByIdAsync(seatLockId);
-        if (seatLock == null)
-        {
-            throw new TicketBookingServiceSeatLockNotFoundException(seatLockId);
-        }
-
-        var updateResult = await seatLockRepository.UpdateStatusAsync(seatLockId, SeatLockStatus.Cancelled);
-        return updateResult;
     }
 }

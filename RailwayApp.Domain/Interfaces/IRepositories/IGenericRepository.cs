@@ -6,7 +6,7 @@ public interface IGenericRepository<TEntity, TId> where TEntity : class, IEntity
 {
     Task<TEntity?> GetByIdAsync(TId id, IClientSessionHandle? session = null);
     Task<IEnumerable<TEntity>> GetAllAsync();
-    Task<TId> AddAsync(TEntity entity);
+    Task<TId> AddAsync(TEntity entity, IClientSessionHandle? session = null);
     Task AddRangeAsync(IEnumerable<TEntity> entities);
     Task DeleteAsync(TId id);
     Task<bool> ExistsAsync(TId id);

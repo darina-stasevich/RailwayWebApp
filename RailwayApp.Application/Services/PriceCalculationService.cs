@@ -1,4 +1,5 @@
 using Microsoft.VisualBasic;
+using MongoDB.Driver;
 using RailwayApp.Application.Models;
 using RailwayApp.Application.Models.Dto;
 using RailwayApp.Domain.Interfaces.IRepositories;
@@ -12,14 +13,14 @@ public class PriceCalculationService(IConcreteRouteRepository concreteRouteRepos
     ICarriageTemplateRepository carriageTemplateRepository,
     ICarriageTemplateService carriageTemplateService) : IPriceCalculationService
 {
-    private async Task<decimal> CalculateBasePriceAsync(Guid concreteRouteId, int startSegmentNumber, int endSegmentNumber)
+    private async Task<decimal> CalculateBasePriceAsync(Guid concreteRouteId, int startSegmentNumber, int endSegmentNumber, IClientSessionHandle? session = null)
     {
-        var concreteRoute = await concreteRouteRepository.GetByIdAsync(concreteRouteId);
+        var concreteRoute = await concreteRouteRepository.GetByIdAsync(concreteRouteId, session);
         if (concreteRoute == null)
         {
             throw new ArgumentException("Concrete route not found");
         }
-        var abstractRoute = await abstractRouteRepository.GetByIdAsync(concreteRoute.AbstractRouteId);
+        var abstractRoute = await abstractRouteRepository.GetByIdAsync(concreteRoute.AbstractRouteId, session);
         if (abstractRoute == null)
         {
             throw new ArgumentException("Abstract route not found");
@@ -27,17 +28,17 @@ public class PriceCalculationService(IConcreteRouteRepository concreteRouteRepos
 
         decimal transferCost = abstractRoute.TransferCost;
         var abstractRouteSegments =
-            await abstractRouteSegmentRepository.GetAbstractSegmentsByRouteIdAsync(abstractRoute.Id);
+            await abstractRouteSegmentRepository.GetAbstractSegmentsByRouteIdAsync(abstractRoute.Id, session);
         var price = abstractRouteSegments
             .Where(s => s.SegmentNumber >= startSegmentNumber && s.SegmentNumber <= endSegmentNumber)
             .Sum(s => s.SegmentCost);
         return price + transferCost;
     }
     
-    public async Task<decimal> CalculatePriceForCarriageAsync(InfoRouteSegmentSearchPerCarriageDto dto)
+    public async Task<decimal> CalculatePriceForCarriageAsync(InfoRouteSegmentSearchPerCarriageDto dto, IClientSessionHandle? session = null)
     {
-        var baseCost = await CalculateBasePriceAsync(dto.ConcreteRouteId, dto.StartSegmentNumber, dto.EndSegmentNumber);
-        var carriageTemplate = await carriageTemplateRepository.GetByIdAsync(dto.CarriageTemplateId);
+        var baseCost = await CalculateBasePriceAsync(dto.ConcreteRouteId, dto.StartSegmentNumber, dto.EndSegmentNumber, session);
+        var carriageTemplate = await carriageTemplateRepository.GetByIdAsync(dto.CarriageTemplateId, session);
         if(carriageTemplate == null)
             throw new Exception("Carriage template not found");
         return baseCost * carriageTemplate.PriceMultiplier;

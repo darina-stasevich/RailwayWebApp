@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices.JavaScript;
+using MongoDB.Driver;
 using RailwayApp.Application.Models;
 using RailwayApp.Domain.Interfaces.IRepositories;
 using RailwayApp.Domain.Interfaces.IServices;
@@ -70,19 +71,19 @@ public class ScheduleService(IConcreteRouteSegmentRepository concreteRouteSegmen
         return scheduleDto;
     }
 
-    public async Task<DateTime> GetDepartureDateForSegment(Guid concreteRouteId, int segmentNumber)
+    public async Task<DateTime> GetDepartureDateForSegment(Guid concreteRouteId, int segmentNumber, IClientSessionHandle? session = null)
     {
         var concreteRouteSegments =
-            await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(concreteRouteId);
+            await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(concreteRouteId, session);
         
         var departureDate  = concreteRouteSegments.Where(s => s.SegmentNumber == segmentNumber).Select(s => s.ConcreteDepartureDate).FirstOrDefault();
         return departureDate;
     }
     
-    public async Task<DateTime> GetArrivalDateForSegment(Guid concreteRouteId, int segmentNumber)
+    public async Task<DateTime> GetArrivalDateForSegment(Guid concreteRouteId, int segmentNumber, IClientSessionHandle? session = null)
     {
         var concreteRouteSegments =
-            await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(concreteRouteId);
+            await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(concreteRouteId, session);
         
         var arrivalDate= concreteRouteSegments.Where(s => s.SegmentNumber == segmentNumber).Select(s => s.ConcreteArrivalDate).FirstOrDefault();
         return arrivalDate;

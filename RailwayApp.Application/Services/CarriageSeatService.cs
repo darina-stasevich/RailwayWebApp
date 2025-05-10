@@ -1,4 +1,5 @@
 using System.Collections;
+using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using RailwayApp.Application.Models.Dto;
 using RailwayApp.Domain.Entities;
@@ -24,17 +25,17 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
             EndSegmentNumber = dto.EndSegmentNumber
         };
     }
-    private async Task<IEnumerable<IGrouping<Guid,CarriageAvailability>>?> GetAllCarriageAvailabilitiesForRouteAsync(InfoRouteSegmentSearchDto dto)
+    private async Task<IEnumerable<IGrouping<Guid,CarriageAvailability>>?> GetAllCarriageAvailabilitiesForRouteAsync(InfoRouteSegmentSearchDto dto, IClientSessionHandle? session = null)
     {
         var concreteRouteSegments =
-            await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(dto.ConcreteRouteId);
+            await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(dto.ConcreteRouteId, session);
         var relevantConcreteRouteSegments = concreteRouteSegments.Where(s =>
             s.SegmentNumber >= dto.StartSegmentNumber && s.SegmentNumber <= dto.EndSegmentNumber);
         
         var allAvailabilities = new List<CarriageAvailability>();
         foreach (var routeSegment in relevantConcreteRouteSegments)
         {
-            var carriageAvailabilities = await carriageAvailabilityRepository.GetByConcreteSegmentIdAsync(routeSegment.Id);
+            var carriageAvailabilities = await carriageAvailabilityRepository.GetByConcreteSegmentIdAsync(routeSegment.Id, session);
             allAvailabilities.AddRange(carriageAvailabilities);
         }
         
@@ -161,9 +162,9 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
 
     }
     
-    private async Task<IEnumerable<int> > GetBookedSeatsPerCarriage(InfoRouteSegmentSearchPerCarriageDto dto)
+    private async Task<IEnumerable<int> > GetBookedSeatsPerCarriage(InfoRouteSegmentSearchPerCarriageDto dto, IClientSessionHandle? session = null)
     {
-        var seatLocks = await seatLockRepository.GetByRouteIdAsync(dto.ConcreteRouteId);
+        var seatLocks = await seatLockRepository.GetByRouteIdAsync(dto.ConcreteRouteId, session);
         var seatLockInfos = seatLocks
             .Where(slis => slis.Status == SeatLockStatus.Active)
             .Where(slis => slis.ExpirationTimeUtc > DateTime.UtcNow)
@@ -179,11 +180,11 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
         return bookedLockedSeats;
 
     }
-    public async Task<IEnumerable<int>> GetAvailableSeatsForCarriageAsync(InfoRouteSegmentSearchPerCarriageDto dto)
+    public async Task<IEnumerable<int>> GetAvailableSeatsForCarriageAsync(InfoRouteSegmentSearchPerCarriageDto dto, IClientSessionHandle? session = null)
     {
         // 1. get grouped carriage availabilities
         var groupedCarriageAvailabilities = await GetAllCarriageAvailabilitiesForRouteAsync(
-            MapInfoRouteSegment(dto));
+            MapInfoRouteSegment(dto), session);
         if (groupedCarriageAvailabilities == null)
         {
             throw new Exception("Carriage availabilities not found");
@@ -215,7 +216,7 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
         
         // 4. get active seatLocks for given route 
         
-        var bookedLockedSeats = await GetBookedSeatsPerCarriage(dto);
+        var bookedLockedSeats = await GetBookedSeatsPerCarriage(dto, session);
         var bookedLockedSeatsHashSet = new HashSet<int>(bookedLockedSeats);
         var fullAvailableSeats = availableSeats.Select(x => x).Where(x => !bookedLockedSeatsHashSet.Contains(x));
         
@@ -234,10 +235,10 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
         };
     }
      
-    public async Task<bool> IsSeatAvailable(InfoSeatSearchDto dto)
+    public async Task<bool> IsSeatAvailable(InfoSeatSearchDto dto, IClientSessionHandle? session = null)
     {
         var seatSearchDto = MapInfoRouteSegmentSearchPerCarriageDto(dto);
-        var notPayedSeats = await GetAvailableSeatsForCarriageAsync(seatSearchDto);
+        var notPayedSeats = await GetAvailableSeatsForCarriageAsync(seatSearchDto, session);
         return notPayedSeats.Contains(dto.SeatNumber);
     }
 }

@@ -19,8 +19,11 @@ public class MongoDbAbstractRouteSegmentRepository(IMongoClient client, IOptions
         return await _collection.Find(s => s.ToStationId == toStationId).ToListAsync();
     }
 
-    public async Task<IEnumerable<AbstractRouteSegment>> GetAbstractSegmentsByRouteIdAsync(Guid routeId)
+    public async Task<IEnumerable<AbstractRouteSegment>> GetAbstractSegmentsByRouteIdAsync(Guid routeId, IClientSessionHandle? session = null)
     {
-        return await _collection.Find(s => s.AbstractRouteId == routeId).ToListAsync();
+        if(session == null) 
+            return await _collection.Find(s => s.AbstractRouteId == routeId).ToListAsync();
+        else
+            return await _collection.Find(session, s => s.AbstractRouteId == routeId).ToListAsync();
     }
 }

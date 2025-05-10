@@ -10,13 +10,15 @@ namespace RailwayApp.Infrastructure.Repositories;
 public class MongoDbSeatLockRepository(IMongoClient client, IOptions<MongoDbSettings> settings)
     : MongoDbGenericRepository<SeatLock, Guid>(client, settings, "SeatLocks"), ISeatLockRepository
 {
-    public async Task<IEnumerable<SeatLock>> GetByRouteIdAsync(Guid concreteRouteId)
+    public async Task<IEnumerable<SeatLock>> GetByRouteIdAsync(Guid concreteRouteId, IClientSessionHandle? session = null)
     {
         var filter = Builders<SeatLock>.Filter.ElemMatch(
             sl => sl.LockedSeatInfos,
             lsi => lsi.ConcreteRouteId == concreteRouteId);
-
-        return await _collection.Find(filter).ToListAsync();
+        if(session == null)
+            return await _collection.Find(filter).ToListAsync();
+        else
+            return await _collection.Find(session, filter).ToListAsync();
     }
 
     public async Task<bool> UpdateStatusAsync(Guid seatLockId, SeatLockStatus status, IClientSessionHandle? session = null)

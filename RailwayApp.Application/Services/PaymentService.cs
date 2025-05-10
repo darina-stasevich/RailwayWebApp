@@ -93,7 +93,9 @@ public class PaymentService(IMongoClient mongoClient,
         }
         catch (Exception e)
         {
-            await session.AbortTransactionAsync();
+            if (session.IsInTransaction) {
+                await session.AbortTransactionAsync();
+            }
             throw;
         }
     }
@@ -146,7 +148,9 @@ public class PaymentService(IMongoClient mongoClient,
         }
         catch (Exception e)
         {
-            await session.AbortTransactionAsync();
+            if (session.IsInTransaction) {
+                await session.AbortTransactionAsync();
+            }
             throw;
         }
     }
