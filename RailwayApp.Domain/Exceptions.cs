@@ -32,3 +32,6 @@ public class SeatLockExpiredException(Guid id) : SeatLockException($"SeatLock {i
 public class SeatLockNotActiveException(Guid id) : SeatLockException($"SeatLock {id} not active");
 
 public class CarriageAvailabilityUpdateService(string message) : Exception(message);
+
+public class TicketException(string message) : Exception(message);
+public class TicketNotFoundException(Guid id) : TicketException($"Ticket {id} not found");

@@ -1,5 +1,6 @@
 using MongoDB.Driver;
 using RailwayApp.Application.Models;
+using RailwayApp.Application.Models.Dto;
 using RailwayApp.Domain;
 using RailwayApp.Domain.Entities;
 using RailwayApp.Domain.Interfaces.IRepositories;
@@ -97,8 +98,56 @@ public class PaymentService(IMongoClient mongoClient,
         }
     }
 
+    private FreeTicketDto MapFreeTicketDto(Ticket ticket)
+    {
+        return new FreeTicketDto
+        {
+            Carriage = ticket.Carriage,
+            StartSegmentNumber = ticket.StartSegmentNumber,
+            EndSegmentNumber = ticket.EndSegmentNumber,
+            ConcreteRouteId = ticket.RouteId,
+            SeatNumber = ticket.Seat
+        };
+    }
     public async Task<bool> CancelTicket(Guid userAccountId, Guid ticketId)
     {
-        throw new NotImplementedException();
+        using var session = await mongoClient.StartSessionAsync();
+        try
+        {
+            //session.StartTransaction();
+            session.StartTransaction(new TransactionOptions(
+                readConcern: ReadConcern.Snapshot,
+                writeConcern: WriteConcern.WMajority));
+            
+            
+            var userAccount = await userAccountRepository.GetByIdAsync(userAccountId, session);
+            if (userAccount == null)
+                throw new UserServiceUserNotFoundException(userAccountId);
+            if (userAccount.Status == UserAccountStatus.Blocked)
+                throw new UserServiceUserBlockedException(userAccountId);
+
+            var ticket = await ticketRepository.GetByIdAsync(ticketId, session);
+            if (ticket == null)
+                throw new TicketNotFoundException(ticketId);
+            if (ticket.UserAccountId != userAccountId)
+                throw new PaymentServiceException($"ticket {ticketId} not found for user {userAccountId}");
+            if (ticket.Status != TicketStatus.Payed)
+                throw new PaymentServiceException($"ticket {ticketId} not payed to cancel");
+
+            await ticketRepository.UpdateStatusAsync(ticketId, TicketStatus.Cancelled, session);
+           
+            var occupiedSeatUpdateResult = await carriageAvailabilityUpdateService.MarkSeatAsFree(MapFreeTicketDto(ticket), session);
+            if (!occupiedSeatUpdateResult)
+                throw new PaymentServiceException("updating seat in carriage availability failed");
+            
+            await session.CommitTransactionAsync();
+
+            return true;
+        }
+        catch (Exception e)
+        {
+            await session.AbortTransactionAsync();
+            throw;
+        }
     }
 }

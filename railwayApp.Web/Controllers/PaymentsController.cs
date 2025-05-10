@@ -45,4 +45,40 @@ public class PaymentsController(IPaymentService paymentService, ILogger<Payments
         }
 
     }
+    
+    [HttpPost("cancelPay")]
+    public async Task<ActionResult<List<Ticket>>> CancelPayTicket(Guid ticketId)
+    {
+        var userAccountId = Guid.Parse("212ac631-4f3d-4010-adfd-e4123d569a91"); // replace with normal claim
+
+        try
+        {
+            var cancelPaymentResult = await paymentService.CancelTicket(userAccountId, ticketId);
+            
+            logger.LogInformation("successfully cancel ticket {ticketId}", ticketId);
+
+            return Ok(cancelPaymentResult);
+        }
+        catch (UserServiceUserNotFoundException ex)
+        {
+            logger.LogWarning("user with id {id} not found", userAccountId);
+            return NotFound(ex.Message);
+        }
+        catch (UserServiceUserBlockedException ex)
+        {
+            logger.LogWarning("user with id {id} blocked", userAccountId);
+            return BadRequest(ex.Message);
+        }
+        catch (TicketBookingServiceSeatNotAvailableException ex)
+        {
+            logger.LogWarning("one or more required seats is already blocked: {ex}", ex.Message);
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Unhandled exception caught {ex}", ex.Message);
+            return StatusCode(500, ex.Message); // change at normal
+        }
+
+    }
 }

@@ -6,6 +6,7 @@ using MongoDB.Driver;
 using RailwayApp.Domain.Entities;
 using RailwayApp.Domain.Interfaces;
 using RailwayApp.Domain.Interfaces.IRepositories;
+using RailwayApp.Domain.Statuses;
 
 namespace RailwayApp.Infrastructure.Repositories;
 
@@ -20,5 +21,13 @@ public class MongoDbTicketRepository(IMongoClient client, IOptions<MongoDbSettin
     public async Task<IEnumerable<Ticket>> GetByUserAccountIdAsync(Guid id)
     {
         return await _collection.Find(t => t.Id == id).ToListAsync();
+    }
+
+    public async Task<bool> UpdateStatusAsync(Guid id, TicketStatus status, IClientSessionHandle session)
+    {
+        var filter = Builders<Ticket>.Filter.Eq(t => t.Id, id);
+        var update = Builders<Ticket>.Update.Set(t => t.Status, status);
+        var updateResult = await _collection.UpdateOneAsync(session, filter, update);
+        return updateResult.IsAcknowledged && updateResult.ModifiedCount > 0;
     }
 }
