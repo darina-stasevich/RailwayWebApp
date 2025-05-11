@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Runtime.Serialization;
+using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using Moq;
 using RailwayApp.Application.Models;
@@ -60,7 +61,7 @@ public class CarriageServiceTest
         ConfigureMocks();
 
         _carriageService = new CarriageService(_mockCarriageSeatService, _mockPriceCalculationService,
-            _mockCarriageTemplateService);
+            _mockCarriageTemplateService, _mockConcreteRouteSegmentRepository.Object, _mockCarriageAvailabilityRepository.Object);
     }
 
     private TestDataContainer GenerateTestData()
@@ -469,8 +470,10 @@ public class CarriageServiceTest
             });
 
         _mockAbstractRouteSegmentRepository
-            .Setup(repo => repo.GetAbstractSegmentsByRouteIdAsync(It.IsAny<Guid>()))
-            .ReturnsAsync((Guid routeId) =>
+            .Setup(repo => repo.GetAbstractSegmentsByRouteIdAsync(
+                It.IsAny<Guid>(), 
+                It.IsAny<IClientSessionHandle?>()))
+            .ReturnsAsync((Guid routeId, IClientSessionHandle? session) =>
             {
                 var matchingSegments = _testData.AbstractRouteSegments
                     .Where(segment => segment.AbstractRouteId == routeId)
@@ -480,8 +483,9 @@ public class CarriageServiceTest
 
         // --- Настройка Abstract Route Repository ---
         _mockAbstractRouteRepository
-            .Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>()))
-            .ReturnsAsync((Guid routeId) =>
+            .Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>(), 
+                It.IsAny<IClientSessionHandle?>()))
+            .ReturnsAsync((Guid routeId, IClientSessionHandle? session) =>
             {
                 var matchingRoute = _testData.AbstractRoutes
                     .Where(r => r.Id == routeId);
@@ -490,8 +494,9 @@ public class CarriageServiceTest
 
         // --- Настройка Concrete Route Repository ---
         _mockConcreteRouteRepository
-            .Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>()))
-            .ReturnsAsync((Guid routeId) =>
+            .Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>(), 
+                It.IsAny<IClientSessionHandle?>()))
+            .ReturnsAsync((Guid routeId, IClientSessionHandle? handle) =>
             {
                 var matchingRouteSegments = _testData.ConcreteRoutes
                     .Where(r => r.Id == routeId);
@@ -521,8 +526,9 @@ public class CarriageServiceTest
             });
 
         _mockConcreteRouteSegmentRepository
-            .Setup(repo => repo.GetConcreteSegmentsByConcreteRouteIdAsync(It.IsAny<Guid>()))
-            .ReturnsAsync((Guid concreteRouteId) => 
+            .Setup(repo => repo.GetConcreteSegmentsByConcreteRouteIdAsync(It.IsAny<Guid>(), 
+                It.IsAny<IClientSessionHandle?>()))
+            .ReturnsAsync((Guid concreteRouteId, IClientSessionHandle? session) => 
             {
                 var matchingSegments = _testData.ConcreteRouteSegments
                     .Where(cs => cs.ConcreteRouteId == concreteRouteId)
@@ -550,8 +556,9 @@ public class CarriageServiceTest
         
         // --- Настройка Carriage Availability Repository ---
         _mockCarriageAvailabilityRepository
-            .Setup(repo => repo.GetByConcreteSegmentIdAsync(It.IsAny<Guid>()))
-            .ReturnsAsync((Guid segmentId) =>
+            .Setup(repo => repo.GetByConcreteSegmentIdAsync(It.IsAny<Guid>(), 
+                It.IsAny<IClientSessionHandle?>()))
+            .ReturnsAsync((Guid segmentId, IClientSessionHandle? session) =>
             {
                 var matchingCarriages = _testData.CarriageAvailabilities
                     .Where(c => c.ConcreteRouteSegmentId == segmentId)
@@ -560,19 +567,23 @@ public class CarriageServiceTest
             });
         
         // --- Настройка Carriage Template Repository ---
-        _mockCarriageTemplateRepository.Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>()))
-            .ReturnsAsync((Guid id) => _testData.CarriageTemplates.FirstOrDefault(t => t.Id == id));
-        _mockCarriageTemplateRepository.Setup(repo => repo.GetByTrainTypeIdAsync(It.IsAny<Guid>()))
-            .ReturnsAsync((Guid trainTypeId) => _testData.TemplatesByTrainTypeId.TryGetValue(trainTypeId, out var templates) ? templates : new List<CarriageTemplate>());
+        _mockCarriageTemplateRepository.Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>(), 
+                It.IsAny<IClientSessionHandle?>()))
+            .ReturnsAsync((Guid id, IClientSessionHandle? session) => _testData.CarriageTemplates.FirstOrDefault(t => t.Id == id));
+        _mockCarriageTemplateRepository.Setup(repo => repo.GetByTrainTypeIdAsync(It.IsAny<Guid>(), 
+                It.IsAny<IClientSessionHandle?>()))
+            .ReturnsAsync((Guid trainTypeId, IClientSessionHandle? session) => _testData.TemplatesByTrainTypeId.TryGetValue(trainTypeId, out var templates) ? templates : new List<CarriageTemplate>());
 
 
         // --- Настройка Train Repository ---
-        _mockTrainRepository.Setup(repo => repo.GetByIdAsync(It.IsAny<string>()))
-            .ReturnsAsync((string id) => _testData.Trains.FirstOrDefault(t => t.Id == id));
+        _mockTrainRepository.Setup(repo => repo.GetByIdAsync(It.IsAny<string>(), 
+                It.IsAny<IClientSessionHandle?>()))
+            .ReturnsAsync((string id, IClientSessionHandle? session) => _testData.Trains.FirstOrDefault(t => t.Id == id));
 
         // --- Настройка Seat Lock Repository
-        _mockSeatLockRepository.Setup(repo => repo.GetByRouteIdAsync(It.IsAny<Guid>()))
-            .ReturnsAsync((Guid id) =>
+        _mockSeatLockRepository.Setup(repo => repo.GetByRouteIdAsync(It.IsAny<Guid>(), 
+                It.IsAny<IClientSessionHandle?>()))
+            .ReturnsAsync((Guid id, IClientSessionHandle? session) =>
             {
                 return _testData.SeatLocks.Where(sl =>
                     sl.LockedSeatInfos.Any(lsi => lsi.ConcreteRouteId == id));

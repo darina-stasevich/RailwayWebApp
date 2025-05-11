@@ -1,3 +1,4 @@
+using MongoDB.Driver;
 using Moq;
 using RailwayApp.Application.Models;
 using RailwayApp.Application.Services;
@@ -53,14 +54,16 @@ public class UserAccountServiceTest
 
     private void ConfigureMocks()
     {
-        _mockUserAccountRepository.Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>()))
-            .ReturnsAsync((Guid id) => _testData.UserAccounts.FirstOrDefault(u => u.Id == id));
+        _mockUserAccountRepository.Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>(), 
+                It.IsAny<IClientSessionHandle?>()))
+            .ReturnsAsync((Guid id, IClientSessionHandle? session) => _testData.UserAccounts.FirstOrDefault(u => u.Id == id));
 
         _mockUserAccountRepository.Setup(repo => repo.GetByEmailAsync(It.IsAny<string>()))
             .ReturnsAsync((string email) => _testData.UserAccounts.FirstOrDefault(u => u.Email == email));
 
-        _mockUserAccountRepository.Setup(repo => repo.AddAsync(It.IsAny<UserAccount>()))
-            .ReturnsAsync((UserAccount user) =>
+        _mockUserAccountRepository.Setup(repo => repo.AddAsync(It.IsAny<UserAccount>(), 
+                It.IsAny<IClientSessionHandle?>()))
+            .ReturnsAsync((UserAccount user, IClientSessionHandle? session) =>
             {
                 user.Id = Guid.NewGuid();
                 _testData.UserAccounts.Add(user);
