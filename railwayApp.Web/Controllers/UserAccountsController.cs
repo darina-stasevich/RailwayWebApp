@@ -2,14 +2,14 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RailwayApp.Application.Models;
-using RailwayApp.Domain;
 using RailwayApp.Domain.Interfaces.IServices;
 
 namespace RailwayApp.Web.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class UserAccountsController(IUserAccountService userAccountService,
+public class UserAccountsController(
+    IUserAccountService userAccountService,
     ILogger<UserAccountsController> logger) : ControllerBase
 {
     [HttpPost("register")]
@@ -21,24 +21,11 @@ public class UserAccountsController(IUserAccountService userAccountService,
             return BadRequest(ModelState);
         }
 
-        try
-        {
-            var userAccountId = await userAccountService.CreateUserAccountAsync(request);
-            logger.LogInformation("User account with id {Id} was created", userAccountId);
-            return Ok(userAccountId);
-        }
-        catch (UserServiceEmailAlreadyExistsException ex)
-        {
-            logger.LogWarning(ex, "Error creating user account: {Message}", ex.Message);
-            return Conflict(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error creating user account: {Message}", ex.Message);
-            return StatusCode(500, "Internal Server Error");
-        }
+        var userAccountId = await userAccountService.CreateUserAccountAsync(request);
+        logger.LogInformation("User account with id {Id} was created", userAccountId);
+        return Ok(userAccountId);
     }
-    
+
     /*[HttpGet("me")]
     [Authorize]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
@@ -78,25 +65,11 @@ public class UserAccountsController(IUserAccountService userAccountService,
         }
 
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdString, out Guid id)) 
+        if (!Guid.TryParse(userIdString, out var id))
             return Unauthorized("User ID claim is missing or invalid.");
-        
-        try
-        {
-            var userAccountId = await userAccountService.UpdateUserAccountAsync(id, request);
-            logger.LogInformation("data of user account with id {Id} was updated", id);
-            return Ok(userAccountId);
-        }
-        catch (UserServiceUserNotFoundException ex)
-        {
-            logger.LogWarning(ex, "Error updating user account: {Message}", ex.Message);
-            return NotFound(ex.Message);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
+        var userAccountId = await userAccountService.UpdateUserAccountAsync(id, request);
+        logger.LogInformation("data of user account with id {Id} was updated", id);
+        return Ok(userAccountId);
     }
 
     [HttpPut("me/password")]
@@ -108,57 +81,26 @@ public class UserAccountsController(IUserAccountService userAccountService,
             logger.LogWarning("Incorrect request: {@Errors}", ModelState);
             return BadRequest(ModelState);
         }
-        
+
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdString, out Guid id)) 
+        if (!Guid.TryParse(userIdString, out var id))
             return Unauthorized("User ID claim is missing or invalid.");
 
-        try
-        {
-            var userAccountId = await userAccountService.UpdateUserPasswordAsync(id, request);
-            logger.LogInformation("data of user account with id {Id} was updated", id);
-            return Ok(userAccountId);
-        }
-        catch (UserServiceUserNotFoundException ex)
-        {
-            logger.LogWarning(ex, "Error updating user account: {Message}", ex.Message);
-            return NotFound(ex.Message);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
+        var userAccountId = await userAccountService.UpdateUserPasswordAsync(id, request);
+        logger.LogInformation("data of user account with id {Id} was updated", id);
+        return Ok(userAccountId);
     }
-    
+
     [HttpDelete("me")]
     [Authorize(Roles = "Client")]
     public async Task<IActionResult> DeleteUserAccount()
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdString, out Guid id)) 
+        if (!Guid.TryParse(userIdString, out var id))
             return Unauthorized("User ID claim is missing or invalid.");
-        
-        try
-        {
-            await userAccountService.DeleteUserAccountAsync(id);
-            logger.LogInformation("User account with id {Id} was deleted", id);
-            return NoContent();
-        }
-        catch(UserServiceUserNotFoundException ex)
-        {
-            logger.LogWarning(ex, "Error deleting user account: {Message}", ex.Message);
-            return NotFound(ex.Message);
-        }
-        catch (UserServiceUserBlockedException ex)
-        {
-            logger.LogWarning(ex, "Error deleting user account: {Message}", ex.Message);
-            return Conflict(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error deleting user account: {Message}", ex.Message);
-            return StatusCode(500, "Internal Server Error");
-        }
+
+        await userAccountService.DeleteUserAccountAsync(id);
+        logger.LogInformation("User account with id {Id} was deleted", id);
+        return NoContent();
     }
 }

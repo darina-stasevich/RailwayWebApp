@@ -52,10 +52,10 @@ public class TicketBookingService(IMongoClient mongoClient,
             
             var userAccount = await userAccountRepository.GetByIdAsync(userAccountId, session);
             if (userAccount == null)
-                throw new UserServiceUserNotFoundException(userAccountId);
+                throw new UserAccountUserNotFoundException(userAccountId);
 
             if (userAccount.Status == UserAccountStatus.Blocked)
-                throw new UserServiceUserBlockedException(userAccountId);
+                throw new UserAccountUserBlockedException(userAccountId);
 
             var lockedSeatInfo = new List<LockedSeatInfo>();
 
@@ -70,15 +70,14 @@ public class TicketBookingService(IMongoClient mongoClient,
                 if (carriageTemplate == null)
                 {
                     throw new CarriageTemplateNotFoundException(
-                        $"carriage template with number {seatRequest.CarriageNumber} not found for route {seatRequest.ConcreteRouteId}");
+                        seatRequest.CarriageNumber, seatRequest.ConcreteRouteId);
                 }
 
                 if (await carriageSeatService.IsSeatAvailable(MapInfoSeatSearchDto(seatRequest, carriageTemplate), session) ==
                     false)
                 {
                     throw new TicketBookingServiceSeatNotAvailableException(
-                        $"Seat {seatRequest.SeatNumber} is not available for ConcreteRouteId {seatRequest.ConcreteRouteId}, " +
-                        $"StartSegmentNumber {seatRequest.StartSegmentNumber}, EndSegmentNumber {seatRequest.EndSegmentNumber}");
+                        seatRequest.SeatNumber, seatRequest.ConcreteRouteId, seatRequest.StartSegmentNumber, seatRequest.EndSegmentNumber);
                 }
 
                 var price = await priceCalculationService.CalculatePriceForCarriageAsync(
@@ -139,12 +138,12 @@ public class TicketBookingService(IMongoClient mongoClient,
             var userAccount = await userAccountRepository.GetByIdAsync(userAccountId, session);
             if (userAccount == null)
             {
-                throw new UserServiceUserNotFoundException(userAccountId);
+                throw new UserAccountUserNotFoundException(userAccountId);
             }
 
             if (userAccount.Status == UserAccountStatus.Blocked)
             {
-                throw new UserServiceUserBlockedException(userAccountId);
+                throw new UserAccountUserBlockedException(userAccountId);
             }
 
 

@@ -28,9 +28,11 @@ public class CarriageAvailabilityUpdateService(ICarriageService carriageService,
 
             foreach (var carriageAvailability in carriageAvailabilities)
             {
+                if (carriageAvailability.OccupiedSeats.Count < seatInfo.SeatNumber)
+                    throw new CarriageAvailabilityUpdateServiceSeatNotFoundException(seatInfo.SeatNumber);
                 if (carriageAvailability.OccupiedSeats[seatInfo.SeatNumber - 1] == false)
-                    throw new Domain.CarriageAvailabilityUpdateService(
-                        $"seat {seatInfo.SeatNumber} is already booked in segment {carriageAvailability.ConcreteRouteSegmentId}");
+                    throw new CarriageAvailabilityUpdateServiceSeatAlreadyBookedException(
+                        seatInfo.SeatNumber);
                 carriageAvailability.OccupiedSeats[seatInfo.SeatNumber - 1] = false;
             }
 
@@ -49,7 +51,7 @@ public class CarriageAvailabilityUpdateService(ICarriageService carriageService,
             await carriageTemplateService.GetCarriageTemplateForRouteAsync(dto.ConcreteRouteId, session);
         var carriageTemplate = carriageTemplates.FirstOrDefault(x => x.CarriageNumber == dto.Carriage);
         if(carriageTemplate == null)
-            throw new CarriageTemplateNotFoundException($"Carriage template for route {dto.ConcreteRouteId} with carriage number {dto.Carriage} not found");
+            throw new CarriageTemplateNotFoundException(dto.Carriage, dto.ConcreteRouteId);
         var seatDto = new OccupiedSeatDto
         {
             CarriageTemplateId = carriageTemplate.Id,
@@ -60,9 +62,10 @@ public class CarriageAvailabilityUpdateService(ICarriageService carriageService,
         var carriageAvailabilities = await carriageService.GetCarriageAvailabilitiesForSeat(seatDto, session);
         foreach (var carriageAvailability in carriageAvailabilities)
         {
+            if (carriageAvailability.OccupiedSeats.Count < dto.SeatNumber)
+                throw new CarriageAvailabilityUpdateServiceSeatNotFoundException(dto.SeatNumber);
             if (carriageAvailability.OccupiedSeats[dto.SeatNumber - 1] == true)
-                throw new Domain.CarriageAvailabilityUpdateService(
-                    $"seat {dto.SeatNumber} is already booked in segment {carriageAvailability.ConcreteRouteSegmentId}");
+                throw new CarriageAvailabilityUpdateServiceSeatAlreadyFreeException(dto.SeatNumber);
             carriageAvailability.OccupiedSeats[dto.SeatNumber - 1] = true;
         }
 

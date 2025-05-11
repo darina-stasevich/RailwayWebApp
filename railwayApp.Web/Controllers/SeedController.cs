@@ -341,7 +341,7 @@ public class SeedController(
             }
 
             var concreteRouteSegments = new List<ConcreteRouteSegment>();
-           
+
             for (var i = 0; i < 7; i++)
             {
                 var date = DateTime.Now.Date;
@@ -364,7 +364,7 @@ public class SeedController(
                         concreteRouteIndex += 5;
                     else
                         concreteRouteIndex = 6;
-                    
+
                     var routeSegment = new ConcreteRouteSegment
                     {
                         AbstractSegmentId = abstractRouteSegment.Id,

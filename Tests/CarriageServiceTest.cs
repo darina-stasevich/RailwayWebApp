@@ -47,8 +47,7 @@ public class CarriageServiceTest
         _mockCarriageTemplateRepository = new Mock<ICarriageTemplateRepository>();
         _mockSeatLockRepository = new Mock<ISeatLockRepository>();
 
-        _mockCarriageSeatService = new CarriageSeatService(_mockConcreteRouteRepository.Object, _mockAbstractRouteRepository.Object,
-            _mockAbstractRouteSegmentRepository.Object, _mockConcreteRouteSegmentRepository.Object,
+        _mockCarriageSeatService = new CarriageSeatService(_mockConcreteRouteSegmentRepository.Object,
             _mockCarriageAvailabilityRepository.Object, _mockSeatLockRepository.Object);
         
         _mockCarriageTemplateService = new CarriageTemplateService(_mockConcreteRouteRepository.Object,

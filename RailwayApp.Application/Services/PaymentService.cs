@@ -1,5 +1,4 @@
 using MongoDB.Driver;
-using RailwayApp.Application.Models;
 using RailwayApp.Application.Models.Dto;
 using RailwayApp.Domain;
 using RailwayApp.Domain.Entities;
@@ -21,7 +20,6 @@ public class PaymentService(IMongoClient mongoClient,
         using var session = await mongoClient.StartSessionAsync();
         try
         {
-            //session.StartTransaction();
             session.StartTransaction(new TransactionOptions(
                 readConcern: ReadConcern.Snapshot,
                 writeConcern: WriteConcern.WMajority));
@@ -29,9 +27,9 @@ public class PaymentService(IMongoClient mongoClient,
             
             var userAccount = await userAccountRepository.GetByIdAsync(userAccountId, session);
             if (userAccount == null)
-                throw new UserServiceUserNotFoundException(userAccountId);
+                throw new UserAccountUserNotFoundException(userAccountId);
             if (userAccount.Status == UserAccountStatus.Blocked)
-                throw new UserServiceUserBlockedException(userAccountId);
+                throw new UserAccountUserBlockedException(userAccountId);
 
             var seatLock = await seatLockRepository.GetByIdAsync(seatLockId, session);
             if (seatLock == null)
@@ -41,7 +39,7 @@ public class PaymentService(IMongoClient mongoClient,
             if (seatLock.ExpirationTimeUtc < DateTime.UtcNow)
                 throw new SeatLockExpiredException(seatLockId);
             if (seatLock.UserAccountId != userAccountId)
-                throw new PaymentServiceException($"seatLock {seatLockId} not found for user {userAccountId}");
+                throw new SeatLockNotFoundException(seatLockId, userAccountId);
             
             bool prepared = await seatLockRepository.PrepareForProcessingAsync(
                 seatLockId,
@@ -51,7 +49,7 @@ public class PaymentService(IMongoClient mongoClient,
                 session);
 
             if (prepared == false)
-                throw new PaymentServiceException($"failed to prepare seatLock {seatLockId} for payment");
+                throw new PaymentServicePreparingFailedException(seatLockId);
 
             var tickets = new List<Ticket>();
             foreach (var seatInfo in seatLock.LockedSeatInfos)
@@ -124,17 +122,17 @@ public class PaymentService(IMongoClient mongoClient,
             
             var userAccount = await userAccountRepository.GetByIdAsync(userAccountId, session);
             if (userAccount == null)
-                throw new UserServiceUserNotFoundException(userAccountId);
+                throw new UserAccountUserNotFoundException(userAccountId);
             if (userAccount.Status == UserAccountStatus.Blocked)
-                throw new UserServiceUserBlockedException(userAccountId);
+                throw new UserAccountUserBlockedException(userAccountId);
 
             var ticket = await ticketRepository.GetByIdAsync(ticketId, session);
             if (ticket == null)
                 throw new TicketNotFoundException(ticketId);
             if (ticket.UserAccountId != userAccountId)
-                throw new PaymentServiceException($"ticket {ticketId} not found for user {userAccountId}");
+                throw new PaymentServiceTicketNotFoundException(ticketId, userAccountId);
             if (ticket.Status != TicketStatus.Payed)
-                throw new PaymentServiceException($"ticket {ticketId} not payed to cancel");
+                throw new PaymentServiceTicketNotPayedException(ticketId);
 
             await ticketRepository.UpdateStatusAsync(ticketId, TicketStatus.Cancelled, session);
            

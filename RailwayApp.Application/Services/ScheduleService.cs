@@ -1,13 +1,13 @@
 using System.Runtime.InteropServices.JavaScript;
 using MongoDB.Driver;
 using RailwayApp.Application.Models;
+using RailwayApp.Domain;
 using RailwayApp.Domain.Interfaces.IRepositories;
 using RailwayApp.Domain.Interfaces.IServices;
 
 namespace RailwayApp.Application.Services;
 
 public class ScheduleService(IConcreteRouteSegmentRepository concreteRouteSegmentRepository,
-    IAbstractRouteSegmentRepository abstractRouteSegmentRepository,
     IAbstractRouteRepository abstractRouteRepository,
     IConcreteRouteRepository concreteRouteRepository,
     IStationRepository stationRepository) : IScheduleService
@@ -18,21 +18,21 @@ public class ScheduleService(IConcreteRouteSegmentRepository concreteRouteSegmen
         var concreteRoute = await concreteRouteRepository.GetByIdAsync(concreteRouteId);
         if(concreteRoute == null)
         {
-            throw new ArgumentException("No concrete route found.");
+            throw new ConcreteRouteNotFoundException(concreteRouteId);
         }
         
         // 2. Get abstract route
         var abstractRoute = await abstractRouteRepository.GetByIdAsync(concreteRoute.AbstractRouteId);
         if(abstractRoute == null)
         {
-            throw new ArgumentException("No abstract route found.");
+            throw new AbstractRouteNotFoundException(concreteRoute.AbstractRouteId);
         }
         
         // 3. Get concrete segments by concreteRouteId
         var concreteRouteSegments = (await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(concreteRouteId)).ToList();
         if (concreteRouteSegments == null || concreteRouteSegments.Count == 0)
         {
-            throw new Exception("No concrete route segments found.");
+            throw new ConcreteRouteSegmentsNotFoundException(concreteRouteId);
         }
 
         // 4. Get stations
@@ -42,7 +42,7 @@ public class ScheduleService(IConcreteRouteSegmentRepository concreteRouteSegmen
         var stations = await stationRepository.GetByIdsAsync(stationIds.ToList());
         if (stations == null || stations.Count() == 0)
         {
-            throw new Exception("No stations found.");
+            throw new StationExceptions("stations for given ids not found");
         }
         var stationsDictionary = stations.ToDictionary(x => x.Id, v => v.Name);
 

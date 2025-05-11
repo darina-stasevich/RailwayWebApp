@@ -2,6 +2,8 @@ using Microsoft.VisualBasic;
 using MongoDB.Driver;
 using RailwayApp.Application.Models;
 using RailwayApp.Application.Models.Dto;
+using RailwayApp.Domain;
+using RailwayApp.Domain.Entities;
 using RailwayApp.Domain.Interfaces.IRepositories;
 using RailwayApp.Domain.Interfaces.IServices;
 
@@ -18,12 +20,12 @@ public class PriceCalculationService(IConcreteRouteRepository concreteRouteRepos
         var concreteRoute = await concreteRouteRepository.GetByIdAsync(concreteRouteId, session);
         if (concreteRoute == null)
         {
-            throw new ArgumentException("Concrete route not found");
+            throw new ConcreteRouteNotFoundException(concreteRouteId);
         }
         var abstractRoute = await abstractRouteRepository.GetByIdAsync(concreteRoute.AbstractRouteId, session);
         if (abstractRoute == null)
         {
-            throw new ArgumentException("Abstract route not found");
+            throw new AbstractRouteNotFoundException(concreteRoute.AbstractRouteId);
         }
 
         decimal transferCost = abstractRoute.TransferCost;
@@ -40,15 +42,18 @@ public class PriceCalculationService(IConcreteRouteRepository concreteRouteRepos
         var baseCost = await CalculateBasePriceAsync(dto.ConcreteRouteId, dto.StartSegmentNumber, dto.EndSegmentNumber, session);
         var carriageTemplate = await carriageTemplateRepository.GetByIdAsync(dto.CarriageTemplateId, session);
         if(carriageTemplate == null)
-            throw new Exception("Carriage template not found");
+            throw new CarriageTemplateNotFoundException(dto.CarriageTemplateId, dto.ConcreteRouteId);
         return baseCost * carriageTemplate.PriceMultiplier;
     }
 
-    public async Task<PriceRangeDto?> GetRoutePriceRangeAsync(InfoRouteSegmentSearchDto dto)
+    public async Task<PriceRangeDto> GetRoutePriceRangeAsync(InfoRouteSegmentSearchDto dto)
     {
         var baseCost = await CalculateBasePriceAsync(dto.ConcreteRouteId, dto.StartSegmentNumber, dto.EndSegmentNumber);
         var carriageTemplates = await carriageTemplateService.GetCarriageTemplateForRouteAsync(dto.ConcreteRouteId);
-       
+
+        if (carriageTemplates == null)
+            throw new CarriageTemplatesNotFoundException(dto.ConcreteRouteId);
+        
         var priceRange = new PriceRangeDto
         {
             MinimalPrice = Decimal.MaxValue,

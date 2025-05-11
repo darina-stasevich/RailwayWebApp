@@ -41,7 +41,7 @@ public class UserAccountService(IPasswordHasher passwordHasher,
     {
         var userAccountCheck = await userAccountRepository.GetByEmailAsync(request.Email);
         if (userAccountCheck != null)
-            throw new UserServiceEmailAlreadyExistsException(request.Email);
+            throw new UserAccountEmailAlreadyExistsException(request.Email);
 
         var userAccount = MapUserAccount(request);
 
@@ -55,16 +55,16 @@ public class UserAccountService(IPasswordHasher passwordHasher,
     {
         var userAccount = await userAccountRepository.GetByIdAsync(userAccountId);
         if (userAccount == null)
-            throw new UserServiceUserNotFoundException(userAccountId);
+            throw new UserAccountUserNotFoundException(userAccountId);
         
         if(userAccount.Status == UserAccountStatus.Blocked)
-            throw new UserServiceUserBlockedException(userAccountId);
+            throw new UserAccountUserBlockedException(userAccountId);
         
         MapUpdateRequestToUserAccount(request, userAccount);
 
         var resultUpdate = await userAccountRepository.UpdateAsync(userAccountId, userAccount);
         if (resultUpdate == false)
-            throw new Exception("Updating user account failed");
+            throw new UserAccountUpdatingFailed(userAccountId);
         
         return userAccountId;
     }
@@ -73,21 +73,21 @@ public class UserAccountService(IPasswordHasher passwordHasher,
     {
         var userAccount = await userAccountRepository.GetByIdAsync(userAccountId);
         if (userAccount == null)
-            throw new UserServiceUserNotFoundException(userAccountId);
+            throw new UserAccountUserNotFoundException(userAccountId);
         
         if(userAccount.Status == UserAccountStatus.Blocked)
-            throw new UserServiceUserBlockedException(userAccountId);
+            throw new UserAccountUserBlockedException(userAccountId);
 
         var oldPasswordHash = userAccount.HashedPassword;
         if(oldPasswordHash != userAccount.HashedPassword)
-            throw new UserServiceInvalidPasswordException(userAccount.Email);
+            throw new UserAccountInvalidPasswordException(userAccount.Email);
         
         var passwordHash = await passwordHasher.HashPassword(request.NewPassword);
         userAccount.HashedPassword = passwordHash;
         var resultUpdate = await userAccountRepository.UpdateAsync(userAccountId, userAccount);
         
         if (resultUpdate == false)
-            throw new Exception("Updating user account failed");
+            throw new UserAccountUpdatingFailed(userAccountId);
 
         return userAccountId;
     }
@@ -96,10 +96,10 @@ public class UserAccountService(IPasswordHasher passwordHasher,
     {
         var userAccount = await userAccountRepository.GetByIdAsync(userAccountId);
         if (userAccount == null)
-            throw new UserServiceUserNotFoundException(userAccountId);
+            throw new UserAccountUserNotFoundException(userAccountId);
         
         if(userAccount.Status == UserAccountStatus.Blocked)
-            throw new UserServiceUserBlockedException(userAccountId);
+            throw new UserAccountUserBlockedException(userAccountId);
 
         await userAccountRepository.DeleteAsync(userAccountId);
         

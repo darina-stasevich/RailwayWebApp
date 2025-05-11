@@ -52,9 +52,7 @@ public class TicketBookingTest
         _mockUserAccountRepository = new Mock<IUserAccountRepository>();
         _mockStationRepository = new Mock<IStationRepository>();
 
-        _mockCarriageSeatService = new CarriageSeatService(_mockConcreteRouteRepository.Object,
-            _mockAbstractRouteRepository.Object,
-            _mockAbstractRouteSegmentRepository.Object, _mockConcreteRouteSegmentRepository.Object,
+        _mockCarriageSeatService = new CarriageSeatService(_mockConcreteRouteSegmentRepository.Object,
             _mockCarriageAvailabilityRepository.Object, _mockSeatLockRepository.Object);
 
         _mockCarriageTemplateService = new CarriageTemplateService(_mockConcreteRouteRepository.Object,
@@ -65,7 +63,7 @@ public class TicketBookingTest
             _mockCarriageTemplateRepository.Object, _mockCarriageTemplateService);
 
         _mockScheduleService = new ScheduleService(_mockConcreteRouteSegmentRepository.Object,
-            _mockAbstractRouteSegmentRepository.Object, _mockAbstractRouteRepository.Object,
+            _mockAbstractRouteRepository.Object,
             _mockConcreteRouteRepository.Object, _mockStationRepository.Object);
         ConfigureMocks();
 

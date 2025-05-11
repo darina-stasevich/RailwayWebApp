@@ -20,11 +20,11 @@ public class TicketService(ITicketRepository ticketRepository,
         var userAccount = await userAccountRepository.GetByIdAsync(userAccountId);
         if (userAccount == null)
         {
-            throw new UserServiceUserNotFoundException(userAccountId);
+            throw new UserAccountUserNotFoundException(userAccountId);
         }
         if (userAccount.Status == UserAccountStatus.Blocked)
         {
-            throw new UserServiceUserBlockedException(userAccountId);
+            throw new UserAccountUserBlockedException(userAccountId);
         }
     }
     public async Task<IEnumerable<Ticket>> GetActiveTickets(Guid userAccountId)

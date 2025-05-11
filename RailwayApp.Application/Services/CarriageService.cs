@@ -1,8 +1,7 @@
-using System.Security.Principal;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 using RailwayApp.Application.Models;
 using RailwayApp.Application.Models.Dto;
+using RailwayApp.Domain;
 using RailwayApp.Domain.Entities;
 using RailwayApp.Domain.Interfaces.IRepositories;
 using RailwayApp.Domain.Interfaces.IServices;
@@ -41,7 +40,9 @@ public class CarriageService(ICarriageSeatService carriageSeatService,
         if(request.StartSegmentNumber > request.EndSegmentNumber)
             throw new ArgumentException("Start segment number must be less than end segment number");
         var carriageTemplates = await carriageTemplateService.GetCarriageTemplateForRouteAsync(request.ConcreteRouteId);
-
+        if (carriageTemplates == null)
+            throw new CarriageTemplatesNotFoundException(request.ConcreteRouteId);
+        
         var searchInfoDto = MapInfoRouteSegmentSearch(request);
         // key: CarriageTemplateId, value is the number of available seats in carriage with given template
         var carriageAvailableSeats =
@@ -73,14 +74,16 @@ public class CarriageService(ICarriageSeatService carriageSeatService,
         
         // 1. Get this carriageTemplate
         var carriageTemplates = await carriageTemplateService.GetCarriageTemplateForRouteAsync(request.ConcreteRouteId);
+
+        if (carriageTemplates == null)
+            throw new CarriageTemplatesNotFoundException(request.ConcreteRouteId);
         var carriageTemplate = carriageTemplates
             .FirstOrDefault(x => x.CarriageNumber == request.CarriageNumber);
 
         if (carriageTemplate == null)
         {
-            throw new ArgumentException($"Carriage template with number {request.CarriageNumber} not found");
+            throw new CarriageTemplateNotFoundException(request.CarriageNumber, request.ConcreteRouteId);
         }
-
 
         var searchPerCarriageDto = MapInfoRouteSegmentPerCarriageSearch(request, carriageTemplate.Id);
         // 2. Get available seats for this carriage

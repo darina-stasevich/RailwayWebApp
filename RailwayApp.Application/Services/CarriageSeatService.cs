@@ -1,7 +1,7 @@
 using System.Collections;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 using RailwayApp.Application.Models.Dto;
+using RailwayApp.Domain;
 using RailwayApp.Domain.Entities;
 using RailwayApp.Domain.Interfaces.IRepositories;
 using RailwayApp.Domain.Interfaces.IServices;
@@ -9,9 +9,7 @@ using RailwayApp.Domain.Statuses;
 
 namespace RailwayApp.Application.Services;
 
-public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepository,
-    IAbstractRouteRepository abstractRouteRepository,
-    IAbstractRouteSegmentRepository abstractRouteSegmentRepository,
+public class CarriageSeatService(
     IConcreteRouteSegmentRepository concreteRouteSegmentRepository,
     ICarriageAvailabilityRepository carriageAvailabilityRepository,
     ISeatLockRepository seatLockRepository
@@ -39,7 +37,6 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
             allAvailabilities.AddRange(carriageAvailabilities);
         }
         
-        // 6. Calculate seats that are free every segment in range
         var availabilityGroupedByCarriageTemplateId = allAvailabilities
             .GroupBy(a => a.CarriageTemplateId);
 
@@ -64,7 +61,7 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
         var availabilityGroupedByCarriage = await GetAllCarriageAvailabilitiesForRouteAsync(dto);
         if (availabilityGroupedByCarriage == null)
         {
-            throw new Exception("No carriages found found");
+            throw new CarriageSeatServiceCarriageAvailabilityNotFoundException(dto.ConcreteRouteId, dto.StartSegmentNumber, dto.EndSegmentNumber);
         }
         
         int totalAvailableSeats = 0;
@@ -107,7 +104,7 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
 
         if (groupedCarriageAvailabilities == null)
         {
-            throw new Exception("Carriage availabilities not found");
+            throw new CarriageSeatServiceCarriageAvailabilityNotFoundException(dto.ConcreteRouteId, dto.StartSegmentNumber, dto.EndSegmentNumber);
         }
         
         var bookedLockedSeats = await GetBookedSeats(dto);
@@ -187,14 +184,15 @@ public class CarriageSeatService(IConcreteRouteRepository concreteRouteRepositor
             MapInfoRouteSegment(dto), session);
         if (groupedCarriageAvailabilities == null)
         {
-            throw new Exception("Carriage availabilities not found");
+            throw new CarriageSeatServiceCarriageAvailabilityNotFoundException(dto.ConcreteRouteId, dto.StartSegmentNumber, dto.EndSegmentNumber);
         }
         
         var targetGroup = groupedCarriageAvailabilities
             .FirstOrDefault(g => g.Key == dto.CarriageTemplateId);
         if(targetGroup == null)
         {
-            throw new ArgumentException("Carriage template not found");
+            throw new CarriageTemplateNotFoundException(dto.CarriageTemplateId,
+                dto.CarriageTemplateId, dto.StartSegmentNumber, dto.EndSegmentNumber);
         }
 
         // 2. calculate mask of seats which are not paid during the given segment range

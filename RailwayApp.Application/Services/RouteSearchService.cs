@@ -6,6 +6,7 @@ using System.Runtime.InteropServices.JavaScript;
 using MongoDB.Driver.Linq;
 using RailwayApp.Application.Models;
 using RailwayApp.Application.Models.Dto;
+using RailwayApp.Domain;
 using RailwayApp.Domain.Entities;
 using RailwayApp.Domain.Interfaces.IRepositories;
 using RailwayApp.Domain.Interfaces.IServices;
@@ -117,10 +118,6 @@ public class RouteSearchService(IStationRepository stationRepository,
                 var infoRouteSegmentDto = MapInfoRouteSegmentSearch(routeId, startNumber, endNumber);
                 var costRange = await priceCalculationService.GetRoutePriceRangeAsync(infoRouteSegmentDto);
                 int availableSeats = await carriageSeatService.GetAvailableSeatsAmountAsync(infoRouteSegmentDto);
-                if (costRange == null)
-                {
-                    throw new Exception("Price range not found");
-                }
 
                 var routeDto = new DirectRouteDto
                 {
@@ -147,12 +144,12 @@ public class RouteSearchService(IStationRepository stationRepository,
         var fromStation = await stationRepository.GetByIdAsync(request.FromStationId);
         if (fromStation == null)
         {
-            throw new ArgumentException("From station not found");
+            throw new StationNotFoundException(request.FromStationId);
         }
         var toStation = await stationRepository.GetByIdAsync(request.ToStationId);
         if (toStation == null)
         {
-            throw new ArgumentException("To station not found");
+            throw new StationNotFoundException(request.ToStationId);
         }
         if(request.DepartureDate.Date - DateTime.UtcNow.Date > TimeSpan.FromDays(30))
         {
@@ -175,14 +172,15 @@ public class RouteSearchService(IStationRepository stationRepository,
 
     private ComplexRouteDto CreateComplexRouteDto(IEnumerable<DirectRouteDto> directRoutes)
     {
+        var directRouteDtos = directRoutes.ToList();
         var complexRoute = new ComplexRouteDto
         {
-            DirectRoutes = directRoutes.ToList(),
-            MinimalTotalCost = directRoutes.Sum(r => r.MinimalCost),
-            MaximumTotalCost = directRoutes.Sum(r => r.MaximumCost),
-            DepartureDate = directRoutes.Min(r => r.DepartureDate),
-            ArrivalDate = directRoutes.Max(r => r.ArrivalDate),
-            TotalDuration = directRoutes.Max(r => r.ArrivalDate) - directRoutes.Min(r => r.DepartureDate)
+            DirectRoutes = directRouteDtos,
+            MinimalTotalCost = directRouteDtos.Sum(r => r.MinimalCost),
+            MaximumTotalCost = directRouteDtos.Sum(r => r.MaximumCost),
+            DepartureDate = directRouteDtos.Min(r => r.DepartureDate),
+            ArrivalDate = directRouteDtos.Max(r => r.ArrivalDate),
+            TotalDuration = directRouteDtos.Max(r => r.ArrivalDate) - directRouteDtos.Min(r => r.DepartureDate)
         };
         return complexRoute;
     }
@@ -193,19 +191,19 @@ public class RouteSearchService(IStationRepository stationRepository,
         
         var startAbstractSegment = await abstractRouteSegmentRepository.GetByIdAsync(segmentsList[0].AbstractSegmentId);
         var endAbstractSegment = await abstractRouteSegmentRepository.GetByIdAsync(segmentsList[^1].AbstractSegmentId);
-        
-        if (endAbstractSegment == null || startAbstractSegment == null)
-            throw new Exception("abstract segment not found");
+
+        if (startAbstractSegment == null)
+            throw new AbstractRouteSegmentNotFoundException(segmentsList[0].AbstractSegmentId);
+        if (endAbstractSegment == null)
+            throw new AbstractRouteSegmentNotFoundException(segmentsList[^1].AbstractSegmentId);
         if (endAbstractSegment.SegmentNumber - startAbstractSegment.SegmentNumber + 1 != segments.Count())
-            throw new Exception("given IEnumerable of segments doesn't make a correct sequence");
+            throw new RouteSearchServicePathCreatingFailedException("given segments not make a valid path");
 
         var request = MapInfoRouteSegmentSearch(segmentsList[0].ConcreteRouteId, startAbstractSegment.SegmentNumber,
             endAbstractSegment.SegmentNumber);
         
         var availableSeats = await carriageSeatService.GetAvailableSeatsAmountAsync(request);
         var costRange = await priceCalculationService.GetRoutePriceRangeAsync(request);
-        if (costRange == null)
-            throw new Exception($"failed to get price range for route {request.ConcreteRouteId}");
         
         var directRouteDto = new DirectRouteDto
         {
@@ -314,15 +312,16 @@ public class RouteSearchService(IStationRepository stationRepository,
 
                     foreach (var currentNextSegment in concreteSegmentsCash[currentStationId])
                     {
-                        var nextArrivalDatetime = new DateTime();
-                        var nextAmountOfTransfers = 0;
-                        var nextStationId = Guid.Empty;
-                        var nextRouteId = Guid.Empty;
                         
                         if(currentNextSegment.ConcreteDepartureDate < currentArrivalDatetime)
                             continue;
                         
                         // look at next segment of path
+                        Guid nextRouteId;
+                        Guid nextStationId;
+                        var nextAmountOfTransfers = 0;
+                        DateTime nextArrivalDatetime;
+                        
                         if (currentNextSegment.ConcreteRouteId == currentRouteId)
                         {
                             // continue current route
