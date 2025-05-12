@@ -112,27 +112,33 @@
         });
     });
 
+    builder.Services.AddCors(options => {
+        options.AddPolicy("ReactClient", policy => {
+            policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+    });
+
     var app = builder.Build();
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
     {
-        app.UseDeveloperExceptionPage(); // Для лучшей диагностики ошибок в разработке
+        app.UseDeveloperExceptionPage();
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
             c.SwaggerEndpoint("/swagger/v1/swagger.json", "RailwayApp API V1");
-            c.EnablePersistAuthorization(); // Для сохранения токена в Swagger UI
+            c.EnablePersistAuthorization();
         });
     }
 
     app.UseHttpsRedirection();
+    app.UseCors("ReactClient");
     app.UseCustomExceptionHandling();
     app.UseAuthentication();
     app.UseUserSessionValidator();
     app.UseAuthorization();
-
-
     app.MapControllers();
-
     app.Run();
