@@ -9,4 +9,8 @@ namespace RailwayApp.Infrastructure.Repositories;
 public class MongoDbAbstractRouteRepository(IMongoClient client, IOptions<MongoDbSettings> settings)
     : MongoDbGenericRepository<AbstractRoute, Guid>(client, settings, "AbstractRoutes"), IAbstractRouteRepository
 {
+    public async Task<IEnumerable<AbstractRoute>> GetActiveRoutes()
+    {
+        return await _collection.Find(x => x.IsActive == true).ToListAsync();
+    }
 }

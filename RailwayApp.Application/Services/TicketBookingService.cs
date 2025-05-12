@@ -88,6 +88,11 @@ public class TicketBookingService(IMongoClient mongoClient,
                 var arrivalDate =
                     await scheduleService.GetArrivalDateForSegment(seatRequest.ConcreteRouteId,
                         seatRequest.EndSegmentNumber, session);
+                if (departureDate < DateTime.Now)
+                {
+                    throw new TicketBookingServiceTrainDepartedException(seatRequest.ConcreteRouteId, seatRequest.CarriageNumber,
+                        seatRequest.SeatNumber);
+                }
                 lockedSeatInfo.Add(new LockedSeatInfo
                 {
                     CarriageTemplateId = carriageTemplate.Id,

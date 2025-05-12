@@ -2,10 +2,6 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace RailwayApp.Domain.Entities;
 
-// связь с абстрактным маршрутом по id
-// связь с сегментами
-// нужна ли связь с билетами?
-
 public class ConcreteRoute : IEntity<Guid>
 {
     [BsonId]

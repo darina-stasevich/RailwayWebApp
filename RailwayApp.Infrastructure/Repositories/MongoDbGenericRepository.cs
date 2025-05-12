@@ -47,9 +47,12 @@ public abstract class MongoDbGenericRepository<TEntity, TId> : IGenericRepositor
         return entity.Id;
     }
 
-    public async Task AddRangeAsync(IEnumerable<TEntity> entities)
+    public async Task AddRangeAsync(IEnumerable<TEntity> entities, IClientSessionHandle? session = null)
     {
-        await _collection.InsertManyAsync(entities);
+        if (session == null)
+            await _collection.InsertManyAsync(entities);
+        else 
+            await _collection.InsertManyAsync(session, entities);
     }
 
     public async Task<bool> ExistsAsync(TId id)

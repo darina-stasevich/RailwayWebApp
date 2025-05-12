@@ -49,6 +49,16 @@ public class TicketBookingServiceSeatLockNotFoundException(Guid id) :
     public Guid SeatLockId { get; } = id;
 }
 
+public class TicketBookingServiceTrainDepartedException(Guid routeId, int carriage, int seat) :
+    TicketBookingServiceException($"Train already departed. Seat {seat} in carriage {carriage} is locked for booking in route {routeId}")
+{
+    public Guid RouteId { get; } = routeId;
+    public int Carriage { get; } = carriage;
+    public int Seat { get; } = seat;
+
+}
+
+
 public class CarriageTemplateException(string message) : Exception(message);
 
 public class CarriageTemplatesNotFoundException(Guid routeId)

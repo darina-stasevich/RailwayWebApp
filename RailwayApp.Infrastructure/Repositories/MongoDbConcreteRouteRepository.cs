@@ -9,4 +9,8 @@ namespace RailwayApp.Infrastructure.Repositories;
 public class MongoDbConcreteRouteRepository(IMongoClient client, IOptions<MongoDbSettings> settings)
     : MongoDbGenericRepository<ConcreteRoute, Guid>(client, settings, "ConcreteRoutes"), IConcreteRouteRepository
 {
+    public async Task<IEnumerable<ConcreteRoute>> GetConcreteRoutesInDate(DateTime startDate, DateTime endDate)
+    {
+        return await _collection.Find(r => r.RouteDepartureDate >= startDate && r.RouteDepartureDate < endDate).ToListAsync();
+    }
 }

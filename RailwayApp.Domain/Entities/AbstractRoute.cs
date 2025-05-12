@@ -13,13 +13,12 @@ public class AbstractRoute : IEntity<Guid>
     [BsonId]
     public Guid Id { get; set; } = Guid.NewGuid();
     public string TrainNumber { get; set; } // connect with Train
-
-    public string ActiveDays { get; set; }
-    //public List<DayOfWeek> ActiveDays { get; set; } = new();
+    public List<DayOfWeek> ActiveDays { get; set; } = new();
     public TimeSpan DepartureTime { get; set; }
     public decimal TransferCost { get; set; }
     public bool HasBeddingOption { get; set; }
-    
+
+    public bool IsActive { get; set; } = true;
     // connection through AbstractRouteSegment.RouteId
     //public List<AbstractRouteSegment> Segments { get; set; } = new();
 }

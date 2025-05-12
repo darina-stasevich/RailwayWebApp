@@ -79,6 +79,12 @@ public class ExceptionHandlingMiddleware(
                 logger.LogWarning(ex, "TicketBookingServiceSeatLockNotFoundException: SeatLock ID: {SeatLockId}",
                     ex.SeatLockId);
                 break;
+            case TicketBookingServiceTrainDepartedException ex:
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                problemDetails.Status = StatusCodes.Status400BadRequest;
+                problemDetails.Title = "Поезд отправился";
+                logger.LogWarning(ex, "TicketBookingServiceTrainDepartedException: Route ID: {routeId}. Carriage: {carriage}, Seat: {seat}", ex.RouteId, ex.Carriage, ex.Seat);
+                break;
 
             case CarriageTemplatesNotFoundException ex:
                 context.Response.StatusCode = StatusCodes.Status404NotFound;

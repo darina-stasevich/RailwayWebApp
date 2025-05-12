@@ -111,7 +111,8 @@ public class RouteSearchServiceTest
             {
                 Id = Guid.NewGuid(),
                 TrainNumber = "TR1",
-                ActiveDays = "MTWHFSN",
+                ActiveDays = new List<DayOfWeek>{DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday},
+                    
                 TransferCost = 20,
                 HasBeddingOption = false,
                 DepartureTime = TimeSpan.FromHours(15)
@@ -120,7 +121,8 @@ public class RouteSearchServiceTest
             {
                 Id = Guid.NewGuid(),
                 TrainNumber = "TR2",
-                ActiveDays = "MTWHFSN",
+                ActiveDays = new List<DayOfWeek>{DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday},
+                    
                 TransferCost = 15,
                 HasBeddingOption = true,
                 DepartureTime = TimeSpan.FromHours(9)
@@ -129,7 +131,8 @@ public class RouteSearchServiceTest
             {
                 Id = Guid.NewGuid(),
                 TrainNumber = "TR1",
-                ActiveDays = "MTWHFSN",
+                ActiveDays = new List<DayOfWeek>{DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday},
+                    
                 TransferCost = 18,
                 HasBeddingOption = false,
                 DepartureTime = TimeSpan.FromHours(8).Add(TimeSpan.FromMinutes(22))
@@ -138,7 +141,8 @@ public class RouteSearchServiceTest
             {
                 Id = Guid.NewGuid(),
                 TrainNumber = "TR2",
-                ActiveDays = "MTWHFSN",
+                ActiveDays = new List<DayOfWeek>{DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday},
+                    
                 TransferCost = 20,
                 HasBeddingOption = true,
                 DepartureTime = TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(05))
@@ -147,7 +151,8 @@ public class RouteSearchServiceTest
             {
                 Id = Guid.NewGuid(),
                 TrainNumber = "TR3",
-                ActiveDays = "MTWHFSN",
+                ActiveDays = new List<DayOfWeek>{DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday},
+                    
                 TransferCost = 18,
                 HasBeddingOption = true,
                 DepartureTime = TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(22))
@@ -156,7 +161,8 @@ public class RouteSearchServiceTest
             {
                 Id = Guid.NewGuid(),
                 TrainNumber = "TR3",
-                ActiveDays = "MTWHFSN",
+                ActiveDays = new List<DayOfWeek>{DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday},
+                    
                 TransferCost = 20,
                 HasBeddingOption = true,
                 DepartureTime =TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(22))
