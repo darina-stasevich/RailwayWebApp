@@ -11,7 +11,7 @@ namespace RailwayApp.Web.Controllers;
 [Authorize(Roles = "Client")]
 public class TicketsController(ILogger<TicketsController> logger, ITicketService ticketService) : ControllerBase
 {
-    [HttpPost("active")]
+    [HttpGet("active")]
     public async Task<ActionResult<IEnumerable<Ticket>>> GetActiveTickets()
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -23,7 +23,7 @@ public class TicketsController(ILogger<TicketsController> logger, ITicketService
         return tickets.ToList();
     }
 
-    [HttpPost("cancelled")]
+    [HttpGet("cancelled")]
     public async Task<ActionResult<IEnumerable<Ticket>>> GetCancelledTickets()
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -35,7 +35,7 @@ public class TicketsController(ILogger<TicketsController> logger, ITicketService
         return tickets.ToList();
     }
 
-    [HttpPost("expired")]
+    [HttpGet("expired")]
     public async Task<ActionResult<IEnumerable<Ticket>>> GetExpiredTickets()
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);

@@ -54,4 +54,16 @@ public class BooksController(
         logger.LogInformation("cancel of lock {seatLockId} successful", seatLockId);
         return result;
     }
+
+    [HttpGet("view")]
+    public async Task<ActionResult<List<SeatLockResponse>>> GetSeatLocks()
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdString, out var userAccountId))
+            return Unauthorized("User ID claim is missing or invalid");
+        logger.LogInformation("Try to get seatlocks for user {userAccountID}", userAccountId);
+        var result = await ticketBookingService.GetBooks(userAccountId);
+        logger.LogInformation("getting seatlocks for {userAccountId} succeded", userAccountId);
+        return result.ToList();
+    }
 }

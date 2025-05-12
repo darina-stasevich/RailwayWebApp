@@ -21,6 +21,11 @@ public class MongoDbSeatLockRepository(IMongoClient client, IOptions<MongoDbSett
             return await _collection.Find(session, filter).ToListAsync();
     }
 
+    public async Task<IEnumerable<SeatLock>> GetByUserAccountIdAsync(Guid userAccountId)
+    {
+        return await _collection.Find(x => x.UserAccountId == userAccountId).ToListAsync();
+    }
+
     public async Task<bool> UpdateStatusAsync(Guid seatLockId, SeatLockStatus status, IClientSessionHandle? session = null)
     {
         var filter = Builders<SeatLock>.Filter.Eq(u => u.Id, seatLockId);

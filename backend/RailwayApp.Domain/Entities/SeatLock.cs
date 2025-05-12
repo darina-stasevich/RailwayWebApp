@@ -21,7 +21,4 @@ public class SeatLock : IEntity<Guid>
     
     [BsonRepresentation(BsonType.String)]
     public SeatLockStatus Status { get; set; }
-    
-    [BsonIgnoreIfNull]
-    public Guid? AssociatedBookingId { get; set; }
 }

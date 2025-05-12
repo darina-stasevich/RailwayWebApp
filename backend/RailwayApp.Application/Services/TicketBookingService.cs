@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 using RailwayApp.Application.Models;
 using RailwayApp.Application.Models.Dto;
 using RailwayApp.Domain;
@@ -14,6 +15,8 @@ public class TicketBookingService(IMongoClient mongoClient,
     ICarriageSeatService carriageSeatService,
     IUserAccountRepository userAccountRepository,
     ISeatLockRepository seatLockRepository,
+    IStationRepository stationRepository,
+    IStationService stationService,
     ICarriageTemplateService carriageTemplateService,
     IPriceCalculationService priceCalculationService,
     IScheduleService scheduleService) : ITicketBookingService
@@ -168,5 +171,68 @@ public class TicketBookingService(IMongoClient mongoClient,
                 await session.AbortTransactionAsync();
             throw;
         }
+    }
+
+    /*private async Task<List<LockedSeatInfoResponse>> MapLockedSeatInfoResponses(
+        IEnumerable<LockedSeatInfo> lockedSeatInfos)
+    {
+        var response = new List<LockedSeatInfoResponse>();
+        
+        
+        foreach (var seatInfo in lockedSeatInfos)
+        {
+            var stations = stationService.GetStationByRouteId(seatInfo.ConcreteRouteId);
+
+            response.Add(new LockedSeatInfoResponse
+            {
+                DepartureDate = seatInfo.DepartureDateUtc,
+                ArrivalDate = seatInfo.ArrivalDateUtc,
+                Carriage = seatInfo.Carriage,
+                SeatNumber = seatInfo.SeatNumber,
+                ConcreteRouteId = seatInfo.ConcreteRouteId,
+                FromStation = ,
+                ToStation = ,
+                HasBedLinenSet = seatInfo.HasBedLinenSet,
+                PassengerData = seatInfo.PassengerData,
+                Price = seatInfo.Price
+            });
+        }
+
+        return response;
+    }
+    
+    private async Task<SeatLockResponse> MapSeatLockResponse(SeatLock seatLock)
+    {
+        return new SeatLockResponse
+        {
+            ExpirationTimeUtc = seatLock.ExpirationTimeUtc,
+            LockedSeatInfos = await MapLockedSeatInfoResponses(seatLock.LockedSeatInfos)
+        };
+    }
+    */
+    
+    public async Task<IEnumerable<SeatLockResponse>> GetBooks(Guid userAccountId)
+    {
+        throw new NotImplementedException();
+/*        var userAccount = await userAccountRepository.GetByIdAsync(userAccountId);
+        if (userAccount == null)
+        {
+            throw new UserAccountUserNotFoundException(userAccountId);
+        }
+
+        if (userAccount.Status == UserAccountStatus.Blocked)
+        {
+            throw new UserAccountUserBlockedException(userAccountId);
+        }
+
+        var seatLocks = await seatLockRepository.GetByUserAccountIdAsync(userAccountId);
+        var activeSeatLocks = seatLocks.Where(s => s.Status == SeatLockStatus.Active);
+        var response = new List<SeatLockResponse>();
+        foreach (var seatLock in activeSeatLocks)
+        {
+            response.Add(await MapSeatLockResponse(seatLock));
+        }
+
+        return response;*/
     }
 }
