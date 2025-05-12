@@ -1,0 +1,32 @@
+# ========= Общие правила =========
+.DS_Store
+*.log
+*.local
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Логи
+logs/
+**/logs/
+
+# IDE/Editor
+.idea/
+.vscode/
+!.vscode/extensions.json  # Разрешаем только extensions.json
+riderModule.iml
+_ReSharper.Caches/
+
+
+# ========= Backend (ASP.NET) =========
+backend/bin/
+backend/obj/
+backend/packages/
+
+
+# ========= Frontend (React/Vite) =========
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
