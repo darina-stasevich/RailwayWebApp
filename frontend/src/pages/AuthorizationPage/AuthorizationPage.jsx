@@ -1,3 +1,5 @@
+import styles from './AuthorizationPage.module.css';
+import RegistrationFields from "./RegistrationFields.jsx";
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -133,94 +135,36 @@ const AuthorizationPage = () => {
     };
 
     return (
-        <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
-            <h2>{isLoginMode ? 'Вход' : 'Регистрация'}</h2>
+        <div className={styles.container}>
+            <h2 className={styles.title}>{isLoginMode ? 'Вход' : 'Регистрация'}</h2>
             <form onSubmit={isLoginMode ? handleLoginSubmit : handleRegisterSubmit}>
-                <div>
+                <div className={styles.inputGroup}>
                     <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="Email"
                         required
-                        style={{ width: '95%', padding: '10px', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
+                        className={styles.inputField}
                     />
                 </div>
                 {!isLoginMode && (
-                    <>
-                        <div>
-                            <input
-                                type="text"
-                                value={surname}
-                                onChange={(e) => setSurname(e.target.value)}
-                                placeholder="Фамилия"
-                                required
-                                minLength="2"
-                                maxLength="40"
-                                style={{ width: '95%', padding: '10px', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
-                            />
-                        </div>
-                        <div>
-                            <input
-                                type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                placeholder="Имя"
-                                required
-                                minLength="2"
-                                maxLength="40"
-                                style={{ width: '95%', padding: '10px', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
-                            />
-                        </div>
-                        <div>
-                            <input
-                                type="text"
-                                value={secondName}
-                                onChange={(e) => setSecondName(e.target.value)}
-                                placeholder="Отчество (необязательно)"
-                                minLength="2"
-                                maxLength="40"
-                                style={{ width: '95%', padding: '10px', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
-                            />
-                        </div>
-                        <div>
-                            <input
-                                type="tel"
-                                value={phoneNumber}
-                                onChange={(e) => setPhoneNumber(e.target.value)}
-                                placeholder="Номер телефона (+375XXYYYYYYY)"
-                                pattern="^\+375\s?\(?\d{2}\)?\s?\d{7}$"
-                                title="Формат: +375(XX)XXXXXXX или +375 XX XXXXXXX"
-                                style={{ width: '95%', padding: '10px', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="birthDate" style={{ display: 'block', marginBottom: '5px' }}>Дата рождения:</label>
-                            <input
-                                type="date"
-                                id="birthDate"
-                                value={birthDate}
-                                onChange={(e) => setBirthDate(e.target.value)}
-                                required
-                                style={{ width: '95%', padding: '10px', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="gender" style={{ display: 'block', marginBottom: '5px' }}>Пол (необязательно):</label>
-                            <select
-                                id="gender"
-                                value={gender}
-                                onChange={(e) => setGender(e.target.value)}
-                                style={{ width: '100%', padding: '10px', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
-                            >
-                                <option value="">Не выбрано</option>
-                                <option value="0">Мужской</option> {}
-                                <option value="1">Женский</option> {}
-                            </select>
-                        </div>
-                    </>
+                    <RegistrationFields
+                            surname={surname}
+                            onSurnameChange={(e) => setSurname(e.target.value)}
+                            name={name}
+                            onNameChange={(e) => setName(e.target.value)}
+                            secondName={secondName}
+                            onSecondNameChange={(e) => setSecondName(e.target.value)}
+                            phoneNumber={phoneNumber}
+                            onPhoneNumberChange={(e) => setPhoneNumber(e.target.value)}
+                            birthDate={birthDate}
+                            onBirthDateChange={(e) => setBirthDate(e.target.value)}
+                            gender={gender}
+                            onGenderChange={(e) => setGender(e.target.value)}
+                    />
                 )}
-                <div>
+                <div className={styles.inputGroup}>
                     <input
                         type="password"
                         value={password}
@@ -229,21 +173,21 @@ const AuthorizationPage = () => {
                         required
                         minLength={isLoginMode ? undefined : "4"}
                         maxLength={isLoginMode ? undefined : "30"}
-                        style={{ width: '95%', padding: '10px', marginBottom: '20px', border: '1px solid #ddd', borderRadius: '4px' }}
+                        className={styles.inputField}
                     />
                 </div>
                 <button
                     type="submit"
-                    style={{ width: '100%', padding: '10px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                    className={`${styles.submitButton} ${styles.button}`}
                 >
                     {isLoginMode ? 'Войти' : 'Зарегистрироваться'}
                 </button>
-                {error && <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
-                {successMessage && <p style={{ color: 'green', marginTop: '10px' }}>{successMessage}</p>}
+                {error && <p className={styles.errorMessage}>{error}</p>}
+                {successMessage && <p className={styles.successMessage}>{successMessage}</p>}
             </form>
             <button
                 onClick={handleModeChange}
-                style={{ width: '100%', padding: '10px', marginTop: '10px', backgroundColor: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                className={`${styles.toggleButton} ${styles.button}`}
             >
                 {isLoginMode ? 'Нет аккаунта? Зарегистрироваться' : 'Уже есть аккаунт? Войти'}
             </button>

@@ -1,8 +1,8 @@
 // App.jsx
 import {BrowserRouter, Routes, Route, Navigate} from "react-router-dom";
-import AuthorizationPage from "./pages/AuthorizationPage.jsx";
+import AuthorizationPage from "./pages/AuthorizationPage/AuthorizationPage.jsx";
 import ProtectedRoute from "./routes/ProtectedRoute";
-import FindRoutePage from "./pages/FindRoutePage.jsx";
+import FindRoutePage from "./pages/FindRoutePage/FindRoutePage.jsx";
 import AdminPanel from "./pages/AdminPanel.jsx";
 
 function App() {
