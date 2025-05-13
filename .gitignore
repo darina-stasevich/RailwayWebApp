@@ -21,6 +21,8 @@ _ReSharper.Caches/
 backend/**/bin/
 backend/**/obj/
 backend/packages/
+backend/**/appsettings.json
+
 
 # Frontend (React/Vite)
 frontend/node_modules/
