@@ -12,9 +12,6 @@ namespace RailwayApp.Web.Controllers;
 public class RoutesController(IRouteSearchService routeSearchService, ILogger<RoutesController> logger) : ControllerBase
 {
     [HttpPost("search")]
-    [ProducesResponseType(typeof(List<ComplexRouteDto>), 200)]
-    [ProducesResponseType(typeof(ValidationProblemDetails), 400)] // Уточненный тип для ошибок валидации модели
-    [ProducesResponseType(500)]
     public async Task<ActionResult<List<ComplexRouteDto>>> SearchRoutes([FromBody] RouteSearchRequest searchRequest)
     {
         var requestJson = JsonSerializer.Serialize(searchRequest);

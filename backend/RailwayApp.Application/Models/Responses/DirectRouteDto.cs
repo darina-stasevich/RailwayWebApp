@@ -5,6 +5,8 @@ public class DirectRouteDto
     public Guid ConcreteRouteId { get; set; }
     public int StartSegmentNumber { get; set; }
     public int EndSegmentNumber { get; set; }
+    public Guid FromStationId { get; set; }
+    public Guid ToStationId { get; set; }
     public DateTime DepartureDate { get; set; }
     public DateTime ArrivalDate { get; set; }
     public TimeSpan TimeInTransit { get; set; }

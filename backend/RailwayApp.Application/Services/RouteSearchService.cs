@@ -42,9 +42,6 @@ public class RouteSearchService(IStationRepository stationRepository,
 
     private async Task<IEnumerable<ComplexRouteDto>> GetDirectRoutes(Station fromStation, Station toStation, DateTime departureDate)
     {
-        // 1. Find concrete route segments that start in fromStation
-        var allStartConcreteRouteSegments =
-            await concreteRouteSegmentRepository.GetConcreteSegmentsByFromStationAsync(fromStation.Id);
         
         TimeZoneInfo localTimeZone;
         try
@@ -55,7 +52,7 @@ public class RouteSearchService(IStationRepository stationRepository,
         {
             localTimeZone = TimeZoneInfo.CreateCustomTimeZone("CustomLocalTimeZone_UTC+3", TimeSpan.FromHours(3), "Local Time (UTC+3)", "Local Time (UTC+3)");
         }
-        Debug.WriteLine(departureDate);
+        
         DateTime departureDateAsUtc = departureDate.ToUniversalTime();
 
         // local time of request
@@ -66,7 +63,11 @@ public class RouteSearchService(IStationRepository stationRepository,
         DateTime startOfRequestedDayUtc = TimeZoneInfo.ConvertTimeToUtc(startOfLocalDayInLocalZone, localTimeZone);
         // local end of the day
         DateTime endOfRequestedDayUtc = startOfRequestedDayUtc.AddDays(1);
+        DateTime endOfSegmentsRequestedDayUtc = startOfRequestedDayUtc.AddDays(3);
 
+        // 1. Get concrete route segments that departure from fromStation
+        var allStartConcreteRouteSegments =
+            await concreteRouteSegmentRepository.GetConcreteSegmentsByFromStationAsync(fromStation.Id);
         // 2. Get concrete route segments that departure in given day after current time
         var startConcreteRouteSegments = allStartConcreteRouteSegments.Where(segment =>
             {
@@ -77,6 +78,7 @@ public class RouteSearchService(IStationRepository stationRepository,
                 return isOnRequestedDate && isAfterCurrentTime;
             })
             .ToList();
+
         
         // 3. Get concrete route id
         var startConcreteRouteIds = new HashSet<Guid>(
@@ -124,6 +126,8 @@ public class RouteSearchService(IStationRepository stationRepository,
                     ConcreteRouteId = routeId,
                     StartSegmentNumber = startNumber,
                     EndSegmentNumber = endNumber,
+                    FromStationId = fromStation.Id,
+                    ToStationId = toStation.Id,
                     DepartureDate = startSegment.ConcreteDepartureDate,
                     ArrivalDate = endSegment.ConcreteArrivalDate,
                     TimeInTransit = endSegment.ConcreteArrivalDate - startSegment.ConcreteDepartureDate,
@@ -172,7 +176,7 @@ public class RouteSearchService(IStationRepository stationRepository,
 
     private ComplexRouteDto CreateComplexRouteDto(IEnumerable<DirectRouteDto> directRoutes)
     {
-        var directRouteDtos = directRoutes.ToList();
+        var directRouteDtos = directRoutes.OrderBy(r => r.DepartureDate).ToList();
         var complexRoute = new ComplexRouteDto
         {
             DirectRoutes = directRouteDtos,
@@ -212,6 +216,8 @@ public class RouteSearchService(IStationRepository stationRepository,
             ConcreteRouteId = segmentsList[0].ConcreteRouteId,
             StartSegmentNumber = startAbstractSegment.SegmentNumber,
             EndSegmentNumber = endAbstractSegment.SegmentNumber,
+            FromStationId = startAbstractSegment.FromStationId,
+            ToStationId = endAbstractSegment.ToStationId,
             MaximumCost = costRange.MaximumPrice,
             MinimalCost = costRange.MinimalPrice,
             AvailableSeats = availableSeats,
@@ -451,4 +457,4 @@ struct StationInfoNode(DateTime arrivalDateTime, ConcreteRouteSegment concreteSe
     
     public Guid PreviousStationId = previousStationId;
     public int AmountOfTransfers = amountOfTransfers;
-}
+}   
