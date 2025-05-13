@@ -1,6 +1,6 @@
 // App.jsx
 import {BrowserRouter, Routes, Route, Navigate} from "react-router-dom";
-import Login from "./components/Login/Login.jsx";
+import AuthorizationPage from "./pages/AuthorizationPage.jsx";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import FindRoutePage from "./pages/FindRoutePage.jsx";
 import AdminPanel from "./pages/AdminPanel.jsx";
@@ -13,7 +13,7 @@ function App() {
                 <Route path="/" element={<Navigate to="/login" replace />} />
 
                 {/* Страница входа */}
-                <Route path="/login" element={<Login />} />
+                <Route path="/login" element={<AuthorizationPage />} />
 
                 {/* Защищенные маршруты */}
                 <Route element={<ProtectedRoute allowedRoles={['Client']} />}>
@@ -25,7 +25,7 @@ function App() {
                 </Route>
 
                 {/* Обработка несуществующих путей */}
-                <Route path="*" element={<div>404 Not Found</div>} />
+                <Route path="*" ele ment={<div>404 Not Found</div>} />
             </Routes>
         </BrowserRouter>
     );
