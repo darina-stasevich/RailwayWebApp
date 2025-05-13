@@ -122,7 +122,7 @@ const FindRoutePage = () => {
         if (!timespanString) return 'N/A';
         const parts = timespanString.split(':');
         let formatted = '';
-        if (parts.length >= 3) { // HH:MM:SS
+        if (parts.length >= 3) {
             const hours = parseInt(parts[0].slice(-2), 10);
             const minutes = parseInt(parts[1], 10);
             if (hours > 0) formatted += `${hours} ч `;
@@ -147,6 +147,14 @@ const FindRoutePage = () => {
         }
     };
 
+    const getStationNameById = (stationId) => {
+        if (!stationId || !stations || stations.length === 0) return 'Неизвестная станция';
+        const station = stations.find(s => s.id === stationId);
+        if (station) {
+            return `${station.name}`;
+        }
+        return `Станция (ID: ...${stationId.slice(-6)})`;
+    };
 
     return (
         <div className={styles.findRoutePage}>
@@ -231,6 +239,8 @@ const FindRoutePage = () => {
                             <h4>Участки маршрута:</h4>
                             {complexRoute.directRoutes.map((directRoute, drIndex) => (
                                 <div key={directRoute.concreteRouteId || drIndex} className={styles.directRouteCard}>
+                                    <p>Откуда: {getStationNameById(directRoute.fromStationId)}</p>
+                                    <p>Куда: {getStationNameById(directRoute.toStationId)}</p>
                                     <p>Отправление: {formatDateTime(directRoute.departureDate)}</p>
                                     <p>Прибытие: {formatDateTime(directRoute.arrivalDate)}</p>
                                     <p>Время в пути: {formatDuration(directRoute.timeInTransit)}</p>
