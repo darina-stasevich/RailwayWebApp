@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import ComplexRouteCard from "./Cards/ComplexRouteCard.jsx";
 import SearchForm from "./Cards/SearchForm.jsx";
 import ScheduleModal from "./Schedule/ScheduleModal.jsx";
+import {formatDateTime, formatDuration} from "../../utils/formatters.js";
 
 const FindRoutePage = () => {
     // for route search: fromStation, toStation, departureDate, isDirectRoute
@@ -171,37 +172,6 @@ const FindRoutePage = () => {
             setScheduleError(err.message);
         } finally {
             setIsLoadingSchedule(false);
-        }
-    };
-
-    // beautiful timeSpan
-    const formatDuration = (timespanString) => {
-        if (!timespanString) return 'N/A';
-        const parts = timespanString.split(':');
-        let formatted = '';
-        if (parts.length >= 3) {
-            const hours = parseInt(parts[0].slice(-2), 10);
-            const minutes = parseInt(parts[1], 10);
-            if (hours > 0) formatted += `${hours} ч `;
-            if (minutes > 0) formatted += `${minutes} мин`;
-            if (!formatted) formatted = "Менее минуты";
-        } else {
-            return timespanString;
-        }
-        return formatted;
-    };
-
-    // beautiful dateTime
-    const formatDateTime = (dateTimeString) => {
-        if (!dateTimeString) return 'N/A';
-        try {
-            const date = new Date(dateTimeString);
-            return date.toLocaleString('ru-RU', {
-                year: 'numeric', month: 'long', day: 'numeric',
-                hour: '2-digit', minute: '2-digit'
-            });
-        } catch (e) {
-            return dateTimeString;
         }
     };
 

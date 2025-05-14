@@ -7,7 +7,26 @@ const ComplexRouteCard = ({ routeIndex, complexRoute, formatDuration, formatDate
     const navigate = useNavigate();
 
     const handleBookTicketsClick = () => {
-        navigate('/tickets-booking', { state: { selectedComplexRoute: complexRoute } });
+
+        let fromStationName = 'Неизвестно';
+        let toStationName = 'Неизвестно';
+
+        if (complexRoute && complexRoute.directRoutes && complexRoute.directRoutes.length > 0) {
+            const firstSegment = complexRoute.directRoutes[0];
+            if (firstSegment && firstSegment.fromStationId) {
+                fromStationName = getStationNameById(firstSegment.fromStationId);
+            }
+
+            const lastSegment = complexRoute.directRoutes[complexRoute.directRoutes.length - 1];
+            if (lastSegment && lastSegment.toStationId) {
+                toStationName = getStationNameById(lastSegment.toStationId);
+            }
+        }
+
+        navigate('/tickets-booking', { state: {
+            selectedComplexRoute: complexRoute,
+            fromStation: fromStationName,
+            toStation: toStationName} });
     };
 
     return (
@@ -15,9 +34,9 @@ const ComplexRouteCard = ({ routeIndex, complexRoute, formatDuration, formatDate
             <div className={styles.complexRouteHeader}>
                 <h3 className={styles.complexRouteTitle}>Маршрут {routeIndex + 1}</h3>
                 <button
-                    onClick={handleBookTicketsClick} // Используем правильный обработчик
+                    onClick={handleBookTicketsClick}
                     type="button"
-                    className={styles.bookTicketsButton} // Добавляем класс для стилизации
+                    className={styles.bookTicketsButton}
                 >
                     Заказать билеты
                 </button>
