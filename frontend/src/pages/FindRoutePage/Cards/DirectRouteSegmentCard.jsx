@@ -1,4 +1,4 @@
-import styles from './FindRoutePage.module.css'
+import styles from './DirectRouteSegmentCard.module.css'
 const DirectRouteSegmentCard = ({ directRoute, formatDuration, formatDateTime, getStationNameById, onShowSchedule}) => {
     return (
         <div className={styles.directRouteCard}>

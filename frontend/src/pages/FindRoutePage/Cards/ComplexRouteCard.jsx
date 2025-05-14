@@ -1,11 +1,27 @@
-import styles from './FindRoutePage.module.css'
+import styles from './ComplexRouteCard.module.css'
 import DirectRouteSegmentCard from './DirectRouteSegmentCard.jsx'
 import React from "react";
+import { useNavigate } from 'react-router-dom';
 
 const ComplexRouteCard = ({ routeIndex, complexRoute, formatDuration, formatDateTime, getStationNameById, onShowSchedule}) => {
+    const navigate = useNavigate();
+
+    const handleBookTicketsClick = () => {
+        navigate('/tickets-booking', { state: { selectedComplexRoute: complexRoute } });
+    };
+
     return (
         <div key={routeIndex + 1} className={styles.complexRouteCard}>
-            <h3>Маршрут {routeIndex + 1}</h3>
+            <div className={styles.complexRouteHeader}>
+                <h3 className={styles.complexRouteTitle}>Маршрут {routeIndex + 1}</h3>
+                <button
+                    onClick={handleBookTicketsClick} // Используем правильный обработчик
+                    type="button"
+                    className={styles.bookTicketsButton} // Добавляем класс для стилизации
+                >
+                    Заказать билеты
+                </button>
+            </div>
             <p><strong>Время в пути:</strong> {formatDuration(complexRoute.totalDuration)}</p>
             <p><strong>Отправление:</strong> {formatDateTime(complexRoute.departureDate)}</p>
             <p><strong>Прибытие:</strong> {formatDateTime(complexRoute.arrivalDate)}</p>
@@ -22,6 +38,7 @@ const ComplexRouteCard = ({ routeIndex, complexRoute, formatDuration, formatDate
                     onShowSchedule={onShowSchedule}>
                 </DirectRouteSegmentCard>
             ))}
+
         </div>
         );
 };

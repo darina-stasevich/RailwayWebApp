@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import styles from './FindRoutePage.module.css';
 import { useNavigate } from 'react-router-dom';
-import ComplexRouteCard from "./ComplexRouteCard.jsx";
-import SearchForm from "./SearchForm.jsx";
+import ComplexRouteCard from "./Cards/ComplexRouteCard.jsx";
+import SearchForm from "./Cards/SearchForm.jsx";
 import ScheduleModal from "./Schedule/ScheduleModal.jsx";
 
 const FindRoutePage = () => {

@@ -1,4 +1,4 @@
-import styles from "./FindRoutePage.module.css";
+import styles from "./SearchForm.module.css";
 import React from "react";
 
 const SearchForm = ({stations,

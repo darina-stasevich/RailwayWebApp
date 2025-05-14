@@ -3,7 +3,8 @@ import {BrowserRouter, Routes, Route, Navigate} from "react-router-dom";
 import AuthorizationPage from "./pages/AuthorizationPage/AuthorizationPage.jsx";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import FindRoutePage from "./pages/FindRoutePage/FindRoutePage.jsx";
-import AdminPanel from "./pages/AdminPanel.jsx";
+import AdminPanel from "./pages/AdminPanel/AdminPanel.jsx";
+import TicketBookingPage from "./pages/TicketBookingPage/TicketBookingPage.jsx";
 
 function App() {
     return (
@@ -18,6 +19,10 @@ function App() {
                 {/* Защищенные маршруты */}
                 <Route element={<ProtectedRoute allowedRoles={['Client']} />}>
                     <Route path="/find-route" element={<FindRoutePage />} />
+                </Route>
+
+                <Route element={<ProtectedRoute allowedRoles={['Client']} />}>
+                    <Route path="/tickets-booking" element={<TicketBookingPage />} />
                 </Route>
 
                 <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>
