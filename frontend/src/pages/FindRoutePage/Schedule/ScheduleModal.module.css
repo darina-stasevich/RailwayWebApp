@@ -1,0 +1,86 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 600px;
+    position: relative;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.closeButton {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: #555;
+}
+
+.closeButton:hover {
+    color: #000;
+}
+
+.errorMessage {
+    color: #dc3545;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+.segmentCard {
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+.segmentCard p {
+    margin: 5px 0;
+    font-size: 0.95rem;
+}
+
+.segmentHeader {
+    margin: 0 0 8px 0;
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+.segmentTimesGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 10px;
+    align-items: baseline;
+}
+
+.timeLabel {
+    font-weight: bold;
+    font-size: 0.85em;
+    color: #111;
+    padding-bottom: 2px;
+}
+
+.timeValue {
+    font-size: 0.95rem;
+    color: #111;
+}

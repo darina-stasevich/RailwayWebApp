@@ -12,7 +12,7 @@ const SearchForm = ({stations,
         <form onSubmit={onSubmit} className={styles.searchForm}>
             <div className={styles.formRow}>
                 <div className={styles.formGroup}>
-                    <label htmlFor="fromStation">станция отправления:</label>
+                    <label htmlFor="fromStation">Станция отправления:</label>
                     <select id="fromStation"
                             value={fromStationId}
                             onChange={(e) => onFromStationChange(e.target.value)}

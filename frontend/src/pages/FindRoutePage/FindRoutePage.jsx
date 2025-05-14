@@ -3,8 +3,10 @@ import styles from './FindRoutePage.module.css';
 import { useNavigate } from 'react-router-dom';
 import ComplexRouteCard from "./ComplexRouteCard.jsx";
 import SearchForm from "./SearchForm.jsx";
+import ScheduleModal from "./Schedule/ScheduleModal.jsx";
 
 const FindRoutePage = () => {
+    // for route search: fromStation, toStation, departureDate, isDirectRoute
     const [stations, setStations] = useState([]);
     const [fromStationId, setFromStationId] = useState('');
     const [toStationId, setToStationId] = useState('');
@@ -12,12 +14,21 @@ const FindRoutePage = () => {
         const today = new Date();
         return today.toISOString().split('T')[0];
     });
+
+    // for searching
     const [isDirectRoute, setIsDirectRoute] = useState(true);
     const [searchResults, setSearchResults] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
+    // for route schedule
+    const [scheduleData, setScheduleData] = useState(null);
+    const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+    const [isLoadingSchedule, setIsLoadingSchedule] = useState(false);
+    const [scheduleError, setScheduleError] = useState('');
+
+    // for stations fetching
     useEffect(() => {
         const fetchStations = async () => {
             setIsLoading(true);
@@ -54,6 +65,7 @@ const FindRoutePage = () => {
         fetchStations();
     }, []);
 
+    // for route search
     const handleSearch = async (e) => {
         e.preventDefault();
         setError('');
@@ -120,6 +132,49 @@ const FindRoutePage = () => {
             setIsLoading(false);
         }
     };
+
+    // show schedule for route
+    const handleShowSchedule = async (concreteRouteId) => {
+        setScheduleData(null);
+        setScheduleError('');
+        setIsLoadingSchedule(true);
+        setIsScheduleModalOpen(true);
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setScheduleError('Ошибка: Пользователь не авторизован для просмотра расписания.');
+            setIsLoadingSchedule(false);
+            setIsScheduleModalOpen(false);
+            navigate("/login");
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:5241/api/Schedules/${concreteRouteId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    throw new Error('Ошибка авторизации при загрузке расписания.');
+                }
+                const errorData = await response.json().catch(() => ({ message: `Ошибка загрузки расписания: ${response.statusText}` }));
+                throw new Error(errorData.message || errorData.title || `Ошибка ${response.status}`);
+            }
+            const data = await response.json();
+            setScheduleData(data);
+        } catch (err) {
+            console.error("Ошибка при загрузке расписания:", err);
+            setScheduleError(err.message);
+        } finally {
+            setIsLoadingSchedule(false);
+        }
+    };
+
+    // beautiful timeSpan
     const formatDuration = (timespanString) => {
         if (!timespanString) return 'N/A';
         const parts = timespanString.split(':');
@@ -136,6 +191,7 @@ const FindRoutePage = () => {
         return formatted;
     };
 
+    // beautiful dateTime
     const formatDateTime = (dateTimeString) => {
         if (!dateTimeString) return 'N/A';
         try {
@@ -149,6 +205,7 @@ const FindRoutePage = () => {
         }
     };
 
+    // get station name by id
     const getStationNameById = (stationId) => {
         if (!stationId || !stations || stations.length === 0) return 'Неизвестная станция';
         const station = stations.find(s => s.id === stationId);
@@ -187,11 +244,21 @@ const FindRoutePage = () => {
                             complexRoute={complexRoute}
                             formatDuration={formatDuration}
                             formatDateTime={formatDateTime}
-                            getStationNameById={getStationNameById}>
+                            getStationNameById={getStationNameById}
+                            onShowSchedule={handleShowSchedule}>
                         </ComplexRouteCard>
                     ))}
                 </div>
             )}
+
+            <ScheduleModal
+                isOpen={isScheduleModalOpen}
+                onClose={() => setIsScheduleModalOpen(false)}
+                scheduleData={scheduleData}
+                isLoading={isLoadingSchedule}
+                error={scheduleError}
+                formatDateTime={formatDateTime}>
+            </ScheduleModal>
         </div>
     );
 };

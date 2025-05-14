@@ -2,7 +2,7 @@ import styles from './FindRoutePage.module.css'
 import DirectRouteSegmentCard from './DirectRouteSegmentCard.jsx'
 import React from "react";
 
-const ComplexRouteCard = ({ routeIndex, complexRoute, formatDuration, formatDateTime, getStationNameById}) => {
+const ComplexRouteCard = ({ routeIndex, complexRoute, formatDuration, formatDateTime, getStationNameById, onShowSchedule}) => {
     return (
         <div key={routeIndex + 1} className={styles.complexRouteCard}>
             <h3>Маршрут {routeIndex + 1}</h3>
@@ -18,7 +18,8 @@ const ComplexRouteCard = ({ routeIndex, complexRoute, formatDuration, formatDate
                     directRoute={directRoute}
                     formatDuration={formatDuration}
                     formatDateTime={formatDateTime}
-                    getStationNameById={getStationNameById}>
+                    getStationNameById={getStationNameById}
+                    onShowSchedule={onShowSchedule}>
                 </DirectRouteSegmentCard>
             ))}
         </div>
