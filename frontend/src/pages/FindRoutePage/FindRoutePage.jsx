@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import styles from './FindRoutePage.module.css';
 import { useNavigate } from 'react-router-dom';
+import ComplexRouteCard from "./ComplexRouteCard.jsx";
+import SearchForm from "./SearchForm.jsx";
 
 const FindRoutePage = () => {
     const [stations, setStations] = useState([]);
@@ -55,7 +57,7 @@ const FindRoutePage = () => {
     const handleSearch = async (e) => {
         e.preventDefault();
         setError('');
-        setSearchResults([]); // Очищаем предыдущие результаты
+        setSearchResults([]);
 
         if (!fromStationId || !toStationId || !departureDate) {
             setError('Пожалуйста, выберите станцию отправления, прибытия и дату.');
@@ -159,69 +161,19 @@ const FindRoutePage = () => {
     return (
         <div className={styles.findRoutePage}>
             <h1>Поиск маршрутов</h1>
-            <form onSubmit={handleSearch} className={styles.searchForm}>
-                <div className={styles.formRow}>
-                    <div className={styles.formGroup}>
-                        <label htmlFor="fromStation">Станция отправления:</label>
-                        <select
-                            id="fromStation"
-                            value={fromStationId}
-                            onChange={(e) => setFromStationId(e.target.value)}
-                            required
-                        >
-                            <option value="">Выберите станцию</option>
-                            {stations.map((station) => (
-                                <option key={station.id} value={station.id}>
-                                    {station.name} ({station.region})
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className={styles.formGroup}>
-                        <label htmlFor="toStation">Станция прибытия:</label>
-                        <select
-                            id="toStation"
-                            value={toStationId}
-                            onChange={(e) => setToStationId(e.target.value)}
-                            required
-                        >
-                            <option value="">Выберите станцию</option>
-                            {stations.map((station) => (
-                                <option key={station.id} value={station.id}>
-                                    {station.name} ({station.region})
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-
-                <div className={styles.formRow}>
-                    <div className={styles.formGroup}>
-                        <label htmlFor="departureDate">Дата отправления:</label>
-                        <input
-                            type="date"
-                            id="departureDate"
-                            value={departureDate}
-                            onChange={(e) => setDepartureDate(e.target.value)}
-                            required
-                            min={new Date().toISOString().split('T')[0]} // Нельзя выбрать прошлую дату
-                        />
-                    </div>
-                    <div className={`${styles.formGroup} ${styles.checkboxGroup}`}>
-                        <input
-                            type="checkbox"
-                            id="isDirectRoute"
-                            checked={isDirectRoute}
-                            onChange={(e) => setIsDirectRoute(e.target.checked)}
-                        />
-                        <label htmlFor="isDirectRoute">Только прямой маршрут</label>
-                    </div>
-                </div>
-
-                <button type="submit" disabled={isLoading} className={styles.searchButton}>
-                    {isLoading ? 'Поиск...' : 'Найти маршруты'}
-                </button>
-            </form>
+            <SearchForm
+                stations={stations}
+                fromStationId={fromStationId}
+                onFromStationChange={setFromStationId}
+                toStationId={toStationId}
+                onToStationChange={setToStationId}
+                departureDate={departureDate}
+                onDepartureDateChange={setDepartureDate}
+                isDirectRoute={isDirectRoute}
+                onIsDirectRouteChange={setIsDirectRoute}
+                onSubmit={handleSearch}
+                isLoading={isLoading}>
+            </SearchForm>
 
             {error && <p className={styles.errorMessage}>{error}</p>}
 
@@ -229,26 +181,14 @@ const FindRoutePage = () => {
                 <div className={styles.resultsContainer}>
                     <h2>Найденные маршруты:</h2>
                     {searchResults.map((complexRoute, index) => (
-                        <div key={index} className={styles.complexRouteCard}>
-                            <h3>Маршрут {index + 1}</h3>
-                            <p><strong>Время в пути:</strong> {formatDuration(complexRoute.totalDuration)}</p>
-                            <p><strong>Отправление:</strong> {formatDateTime(complexRoute.departureDate)}</p>
-                            <p><strong>Прибытие:</strong> {formatDateTime(complexRoute.arrivalDate)}</p>
-                            <p><strong>Стоимость:</strong> от {complexRoute.minimalTotalCost?.toFixed(2)} до {complexRoute.maximumTotalCost?.toFixed(2)} руб.</p>
-
-                            <h4>Участки маршрута:</h4>
-                            {complexRoute.directRoutes.map((directRoute, drIndex) => (
-                                <div key={directRoute.concreteRouteId || drIndex} className={styles.directRouteCard}>
-                                    <p>Откуда: {getStationNameById(directRoute.fromStationId)}</p>
-                                    <p>Куда: {getStationNameById(directRoute.toStationId)}</p>
-                                    <p>Отправление: {formatDateTime(directRoute.departureDate)}</p>
-                                    <p>Прибытие: {formatDateTime(directRoute.arrivalDate)}</p>
-                                    <p>Время в пути: {formatDuration(directRoute.timeInTransit)}</p>
-                                    <p>Стоимость: от {directRoute.minimalCost?.toFixed(2)} до {directRoute.maximumCost?.toFixed(2)} руб.</p>
-                                    <p>Свободных мест: {directRoute.availableSeats}</p>
-                                </div>
-                            ))}
-                        </div>
+                        <ComplexRouteCard
+                            key={index}
+                            routeIndex={index}
+                            complexRoute={complexRoute}
+                            formatDuration={formatDuration}
+                            formatDateTime={formatDateTime}
+                            getStationNameById={getStationNameById}>
+                        </ComplexRouteCard>
                     ))}
                 </div>
             )}
