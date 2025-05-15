@@ -3,7 +3,7 @@ import DirectRouteSegmentCard from './DirectRouteSegmentCard.jsx'
 import React from "react";
 import { useNavigate } from 'react-router-dom';
 
-const ComplexRouteCard = ({ routeIndex, complexRoute, formatDuration, formatDateTime, getStationNameById, onShowSchedule}) => {
+const ComplexRouteCard = ({ routeIndex, complexRoute, formatDuration, formatDateTime, getStationNameById, onShowSchedule, stations}) => {
     const navigate = useNavigate();
 
     const handleBookTicketsClick = () => {
@@ -26,7 +26,8 @@ const ComplexRouteCard = ({ routeIndex, complexRoute, formatDuration, formatDate
         navigate('/tickets-booking', { state: {
             selectedComplexRoute: complexRoute,
             fromStation: fromStationName,
-            toStation: toStationName} });
+            toStation: toStationName,
+            stations: stations} });
     };
 
     return (

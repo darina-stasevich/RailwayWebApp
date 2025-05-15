@@ -215,7 +215,8 @@ const FindRoutePage = () => {
                             formatDuration={formatDuration}
                             formatDateTime={formatDateTime}
                             getStationNameById={getStationNameById}
-                            onShowSchedule={handleShowSchedule}>
+                            onShowSchedule={handleShowSchedule}
+                            stations={stations}>
                         </ComplexRouteCard>
                     ))}
                 </div>
