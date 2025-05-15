@@ -7,5 +7,7 @@ public interface IAbstractRouteSegmentRepository : IGenericRepository<AbstractRo
 {
     Task<IEnumerable<AbstractRouteSegment>> GetAbstractSegmentsByFromStationAsync(Guid fromStationId);
     Task<IEnumerable<AbstractRouteSegment>> GetAbstractSegmentsByToStationAsync(Guid toStationId);
-    Task<IEnumerable<AbstractRouteSegment>> GetAbstractSegmentsByRouteIdAsync(Guid routeId, IClientSessionHandle? session = null);
+
+    Task<IEnumerable<AbstractRouteSegment>> GetAbstractSegmentsByRouteIdAsync(Guid routeId,
+        IClientSessionHandle? session = null);
 }

@@ -9,5 +9,7 @@ public interface ICarriageService
 {
     Task<IEnumerable<ShortCarriageInfoDto>> GetAllCarriagesInfo(CarriagesInfoRequest request);
     Task<DetailedCarriageInfoDto> GetCarriageInfo(CarriageInfoRequest request);
-    Task<IEnumerable<CarriageAvailability>> GetCarriageAvailabilitiesForSeat(OccupiedSeatDto dto, IClientSessionHandle session);
+
+    Task<IEnumerable<CarriageAvailability>> GetCarriageAvailabilitiesForSeat(OccupiedSeatDto dto,
+        IClientSessionHandle session);
 }

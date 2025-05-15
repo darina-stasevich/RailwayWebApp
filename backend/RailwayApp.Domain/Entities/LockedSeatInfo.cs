@@ -1,5 +1,3 @@
-using MongoDB.Bson.Serialization.Attributes;
-
 namespace RailwayApp.Domain.Entities;
 
 public class LockedSeatInfo
@@ -14,6 +12,5 @@ public class LockedSeatInfo
     public PassengerData PassengerData { get; set; }
     public DateTime DepartureDateUtc { get; set; }
     public DateTime ArrivalDateUtc { get; set; }
-    public Decimal Price { get; set; }
-
+    public decimal Price { get; set; }
 }

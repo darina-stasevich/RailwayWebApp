@@ -1,6 +1,5 @@
-using System.Runtime.CompilerServices;
+using System.ComponentModel.DataAnnotations;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 using RailwayApp.Application.Models;
 using RailwayApp.Application.Models.Dto;
 using RailwayApp.Domain;
@@ -11,7 +10,8 @@ using RailwayApp.Domain.Statuses;
 
 namespace RailwayApp.Application.Services;
 
-public class TicketBookingService(IMongoClient mongoClient,
+public class TicketBookingService(
+    IMongoClient mongoClient,
     ICarriageSeatService carriageSeatService,
     IUserAccountRepository userAccountRepository,
     ISeatLockRepository seatLockRepository,
@@ -20,39 +20,19 @@ public class TicketBookingService(IMongoClient mongoClient,
     ICarriageTemplateService carriageTemplateService,
     IPriceCalculationService priceCalculationService,
     IScheduleService scheduleService) : ITicketBookingService
-{ 
+{
     public static readonly TimeSpan ReservationTime = TimeSpan.FromMinutes(20);
-    private InfoSeatSearchDto MapInfoSeatSearchDto(BookSeatRequest dto, CarriageTemplate carriageTemplate)
-    {
-        return new InfoSeatSearchDto
-        {
-            CarriageTemplateId = carriageTemplate.Id,
-            ConcreteRouteId = dto.ConcreteRouteId,
-            EndSegmentNumber = dto.EndSegmentNumber,
-            SeatNumber = dto.SeatNumber,
-            StartSegmentNumber = dto.StartSegmentNumber,
-        };
-    }
 
-    private InfoRouteSegmentSearchPerCarriageDto MapInfoRouteSegmentSearchPerCarriageDto(Guid carriageTemplateId, BookSeatRequest seatRequest)
-    {
-        return new InfoRouteSegmentSearchPerCarriageDto
-        {
-            CarriageTemplateId = carriageTemplateId,
-            ConcreteRouteId = seatRequest.ConcreteRouteId,
-            StartSegmentNumber = seatRequest.StartSegmentNumber,
-            EndSegmentNumber = seatRequest.EndSegmentNumber
-        };
-    }
     public async Task<Guid> BookPlaces(Guid userAccountId, List<BookSeatRequest> request)
     {
+        ValidateRequests(request);
         using var session = await mongoClient.StartSessionAsync();
         try
         {
             session.StartTransaction(new TransactionOptions(
-                readConcern: ReadConcern.Snapshot,
+                ReadConcern.Snapshot,
                 writeConcern: WriteConcern.WMajority));
-            
+
             var userAccount = await userAccountRepository.GetByIdAsync(userAccountId, session);
             if (userAccount == null)
                 throw new UserAccountUserNotFoundException(userAccountId);
@@ -65,23 +45,22 @@ public class TicketBookingService(IMongoClient mongoClient,
             foreach (var seatRequest in request)
             {
                 var carriageTemplates =
-                    await carriageTemplateService.GetCarriageTemplateForRouteAsync(seatRequest.ConcreteRouteId, session);
+                    await carriageTemplateService.GetCarriageTemplateForRouteAsync(seatRequest.ConcreteRouteId,
+                        session);
 
                 var carriageTemplate =
                     carriageTemplates.FirstOrDefault(x => x.CarriageNumber == seatRequest.CarriageNumber);
 
                 if (carriageTemplate == null)
-                {
                     throw new CarriageTemplateNotFoundException(
                         seatRequest.CarriageNumber, seatRequest.ConcreteRouteId);
-                }
 
-                if (await carriageSeatService.IsSeatAvailable(MapInfoSeatSearchDto(seatRequest, carriageTemplate), session) ==
+                if (await carriageSeatService.IsSeatAvailable(MapInfoSeatSearchDto(seatRequest, carriageTemplate),
+                        session) ==
                     false)
-                {
                     throw new TicketBookingServiceSeatNotAvailableException(
-                        seatRequest.SeatNumber, seatRequest.ConcreteRouteId, seatRequest.StartSegmentNumber, seatRequest.EndSegmentNumber);
-                }
+                        seatRequest.SeatNumber, seatRequest.ConcreteRouteId, seatRequest.StartSegmentNumber,
+                        seatRequest.EndSegmentNumber);
 
                 var price = await priceCalculationService.CalculatePriceForCarriageAsync(
                     MapInfoRouteSegmentSearchPerCarriageDto(carriageTemplate.Id, seatRequest), session);
@@ -92,10 +71,9 @@ public class TicketBookingService(IMongoClient mongoClient,
                     await scheduleService.GetArrivalDateForSegment(seatRequest.ConcreteRouteId,
                         seatRequest.EndSegmentNumber, session);
                 if (departureDate < DateTime.Now)
-                {
-                    throw new TicketBookingServiceTrainDepartedException(seatRequest.ConcreteRouteId, seatRequest.CarriageNumber,
+                    throw new TicketBookingServiceTrainDepartedException(seatRequest.ConcreteRouteId,
+                        seatRequest.CarriageNumber,
                         seatRequest.SeatNumber);
-                }
                 lockedSeatInfo.Add(new LockedSeatInfo
                 {
                     CarriageTemplateId = carriageTemplate.Id,
@@ -127,7 +105,7 @@ public class TicketBookingService(IMongoClient mongoClient,
         }
         catch (Exception ex)
         {
-            if(session.IsInTransaction)
+            if (session.IsInTransaction)
                 await session.AbortTransactionAsync();
             throw;
         }
@@ -139,35 +117,28 @@ public class TicketBookingService(IMongoClient mongoClient,
         try
         {
             session.StartTransaction(new TransactionOptions(
-                readConcern: ReadConcern.Snapshot,
+                ReadConcern.Snapshot,
                 writeConcern: WriteConcern.WMajority));
 
 
             var userAccount = await userAccountRepository.GetByIdAsync(userAccountId, session);
-            if (userAccount == null)
-            {
-                throw new UserAccountUserNotFoundException(userAccountId);
-            }
+            if (userAccount == null) throw new UserAccountUserNotFoundException(userAccountId);
 
             if (userAccount.Status == UserAccountStatus.Blocked)
-            {
                 throw new UserAccountUserBlockedException(userAccountId);
-            }
 
 
             var seatLock = await seatLockRepository.GetByIdAsync(seatLockId, session);
-            if (seatLock == null)
-            {
-                throw new TicketBookingServiceSeatLockNotFoundException(seatLockId);
-            }
+            if (seatLock == null) throw new TicketBookingServiceSeatLockNotFoundException(seatLockId);
 
-            var updateResult = await seatLockRepository.UpdateStatusAsync(seatLockId, SeatLockStatus.Cancelled, session);
+            var updateResult =
+                await seatLockRepository.UpdateStatusAsync(seatLockId, SeatLockStatus.Cancelled, session);
             await session.CommitTransactionAsync();
             return updateResult;
         }
         catch (Exception ex)
         {
-            if(session.IsInTransaction)
+            if (session.IsInTransaction)
                 await session.AbortTransactionAsync();
             throw;
         }
@@ -177,8 +148,8 @@ public class TicketBookingService(IMongoClient mongoClient,
         IEnumerable<LockedSeatInfo> lockedSeatInfos)
     {
         var response = new List<LockedSeatInfoResponse>();
-        
-        
+
+
         foreach (var seatInfo in lockedSeatInfos)
         {
             var stations = stationService.GetStationByRouteId(seatInfo.ConcreteRouteId);
@@ -200,7 +171,7 @@ public class TicketBookingService(IMongoClient mongoClient,
 
         return response;
     }
-    
+
     private async Task<SeatLockResponse> MapSeatLockResponse(SeatLock seatLock)
     {
         return new SeatLockResponse
@@ -210,7 +181,7 @@ public class TicketBookingService(IMongoClient mongoClient,
         };
     }
     */
-    
+
     public async Task<IEnumerable<SeatLockResponse>> GetBooks(Guid userAccountId)
     {
         throw new NotImplementedException();
@@ -234,5 +205,36 @@ public class TicketBookingService(IMongoClient mongoClient,
         }
 
         return response;*/
+    }
+
+    private InfoSeatSearchDto MapInfoSeatSearchDto(BookSeatRequest dto, CarriageTemplate carriageTemplate)
+    {
+        return new InfoSeatSearchDto
+        {
+            CarriageTemplateId = carriageTemplate.Id,
+            ConcreteRouteId = dto.ConcreteRouteId,
+            EndSegmentNumber = dto.EndSegmentNumber,
+            SeatNumber = dto.SeatNumber,
+            StartSegmentNumber = dto.StartSegmentNumber
+        };
+    }
+
+    private InfoRouteSegmentSearchPerCarriageDto MapInfoRouteSegmentSearchPerCarriageDto(Guid carriageTemplateId,
+        BookSeatRequest seatRequest)
+    {
+        return new InfoRouteSegmentSearchPerCarriageDto
+        {
+            CarriageTemplateId = carriageTemplateId,
+            ConcreteRouteId = seatRequest.ConcreteRouteId,
+            StartSegmentNumber = seatRequest.StartSegmentNumber,
+            EndSegmentNumber = seatRequest.EndSegmentNumber
+        };
+    }
+
+    private void ValidateRequests(List<BookSeatRequest> requests)
+    {
+        foreach (var request in requests)
+            if (DateTime.Now.Date - request.PassengerData.BirthDate.Date < TimeSpan.Zero)
+                throw new ValidationException("validation of birth date failed");
     }
 }

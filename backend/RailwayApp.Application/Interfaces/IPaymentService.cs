@@ -1,4 +1,3 @@
-using RailwayApp.Application.Models;
 using RailwayApp.Domain.Entities;
 
 namespace RailwayApp.Domain.Interfaces.IServices;

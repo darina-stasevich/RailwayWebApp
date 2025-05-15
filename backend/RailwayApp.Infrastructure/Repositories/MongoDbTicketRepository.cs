@@ -1,6 +1,5 @@
 // RailwayApp.Infrastructure/Persistence/Neo4j/Repositories/TicketRepository.cs
 
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using RailwayApp.Domain.Entities;

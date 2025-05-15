@@ -1,10 +1,9 @@
 using System.Collections;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 using RailwayApp.Domain.Entities;
 using RailwayApp.Domain.Interfaces.IRepositories;
 
@@ -15,11 +14,16 @@ public class ConcreteRouteGeneratorService(
     IServiceScopeFactory scopeFactory)
     : IHostedService, IDisposable
 {
+    private const int GenerationAdvanceDays = 30;
+
+    private static readonly TimeSpan LocalOffset = TimeSpan.FromHours(3);
     private readonly IConfiguration _configuration = configuration;
     private Timer _timer;
 
-    private static readonly TimeSpan LocalOffset = TimeSpan.FromHours(3);
-    private const int GenerationAdvanceDays = 30;
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
 
     public Task StartAsync(CancellationToken stoppingToken)
     {
@@ -36,31 +40,39 @@ public class ConcreteRouteGeneratorService(
         return Task.CompletedTask;
     }
 
+    public Task StopAsync(CancellationToken stoppingToken)
+    {
+        logger.LogInformation("ConcreteRouteGeneratorService is stopping.");
+        _timer?.Change(Timeout.Infinite, 0);
+        return Task.CompletedTask;
+    }
+
     private void ScheduleNextRun(CancellationToken stoppingToken, bool isRescheduling = false)
     {
         var now = DateTime.Now;
         var nextRunTime = now.Date.AddDays(1);
         //var nextRunTime = now.AddMinutes(5);
         var dueTime = nextRunTime - now;
-        if (dueTime <= TimeSpan.Zero) 
+        if (dueTime <= TimeSpan.Zero)
             dueTime = TimeSpan.Zero;
-        
+
         if (_timer == null)
         {
-            _timer = new Timer(async (state) => await DoWorkWrapperAsync(state, stoppingToken), null, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+            _timer = new Timer(async state => await DoWorkWrapperAsync(state, stoppingToken), null,
+                Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
             logger.LogInformation("Timer created.");
         }
-        
+
         _timer.Change(dueTime, Timeout.InfiniteTimeSpan);
 
-        if(isRescheduling)
-        {
-            logger.LogInformation("ConcreteRouteGeneratorService rescheduled. Next run at {NextRunDateTimeUtc} (in {DueTime})", nextRunTime, dueTime);
-        }
+        if (isRescheduling)
+            logger.LogInformation(
+                "ConcreteRouteGeneratorService rescheduled. Next run at {NextRunDateTimeUtc} (in {DueTime})",
+                nextRunTime, dueTime);
         else
-        {
-            logger.LogInformation("ConcreteRouteGeneratorService scheduled. First run at {NextRunDateTimeUtc} (in {DueTime})", nextRunTime, dueTime);
-        }
+            logger.LogInformation(
+                "ConcreteRouteGeneratorService scheduled. First run at {NextRunDateTimeUtc} (in {DueTime})",
+                nextRunTime, dueTime);
     }
 
     private async Task DoWorkWrapperAsync(object state, CancellationToken stoppingToken)
@@ -73,6 +85,7 @@ public class ConcreteRouteGeneratorService(
                 logger.LogInformation("Cancellation requested before starting actual work in DoWorkWrapperAsync.");
                 return;
             }
+
             await DoWorkAsync(state, stoppingToken);
         }
         catch (Exception ex)
@@ -91,32 +104,33 @@ public class ConcreteRouteGeneratorService(
                 logger.LogInformation("Cancellation requested. Not rescheduling next run.");
             }
         }
-        logger.LogInformation("ConcreteRouteGeneratorService.DoWorkWrapperAsync finished at {Now}", DateTime.Now);
 
+        logger.LogInformation("ConcreteRouteGeneratorService.DoWorkWrapperAsync finished at {Now}", DateTime.Now);
     }
-    
+
     private async Task DoWorkAsync(object state, CancellationToken stoppingToken)
     {
         var today = DateTime.Now.Date;
         logger.LogInformation("ConcreteRouteGeneratorService.DoWorkAsync is starting.");
         using (var scope = scopeFactory.CreateScope())
         {
-            IAbstractRouteRepository abstractRouteRepository =
+            var abstractRouteRepository =
                 scope.ServiceProvider.GetRequiredService<IAbstractRouteRepository>();
-            IAbstractRouteSegmentRepository abstractRouteSegmentRepository =
+            var abstractRouteSegmentRepository =
                 scope.ServiceProvider.GetRequiredService<IAbstractRouteSegmentRepository>();
-            IConcreteRouteRepository concreteRouteRepository =
+            var concreteRouteRepository =
                 scope.ServiceProvider.GetRequiredService<IConcreteRouteRepository>();
-            IConcreteRouteSegmentRepository concreteRouteSegmentRepository =
+            var concreteRouteSegmentRepository =
                 scope.ServiceProvider.GetRequiredService<IConcreteRouteSegmentRepository>();
-            ITrainRepository trainRepository = scope.ServiceProvider.GetRequiredService<ITrainRepository>();
-            ICarriageTemplateRepository carriageTemplateRepository =
+            var trainRepository = scope.ServiceProvider.GetRequiredService<ITrainRepository>();
+            var carriageTemplateRepository =
                 scope.ServiceProvider.GetRequiredService<ICarriageTemplateRepository>();
-            ICarriageAvailabilityRepository carriageAvailabilityRepository =
+            var carriageAvailabilityRepository =
                 scope.ServiceProvider.GetRequiredService<ICarriageAvailabilityRepository>();
             try
             {
-                logger.LogInformation("ConcreteRouteGeneratorService is running at {RunTime} for target generation date {TargetDate}",
+                logger.LogInformation(
+                    "ConcreteRouteGeneratorService is running at {RunTime} for target generation date {TargetDate}",
                     DateTime.Now, today.AddDays(GenerationAdvanceDays));
                 await GenerateRoutesForDayAsync(today.AddDays(GenerationAdvanceDays), stoppingToken,
                     abstractRouteRepository, abstractRouteSegmentRepository, concreteRouteRepository,
@@ -138,8 +152,9 @@ public class ConcreteRouteGeneratorService(
         ICarriageTemplateRepository carriageTemplateRepository,
         ICarriageAvailabilityRepository carriageAvailabilityRepository)
     {
-        logger.LogInformation("Generating concrete routes for departure date: {TargetDepartureDateUtc}", targetDepartureDate.ToString("yyyy-MM-dd"));
-        
+        logger.LogInformation("Generating concrete routes for departure date: {TargetDepartureDateUtc}",
+            targetDepartureDate.ToString("yyyy-MM-dd"));
+
         var activeAbstractRoutes = await abstractRouteRepository.GetActiveRoutes();
 
         foreach (var abstractRoute in activeAbstractRoutes)
@@ -149,24 +164,30 @@ public class ConcreteRouteGeneratorService(
                 logger.LogInformation("Cancellation requested, stopping route generation.");
                 return;
             }
-            
-            bool shouldGenerate = ShouldGenerateForDate(abstractRoute, targetDepartureDate);
+
+            var shouldGenerate = ShouldGenerateForDate(abstractRoute, targetDepartureDate);
 
             if (shouldGenerate)
             {
-                
-                var routesInDate = await concreteRouteRepository.GetConcreteRoutesInDate(targetDepartureDate.Date, targetDepartureDate.Date.AddDays(1));
+                var routesInDate = await concreteRouteRepository.GetConcreteRoutesInDate(targetDepartureDate.Date,
+                    targetDepartureDate.Date.AddDays(1));
                 var exists = routesInDate.FirstOrDefault(r => r.AbstractRouteId == abstractRoute.Id);
                 if (exists != null)
                 {
-                    logger.LogInformation("ConcreteRoute for AbstractRouteId {AbstractRouteId} at {DepartureDateTimeUtc} already exists. Skipping.", abstractRoute.Id, targetDepartureDate);
+                    logger.LogInformation(
+                        "ConcreteRoute for AbstractRouteId {AbstractRouteId} at {DepartureDateTimeUtc} already exists. Skipping.",
+                        abstractRoute.Id, targetDepartureDate);
                     continue;
                 }
-                
-                await CreateAndSaveConcreteRouteWithTransactionAsync(abstractRoute, targetDepartureDate, stoppingToken, abstractRouteSegmentRepository, concreteRouteRepository, concreteRouteSegmentRepository, trainRepository, carriageTemplateRepository, carriageAvailabilityRepository);
+
+                await CreateAndSaveConcreteRouteWithTransactionAsync(abstractRoute, targetDepartureDate, stoppingToken,
+                    abstractRouteSegmentRepository, concreteRouteRepository, concreteRouteSegmentRepository,
+                    trainRepository, carriageTemplateRepository, carriageAvailabilityRepository);
             }
         }
-        logger.LogInformation("Finished generating concrete routes for departure date: {TargetDepartureDateUtc}", targetDepartureDate.ToString("yyyy-MM-dd"));
+
+        logger.LogInformation("Finished generating concrete routes for departure date: {TargetDepartureDateUtc}",
+            targetDepartureDate.ToString("yyyy-MM-dd"));
     }
 
     private bool ShouldGenerateForDate(AbstractRoute abstractRoute, DateTime targetDate)
@@ -190,33 +211,36 @@ public class ConcreteRouteGeneratorService(
         var abstractSegments =
             (await abstractRouteSegmentRepository.GetAbstractSegmentsByRouteIdAsync(abstractRoute.Id))
             .OrderBy(s => s.SegmentNumber).ToList();
-        if (abstractSegments == null || abstractSegments.Count == 0){
-            
+        if (abstractSegments == null || abstractSegments.Count == 0)
+        {
             logger.LogWarning("Abstract route {routeId} has no abstract segments", abstractRoute.Id);
-        return;
+            return;
         }
-        
+
         // 2. get train for route
         var train = await trainRepository.GetByIdAsync(abstractRoute.TrainNumber);
         if (train == null)
         {
-            logger.LogWarning("Train {TrainNumber} not found for AbstractRoute {AbstractRouteId}. Skipping.", abstractRoute.TrainNumber, abstractRoute.Id);
+            logger.LogWarning("Train {TrainNumber} not found for AbstractRoute {AbstractRouteId}. Skipping.",
+                abstractRoute.TrainNumber, abstractRoute.Id);
             return;
         }
-        
+
         // 3. get carriage templates for train
-        var carriageTemplates = (await carriageTemplateRepository.GetByTrainTypeIdAsync(train.TrainTypeId))?.OrderBy(c => c.CarriageNumber).ToList();
+        var carriageTemplates = (await carriageTemplateRepository.GetByTrainTypeIdAsync(train.TrainTypeId))
+            ?.OrderBy(c => c.CarriageNumber).ToList();
         if (carriageTemplates == null || !carriageTemplates.Any())
         {
-            logger.LogWarning("No carriage templates for TrainType {TrainTypeId} (Train: {TrainNumber}). Skipping.", train.TrainTypeId, abstractRoute.TrainNumber);
+            logger.LogWarning("No carriage templates for TrainType {TrainTypeId} (Train: {TrainNumber}). Skipping.",
+                train.TrainTypeId, abstractRoute.TrainNumber);
             return;
         }
-        
+
         // create route, route segments, carriage availabilities
         using (var session = await mongoClient.StartSessionAsync(cancellationToken: stoppingToken))
         {
             session.StartTransaction(new TransactionOptions(
-                readConcern: ReadConcern.Snapshot,
+                ReadConcern.Snapshot,
                 writeConcern: WriteConcern.WMajority));
             try
             {
@@ -250,12 +274,12 @@ public class ConcreteRouteGeneratorService(
                         ToStationId = abstractSegment.ToStationId,
                         SegmentNumber = abstractSegment.SegmentNumber
                     };
-                    
+
                     concreteSegments.Add(concreteRouteSegment);
                 }
 
                 await concreteRouteSegmentRepository.AddRangeAsync(concreteSegments, session);
-                
+
                 // add carriage availabilities
                 var carriageAvailabilities = new List<CarriageAvailability>();
                 logger.LogInformation("concrete segments amount is {amount}", concreteSegments.Count);
@@ -268,6 +292,7 @@ public class ConcreteRouteGeneratorService(
                         logger.LogWarning("Transaction aborted due to cancellation request.");
                         return;
                     }
+
                     foreach (var carriageTemplate in carriageTemplates)
                     {
                         var carriageAvailability = new CarriageAvailability
@@ -283,38 +308,26 @@ public class ConcreteRouteGeneratorService(
                 logger.LogInformation("noe got {amount} carriage availiabilities", carriageAvailabilities.Count);
 
                 await carriageAvailabilityRepository.AddRangeAsync(carriageAvailabilities, session);
-                
+
                 if (stoppingToken.IsCancellationRequested)
                 {
                     await session.AbortTransactionAsync(stoppingToken);
                     logger.LogWarning("Transaction aborted due to cancellation request.");
                     return;
                 }
-                
+
                 await session.CommitTransactionAsync(stoppingToken);
-                logger.LogInformation("Successfully committed transaction for ConcreteRoute {ConcreteRouteId} (AbstractRouteId: {AbstractRouteId}, Train: {TrainNumber}).",
-                                     concreteRoute.Id, abstractRoute.Id, abstractRoute.TrainNumber);
+                logger.LogInformation(
+                    "Successfully committed transaction for ConcreteRoute {ConcreteRouteId} (AbstractRouteId: {AbstractRouteId}, Train: {TrainNumber}).",
+                    concreteRoute.Id, abstractRoute.Id, abstractRoute.TrainNumber);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error during transaction for AbstractRoute {AbstractRouteId} (Train: {TrainNumber}). Aborting transaction.", abstractRoute.Id, abstractRoute.TrainNumber);
-                if (session.IsInTransaction)
-                {
-                    await session.AbortTransactionAsync(CancellationToken.None);
-                }
+                logger.LogError(ex,
+                    "Error during transaction for AbstractRoute {AbstractRouteId} (Train: {TrainNumber}). Aborting transaction.",
+                    abstractRoute.Id, abstractRoute.TrainNumber);
+                if (session.IsInTransaction) await session.AbortTransactionAsync(CancellationToken.None);
             }
         }
-    }
-
-    public Task StopAsync(CancellationToken stoppingToken)
-    {
-        logger.LogInformation("ConcreteRouteGeneratorService is stopping.");
-        _timer?.Change(Timeout.Infinite, 0);
-        return Task.CompletedTask;
-    }
-
-    public void Dispose()
-    {
-        _timer?.Dispose();
     }
 }

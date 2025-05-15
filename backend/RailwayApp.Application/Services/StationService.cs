@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using RailwayApp.Application.Models;
 using RailwayApp.Domain.Entities;
 using RailwayApp.Domain.Interfaces.IRepositories;
@@ -17,13 +16,10 @@ public class StationService(IStationRepository stationRepository) : IStationServ
     {
         var existingStation = await stationRepository.GetByNameAsync(request.Name);
 
-        if (existingStation != null)
+        if (existingStation != null) throw new InvalidOperationException($"Station {request.Region} already exists");
+
+        var station = new Station
         {
-            throw new InvalidOperationException($"Station {request.Region} already exists");
-        }
-        
-        var station = new Station 
-        { 
             Name = request.Name,
             Region = request.Region
         };

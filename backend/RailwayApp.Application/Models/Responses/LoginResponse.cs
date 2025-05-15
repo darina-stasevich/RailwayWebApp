@@ -1,5 +1,3 @@
-using RailwayApp.Domain.Statuses;
-
 namespace RailwayApp.Application.Models;
 
 public class LoginResponse

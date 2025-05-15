@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Diagnostics;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 using Moq;
 using RailwayApp.Application.Models;
 using RailwayApp.Application.Services;
@@ -15,27 +14,6 @@ namespace Tests;
 [TestFixture]
 public class TicketBookingTest
 {
-    private Mock<IAbstractRouteSegmentRepository> _mockAbstractRouteSegmentRepository;
-    private Mock<IConcreteRouteSegmentRepository> _mockConcreteRouteSegmentRepository;
-    private Mock<IAbstractRouteRepository> _mockAbstractRouteRepository;
-    private Mock<IConcreteRouteRepository> _mockConcreteRouteRepository;
-    private Mock<ICarriageAvailabilityRepository> _mockCarriageAvailabilityRepository;
-    private Mock<ITrainRepository> _mockTrainRepository;
-    private Mock<ICarriageTemplateRepository> _mockCarriageTemplateRepository;
-    private Mock<ISeatLockRepository> _mockSeatLockRepository;
-    private Mock<IUserAccountRepository> _mockUserAccountRepository;
-    private Mock<IStationRepository> _mockStationRepository;
-
-    private TicketBookingService _ticketBookingService;
-
-    private PriceCalculationService _mockPriceCalculationService;
-    private CarriageTemplateService _mockCarriageTemplateService;
-    private CarriageSeatService _mockCarriageSeatService;
-    private ScheduleService _mockScheduleService;
-    private readonly TrainCarriageInitializer _trainCarriageInitializer = new TrainCarriageInitializer();
-
-    private TestDataContainer _testData;
-
     [SetUp]
     public void Setup()
     {
@@ -72,6 +50,27 @@ public class TicketBookingTest
             _mockPriceCalculationService, _mockScheduleService);
     }
 
+    private Mock<IAbstractRouteSegmentRepository> _mockAbstractRouteSegmentRepository;
+    private Mock<IConcreteRouteSegmentRepository> _mockConcreteRouteSegmentRepository;
+    private Mock<IAbstractRouteRepository> _mockAbstractRouteRepository;
+    private Mock<IConcreteRouteRepository> _mockConcreteRouteRepository;
+    private Mock<ICarriageAvailabilityRepository> _mockCarriageAvailabilityRepository;
+    private Mock<ITrainRepository> _mockTrainRepository;
+    private Mock<ICarriageTemplateRepository> _mockCarriageTemplateRepository;
+    private Mock<ISeatLockRepository> _mockSeatLockRepository;
+    private Mock<IUserAccountRepository> _mockUserAccountRepository;
+    private Mock<IStationRepository> _mockStationRepository;
+
+    private TicketBookingService _ticketBookingService;
+
+    private PriceCalculationService _mockPriceCalculationService;
+    private CarriageTemplateService _mockCarriageTemplateService;
+    private CarriageSeatService _mockCarriageSeatService;
+    private ScheduleService _mockScheduleService;
+    private readonly TrainCarriageInitializer _trainCarriageInitializer = new();
+
+    private TestDataContainer _testData;
+
     private TestDataContainer GenerateTestData()
     {
         var container = new TestDataContainer();
@@ -102,15 +101,15 @@ public class TicketBookingTest
         container.MinskId = stations[4].Id;
         container.HomelId = stations[5].Id;
 
-        Guid trainTypeTr1Id = container.TrainTypes.Count > 8 ? container.TrainTypes[8].Id : Guid.NewGuid();
-        Guid trainTypeTr2Id = container.TrainTypes.Count > 9 ? container.TrainTypes[9].Id : Guid.NewGuid();
-        Guid trainTypeTr3Id = container.TrainTypes.Count > 10 ? container.TrainTypes[10].Id : Guid.NewGuid();
+        var trainTypeTr1Id = container.TrainTypes.Count > 8 ? container.TrainTypes[8].Id : Guid.NewGuid();
+        var trainTypeTr2Id = container.TrainTypes.Count > 9 ? container.TrainTypes[9].Id : Guid.NewGuid();
+        var trainTypeTr3Id = container.TrainTypes.Count > 10 ? container.TrainTypes[10].Id : Guid.NewGuid();
 
         container.Trains = new List<Train>
         {
-            new Train { Id = "TR1", TrainTypeId = trainTypeTr1Id },
-            new Train { Id = "TR2", TrainTypeId = trainTypeTr2Id },
-            new Train { Id = "TR3", TrainTypeId = trainTypeTr3Id }
+            new() { Id = "TR1", TrainTypeId = trainTypeTr1Id },
+            new() { Id = "TR2", TrainTypeId = trainTypeTr2Id },
+            new() { Id = "TR3", TrainTypeId = trainTypeTr3Id }
         };
 
         var abstractRoutes = new List<AbstractRoute>
@@ -119,8 +118,12 @@ public class TicketBookingTest
             {
                 Id = Guid.NewGuid(),
                 TrainNumber = "TR1",
-                ActiveDays = new List<DayOfWeek>{DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday},
-                    
+                ActiveDays = new List<DayOfWeek>
+                {
+                    DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday,
+                    DayOfWeek.Friday, DayOfWeek.Saturday
+                },
+
                 TransferCost = 20,
                 HasBeddingOption = false,
                 DepartureTime = TimeSpan.FromHours(15)
@@ -129,8 +132,12 @@ public class TicketBookingTest
             {
                 Id = Guid.NewGuid(),
                 TrainNumber = "TR2",
-                ActiveDays = new List<DayOfWeek>{DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday},
-                    
+                ActiveDays = new List<DayOfWeek>
+                {
+                    DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday,
+                    DayOfWeek.Friday, DayOfWeek.Saturday
+                },
+
                 TransferCost = 15,
                 HasBeddingOption = true,
                 DepartureTime = TimeSpan.FromHours(9)
@@ -139,8 +146,12 @@ public class TicketBookingTest
             {
                 Id = Guid.NewGuid(),
                 TrainNumber = "TR1",
-                ActiveDays = new List<DayOfWeek>{DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday},
-                    
+                ActiveDays = new List<DayOfWeek>
+                {
+                    DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday,
+                    DayOfWeek.Friday, DayOfWeek.Saturday
+                },
+
                 TransferCost = 18,
                 HasBeddingOption = false,
                 DepartureTime = TimeSpan.FromHours(8).Add(TimeSpan.FromMinutes(22))
@@ -149,8 +160,12 @@ public class TicketBookingTest
             {
                 Id = Guid.NewGuid(),
                 TrainNumber = "TR2",
-                ActiveDays = new List<DayOfWeek>{DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday},
-                    
+                ActiveDays = new List<DayOfWeek>
+                {
+                    DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday,
+                    DayOfWeek.Friday, DayOfWeek.Saturday
+                },
+
                 TransferCost = 20,
                 HasBeddingOption = true,
                 DepartureTime = TimeSpan.FromHours(17).Add(TimeSpan.FromMinutes(05))
@@ -159,8 +174,12 @@ public class TicketBookingTest
             {
                 Id = Guid.NewGuid(),
                 TrainNumber = "TR3",
-                ActiveDays = new List<DayOfWeek>{DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday},
-                    
+                ActiveDays = new List<DayOfWeek>
+                {
+                    DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday,
+                    DayOfWeek.Friday, DayOfWeek.Saturday
+                },
+
                 TransferCost = 18,
                 HasBeddingOption = true,
                 DepartureTime = TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(22))
@@ -169,8 +188,12 @@ public class TicketBookingTest
             {
                 Id = Guid.NewGuid(),
                 TrainNumber = "TR3",
-                ActiveDays = new List<DayOfWeek>{DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday},
-                    
+                ActiveDays = new List<DayOfWeek>
+                {
+                    DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday,
+                    DayOfWeek.Friday, DayOfWeek.Saturday
+                },
+
                 TransferCost = 20,
                 HasBeddingOption = true,
                 DepartureTime = TimeSpan.FromHours(18).Add(TimeSpan.FromMinutes(22))
@@ -403,7 +426,7 @@ public class TicketBookingTest
         var firstDayConcreteSegments = container.ConcreteRouteSegments
             .Where(cs => firstDayConcreteRouteIds.Contains(cs.ConcreteRouteId));
 
-        int idx = 0;
+        var idx = 0;
 
         foreach (var concreteSegment in firstDayConcreteSegments)
         {
@@ -426,25 +449,18 @@ public class TicketBookingTest
             }
 
             if (templatesByTrainTypeId.TryGetValue(currentTrainTypeId, out var relevantTemplates))
-            {
                 foreach (var template in relevantTemplates)
                 {
-                    bool isSegmentEven = idx % 2 == 0;
+                    var isSegmentEven = idx % 2 == 0;
                     var initialValues = new bool[template.TotalSeats];
                     if (isSegmentEven)
                     {
-                        for (int i = 0; i < template.TotalSeats; i++)
-                        {
-                            initialValues[i] = i % 2 == 0;
-                        }
+                        for (var i = 0; i < template.TotalSeats; i++) initialValues[i] = i % 2 == 0;
                     }
                     else
                     {
-                        int half = (template.TotalSeats + 1) / 2;
-                        for (int i = 0; i < template.TotalSeats; i++)
-                        {
-                            initialValues[i] = i < half;
-                        }
+                        var half = (template.TotalSeats + 1) / 2;
+                        for (var i = 0; i < template.TotalSeats; i++) initialValues[i] = i < half;
                     }
 
                     var occupiedSeatsArray = new BitArray(initialValues);
@@ -458,7 +474,6 @@ public class TicketBookingTest
                     };
                     container.CarriageAvailabilities.Add(carriageAvailability);
                 }
-            }
 
             idx++;
         }
@@ -470,14 +485,20 @@ public class TicketBookingTest
     {
         // --- Настройка Station Repository
         _mockStationRepository
-            .Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>(), 
+            .Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>(),
                 It.IsAny<IClientSessionHandle?>()))
-            .ReturnsAsync((Guid id, IClientSessionHandle? session) => { return _testData.Stations.FirstOrDefault(x => x.Id == id);});
+            .ReturnsAsync((Guid id, IClientSessionHandle? session) =>
+            {
+                return _testData.Stations.FirstOrDefault(x => x.Id == id);
+            });
         // --- Настройка User Account Repository
         _mockUserAccountRepository
-            .Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>(), 
+            .Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>(),
                 It.IsAny<IClientSessionHandle?>()))
-            .ReturnsAsync((Guid id, IClientSessionHandle? session) => { return _testData.UserAccounts.FirstOrDefault(x => x.Id == id); });
+            .ReturnsAsync((Guid id, IClientSessionHandle? session) =>
+            {
+                return _testData.UserAccounts.FirstOrDefault(x => x.Id == id);
+            });
 
         // --- Настройка Abstract Route Segment Repository ---
         _mockAbstractRouteSegmentRepository
@@ -501,7 +522,7 @@ public class TicketBookingTest
             });
 
         _mockAbstractRouteSegmentRepository
-            .Setup(repo => repo.GetAbstractSegmentsByRouteIdAsync(It.IsAny<Guid>(), 
+            .Setup(repo => repo.GetAbstractSegmentsByRouteIdAsync(It.IsAny<Guid>(),
                 It.IsAny<IClientSessionHandle?>()))
             .ReturnsAsync((Guid routeId, IClientSessionHandle? session) =>
             {
@@ -513,7 +534,7 @@ public class TicketBookingTest
 
         // --- Настройка Abstract Route Repository ---
         _mockAbstractRouteRepository
-            .Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>(), 
+            .Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>(),
                 It.IsAny<IClientSessionHandle?>()))
             .ReturnsAsync((Guid routeId, IClientSessionHandle? session) =>
             {
@@ -524,7 +545,7 @@ public class TicketBookingTest
 
         // --- Настройка Concrete Route Repository ---
         _mockConcreteRouteRepository
-            .Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>(), 
+            .Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>(),
                 It.IsAny<IClientSessionHandle?>()))
             .ReturnsAsync((Guid routeId, IClientSessionHandle? session) =>
             {
@@ -556,7 +577,7 @@ public class TicketBookingTest
             });
 
         _mockConcreteRouteSegmentRepository
-            .Setup(repo => repo.GetConcreteSegmentsByConcreteRouteIdAsync(It.IsAny<Guid>(), 
+            .Setup(repo => repo.GetConcreteSegmentsByConcreteRouteIdAsync(It.IsAny<Guid>(),
                 It.IsAny<IClientSessionHandle?>()))
             .ReturnsAsync((Guid concreteRouteId, IClientSessionHandle? session) =>
             {
@@ -565,7 +586,7 @@ public class TicketBookingTest
                     .ToList();
                 return matchingSegments;
             });
-        
+
         _mockConcreteRouteSegmentRepository
             .Setup(repo => repo.GetConcreteSegmentsByFromStationAsync(It.IsAny<Guid>()))
             .ReturnsAsync((Guid id) =>
@@ -574,7 +595,7 @@ public class TicketBookingTest
                     .Where(cs => cs.FromStationId == id).ToList();
                 return matchingElements;
             });
-        
+
         _mockConcreteRouteSegmentRepository
             .Setup(repo => repo.GetConcreteSegmentsByToStationAsync(It.IsAny<Guid>()))
             .ReturnsAsync((Guid id) =>
@@ -586,7 +607,7 @@ public class TicketBookingTest
 
         // --- Настройка Carriage Availability Repository ---
         _mockCarriageAvailabilityRepository
-            .Setup(repo => repo.GetByConcreteSegmentIdAsync(It.IsAny<Guid>(), 
+            .Setup(repo => repo.GetByConcreteSegmentIdAsync(It.IsAny<Guid>(),
                 It.IsAny<IClientSessionHandle?>()))
             .ReturnsAsync((Guid segmentId, IClientSessionHandle? session) =>
             {
@@ -597,10 +618,11 @@ public class TicketBookingTest
             });
 
         // --- Настройка Carriage Template Repository ---
-        _mockCarriageTemplateRepository.Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>(), 
+        _mockCarriageTemplateRepository.Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>(),
                 It.IsAny<IClientSessionHandle?>()))
-            .ReturnsAsync((Guid id, IClientSessionHandle? session) => _testData.CarriageTemplates.FirstOrDefault(t => t.Id == id));
-        _mockCarriageTemplateRepository.Setup(repo => repo.GetByTrainTypeIdAsync(It.IsAny<Guid>(), 
+            .ReturnsAsync((Guid id, IClientSessionHandle? session) =>
+                _testData.CarriageTemplates.FirstOrDefault(t => t.Id == id));
+        _mockCarriageTemplateRepository.Setup(repo => repo.GetByTrainTypeIdAsync(It.IsAny<Guid>(),
                 It.IsAny<IClientSessionHandle?>()))
             .ReturnsAsync((Guid trainTypeId, IClientSessionHandle? session) =>
                 _testData.TemplatesByTrainTypeId.TryGetValue(trainTypeId, out var templates)
@@ -609,22 +631,23 @@ public class TicketBookingTest
 
 
         // --- Настройка Train Repository ---
-        _mockTrainRepository.Setup(repo => repo.GetByIdAsync(It.IsAny<string>(), 
+        _mockTrainRepository.Setup(repo => repo.GetByIdAsync(It.IsAny<string>(),
                 It.IsAny<IClientSessionHandle?>()))
-            .ReturnsAsync((string id, IClientSessionHandle? session) => _testData.Trains.FirstOrDefault(t => t.Id == id));
+            .ReturnsAsync(
+                (string id, IClientSessionHandle? session) => _testData.Trains.FirstOrDefault(t => t.Id == id));
 
         // --- Настройка Seat Lock Repository
-        _mockSeatLockRepository.Setup(repo => repo.GetByRouteIdAsync(It.IsAny<Guid>(), 
+        _mockSeatLockRepository.Setup(repo => repo.GetByRouteIdAsync(It.IsAny<Guid>(),
                 It.IsAny<IClientSessionHandle?>()))
             .ReturnsAsync((Guid id, IClientSessionHandle? sessionHandle) =>
             {
                 return _testData.SeatLocks
                     .Where(sl =>
-                    sl.LockedSeatInfos.Any(lsi => lsi.ConcreteRouteId == id))
+                        sl.LockedSeatInfos.Any(lsi => lsi.ConcreteRouteId == id))
                     .Where(sl => sl.ExpirationTimeUtc > DateTime.UtcNow);
             });
 
-        _mockSeatLockRepository.Setup(repo => repo.AddAsync(It.IsAny<SeatLock>(), 
+        _mockSeatLockRepository.Setup(repo => repo.AddAsync(It.IsAny<SeatLock>(),
                 It.IsAny<IClientSessionHandle?>()))
             .ReturnsAsync((SeatLock seatLock, IClientSessionHandle? session) =>
             {
@@ -649,7 +672,7 @@ public class TicketBookingTest
             HashedPassword = "1",
             Status = UserAccountStatus.Active
         };
-        
+
         _testData.UserAccounts.Add(user);
 
         var bookSeatRequest = new BookSeatRequest
@@ -661,8 +684,9 @@ public class TicketBookingTest
             SeatNumber = 9
         };
 
-        var result = await _ticketBookingService.BookPlaces(userAccountId, new List<BookSeatRequest>{bookSeatRequest});
-        
+        var result =
+            await _ticketBookingService.BookPlaces(userAccountId, new List<BookSeatRequest> { bookSeatRequest });
+
         Assert.That(result != Guid.Empty, Is.EqualTo(true), "book must be successful");
 
         try
@@ -672,7 +696,7 @@ public class TicketBookingTest
         }
         catch (Exception ex)
         {
-            int x = 0;
+            var x = 0;
             Assert.That(x, Is.EqualTo(0), "validation must fail");
         }
 
@@ -685,12 +709,13 @@ public class TicketBookingTest
         }
         catch (Exception ex)
         {
-            int x = 0;
+            var x = 0;
             Assert.That(x, Is.EqualTo(0), "validation must fail");
         }
+
         Debug.WriteLine("ok now wait for delay");
         await Task.Delay(40000);
-        
+
         try
         {
             var result2 =
@@ -698,7 +723,7 @@ public class TicketBookingTest
         }
         catch (Exception ex)
         {
-            int x = 0;
+            var x = 0;
             Assert.That(x, Is.EqualTo(1), "validation must be successful");
         }
     }

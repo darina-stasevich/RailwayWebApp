@@ -7,9 +7,79 @@ using RailwayApp.Domain.Statuses;
 
 namespace RailwayApp.Application.Services;
 
-public class UserAccountService(IPasswordHasher passwordHasher,
+public class UserAccountService(
+    IPasswordHasher passwordHasher,
     IUserAccountRepository userAccountRepository) : IUserAccountService
 {
+    public async Task<Guid> CreateUserAccountAsync(CreateUserAccountRequest request)
+    {
+        var userAccountCheck = await userAccountRepository.GetByEmailAsync(request.Email);
+        if (userAccountCheck != null)
+            throw new UserAccountEmailAlreadyExistsException(request.Email);
+
+        var userAccount = MapUserAccount(request);
+
+        var passwordHash = await passwordHasher.HashPassword(request.Password);
+        userAccount.HashedPassword = passwordHash;
+
+        return await userAccountRepository.AddAsync(userAccount);
+    }
+
+    public async Task<Guid> UpdateUserAccountAsync(Guid userAccountId, UpdateUserAccountRequest request)
+    {
+        var userAccount = await userAccountRepository.GetByIdAsync(userAccountId);
+        if (userAccount == null)
+            throw new UserAccountUserNotFoundException(userAccountId);
+
+        if (userAccount.Status == UserAccountStatus.Blocked)
+            throw new UserAccountUserBlockedException(userAccountId);
+
+        MapUpdateRequestToUserAccount(request, userAccount);
+
+        var resultUpdate = await userAccountRepository.UpdateAsync(userAccountId, userAccount);
+        if (resultUpdate == false)
+            throw new UserAccountUpdatingFailed(userAccountId);
+
+        return userAccountId;
+    }
+
+    public async Task<Guid> UpdateUserPasswordAsync(Guid userAccountId, ChangePasswordRequest request)
+    {
+        var userAccount = await userAccountRepository.GetByIdAsync(userAccountId);
+        if (userAccount == null)
+            throw new UserAccountUserNotFoundException(userAccountId);
+
+        if (userAccount.Status == UserAccountStatus.Blocked)
+            throw new UserAccountUserBlockedException(userAccountId);
+
+        var oldPasswordHash = userAccount.HashedPassword;
+        if (oldPasswordHash != userAccount.HashedPassword)
+            throw new UserAccountInvalidPasswordException(userAccount.Email);
+
+        var passwordHash = await passwordHasher.HashPassword(request.NewPassword);
+        userAccount.HashedPassword = passwordHash;
+        var resultUpdate = await userAccountRepository.UpdateAsync(userAccountId, userAccount);
+
+        if (resultUpdate == false)
+            throw new UserAccountUpdatingFailed(userAccountId);
+
+        return userAccountId;
+    }
+
+    public async Task<Guid> DeleteUserAccountAsync(Guid userAccountId)
+    {
+        var userAccount = await userAccountRepository.GetByIdAsync(userAccountId);
+        if (userAccount == null)
+            throw new UserAccountUserNotFoundException(userAccountId);
+
+        if (userAccount.Status == UserAccountStatus.Blocked)
+            throw new UserAccountUserBlockedException(userAccountId);
+
+        await userAccountRepository.DeleteAsync(userAccountId);
+
+        return userAccountId;
+    }
+
     private UserAccount MapUserAccount(CreateUserAccountRequest request)
     {
         var userAccount = new UserAccount
@@ -22,11 +92,11 @@ public class UserAccountService(IPasswordHasher passwordHasher,
             BirthDate = request.BirthDate,
             Gender = request.Gender,
             Status = UserAccountStatus.Active,
-            StatusChangedDate = DateTime.Now,
+            StatusChangedDate = DateTime.Now
         };
         return userAccount;
     }
-    
+
     private void MapUpdateRequestToUserAccount(UpdateUserAccountRequest request, UserAccount userAccount)
     {
         userAccount.Surname = request.Surname;
@@ -35,74 +105,5 @@ public class UserAccountService(IPasswordHasher passwordHasher,
         userAccount.PhoneNumber = request.PhoneNumber;
         userAccount.BirthDate = request.BirthDate.ToUniversalTime();
         userAccount.Gender = request.Gender;
-    }
-    
-    public async Task<Guid> CreateUserAccountAsync(CreateUserAccountRequest request)
-    {
-        var userAccountCheck = await userAccountRepository.GetByEmailAsync(request.Email);
-        if (userAccountCheck != null)
-            throw new UserAccountEmailAlreadyExistsException(request.Email);
-
-        var userAccount = MapUserAccount(request);
-
-        var passwordHash = await passwordHasher.HashPassword(request.Password);
-        userAccount.HashedPassword = passwordHash;
-        
-        return await userAccountRepository.AddAsync(userAccount);
-    }
-
-    public async Task<Guid> UpdateUserAccountAsync(Guid userAccountId, UpdateUserAccountRequest request)
-    {
-        var userAccount = await userAccountRepository.GetByIdAsync(userAccountId);
-        if (userAccount == null)
-            throw new UserAccountUserNotFoundException(userAccountId);
-        
-        if(userAccount.Status == UserAccountStatus.Blocked)
-            throw new UserAccountUserBlockedException(userAccountId);
-        
-        MapUpdateRequestToUserAccount(request, userAccount);
-
-        var resultUpdate = await userAccountRepository.UpdateAsync(userAccountId, userAccount);
-        if (resultUpdate == false)
-            throw new UserAccountUpdatingFailed(userAccountId);
-        
-        return userAccountId;
-    }
-
-    public async Task<Guid> UpdateUserPasswordAsync(Guid userAccountId, ChangePasswordRequest request)
-    {
-        var userAccount = await userAccountRepository.GetByIdAsync(userAccountId);
-        if (userAccount == null)
-            throw new UserAccountUserNotFoundException(userAccountId);
-        
-        if(userAccount.Status == UserAccountStatus.Blocked)
-            throw new UserAccountUserBlockedException(userAccountId);
-
-        var oldPasswordHash = userAccount.HashedPassword;
-        if(oldPasswordHash != userAccount.HashedPassword)
-            throw new UserAccountInvalidPasswordException(userAccount.Email);
-        
-        var passwordHash = await passwordHasher.HashPassword(request.NewPassword);
-        userAccount.HashedPassword = passwordHash;
-        var resultUpdate = await userAccountRepository.UpdateAsync(userAccountId, userAccount);
-        
-        if (resultUpdate == false)
-            throw new UserAccountUpdatingFailed(userAccountId);
-
-        return userAccountId;
-    }
-
-    public async Task<Guid> DeleteUserAccountAsync(Guid userAccountId)
-    {
-        var userAccount = await userAccountRepository.GetByIdAsync(userAccountId);
-        if (userAccount == null)
-            throw new UserAccountUserNotFoundException(userAccountId);
-        
-        if(userAccount.Status == UserAccountStatus.Blocked)
-            throw new UserAccountUserBlockedException(userAccountId);
-
-        await userAccountRepository.DeleteAsync(userAccountId);
-        
-        return userAccountId;
     }
 }

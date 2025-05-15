@@ -1,17 +1,13 @@
-using System.Collections;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace RailwayApp.Domain.Entities;
 
 /// <summary>
-/// связь с поездом через TrainNumber
-/// связь с сегментами через List<AbstractRouteSegment>
+///     связь с поездом через TrainNumber
+///     связь с сегментами через List<AbstractRouteSegment>
 /// </summary>
-
 public class AbstractRoute : IEntity<Guid>
 {
-    [BsonId]
-    public Guid Id { get; set; } = Guid.NewGuid();
     public string TrainNumber { get; set; } // connect with Train
     public List<DayOfWeek> ActiveDays { get; set; } = new();
     public TimeSpan DepartureTime { get; set; }
@@ -19,6 +15,8 @@ public class AbstractRoute : IEntity<Guid>
     public bool HasBeddingOption { get; set; }
 
     public bool IsActive { get; set; } = true;
+
+    [BsonId] public Guid Id { get; set; } = Guid.NewGuid();
     // connection through AbstractRouteSegment.RouteId
     //public List<AbstractRouteSegment> Segments { get; set; } = new();
 }

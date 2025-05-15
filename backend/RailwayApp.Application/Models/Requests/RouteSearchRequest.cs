@@ -12,5 +12,6 @@ public class RouteSearchRequest
 
     [Required(ErrorMessage = "departure date is required")]
     public DateTime DepartureDate { get; set; }
+
     public bool IsDirectRoute { get; set; } = true;
 }

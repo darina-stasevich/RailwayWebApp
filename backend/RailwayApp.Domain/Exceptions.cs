@@ -31,9 +31,14 @@ public class UserAccountUpdatingFailed(Guid id)
 {
     public Guid UserId { get; } = id;
 }
+
 public class TicketBookingServiceException(string message) : Exception(message);
 
-public class TicketBookingServiceSeatNotAvailableException(int seat, Guid routeId, int startSegmentNumber, int endSegmentNumber) :
+public class TicketBookingServiceSeatNotAvailableException(
+    int seat,
+    Guid routeId,
+    int startSegmentNumber,
+    int endSegmentNumber) :
     TicketBookingServiceException($"Seat {seat} is not available for ConcreteRouteId {routeId}, " +
                                   $"StartSegmentNumber {startSegmentNumber}, EndSegmentNumber {endSegmentNumber}")
 {
@@ -50,14 +55,13 @@ public class TicketBookingServiceSeatLockNotFoundException(Guid id) :
 }
 
 public class TicketBookingServiceTrainDepartedException(Guid routeId, int carriage, int seat) :
-    TicketBookingServiceException($"Train already departed. Seat {seat} in carriage {carriage} is locked for booking in route {routeId}")
+    TicketBookingServiceException(
+        $"Train already departed. Seat {seat} in carriage {carriage} is locked for booking in route {routeId}")
 {
     public Guid RouteId { get; } = routeId;
     public int Carriage { get; } = carriage;
     public int Seat { get; } = seat;
-
 }
-
 
 public class CarriageTemplateException(string message) : Exception(message);
 
@@ -66,13 +70,9 @@ public class CarriageTemplatesNotFoundException(Guid routeId)
 {
     public Guid RouteId { get; } = routeId;
 }
+
 public class CarriageTemplateNotFoundException : CarriageTemplateException
 {
-    public Guid CarriageTemplateId { get; }
-    public Guid RouteId { get; }
-
-    public int CarriageNumber { get; }
-    
     public CarriageTemplateNotFoundException(Guid id, Guid routeId) : base(
         $"carriage template {id} not found for route {routeId}")
     {
@@ -98,6 +98,11 @@ public class CarriageTemplateNotFoundException : CarriageTemplateException
         CarriageTemplateId = carriageTemplateId;
         RouteId = routeId;
     }
+
+    public Guid CarriageTemplateId { get; }
+    public Guid RouteId { get; }
+
+    public int CarriageNumber { get; }
 }
 
 public class ConcreteRouteNotFoundException(Guid id) : Exception($"concrete route with id {id} not found")
@@ -113,9 +118,10 @@ public class AbstractRouteNotFoundException(Guid id) : Exception($"abstract rout
 public class AbstractRouteSegmentNotFoundException(Guid id) : Exception($"abstract route segment {id} not found")
 {
     public Guid SegmentId { get; } = id;
-
 }
-public class ConcreteRouteSegmentsNotFoundException(Guid routeId) : Exception($"concrete route segments not found for route {routeId}")
+
+public class ConcreteRouteSegmentsNotFoundException(Guid routeId)
+    : Exception($"concrete route segments not found for route {routeId}")
 {
     public Guid RouteId { get; } = routeId;
 }
@@ -123,15 +129,14 @@ public class ConcreteRouteSegmentsNotFoundException(Guid routeId) : Exception($"
 public class TrainNotFoundException(string number) : Exception($"train {number} not found")
 {
     public string Number { get; } = number;
-
 }
+
 public class PaymentServiceException(string message) : Exception(message);
 
 public class PaymentServicePreparingFailedException(Guid seatLockId)
     : PaymentServiceException($"preparing of seatLock {seatLockId} for payment failed")
 {
     public Guid SeatLockId { get; } = seatLockId;
-
 }
 
 public class PaymentServicePaymentFailedException(Guid seatLockId) :
@@ -170,7 +175,6 @@ public class SeatLockNotFoundException(Guid seatLockId, Guid userAccountId)
 {
     public Guid SeatLockId { get; } = seatLockId;
     public Guid UserAccountId { get; } = userAccountId;
-
 }
 
 public class CarriageAvailabilityUpdateServiceException(string message) : Exception(message);
@@ -178,7 +182,6 @@ public class CarriageAvailabilityUpdateServiceException(string message) : Except
 public class CarriageAvailabilityUpdateServiceSeatNotFoundException(int seat)
     : CarriageAvailabilityUpdateServiceException($"seat {seat} not found")
 {
-
     public int Seat { get; } = seat;
 }
 
@@ -200,6 +203,7 @@ public class TicketNotFoundException(Guid id) : TicketException($"Ticket {id} no
 {
     public Guid TicketId { get; } = id;
 }
+
 public class CarriageSeatServiceException(string message) : Exception(message);
 
 public class CarriageSeatServiceCarriageAvailabilityNotFoundException(Guid routeId, int startSegment, int endSegment)

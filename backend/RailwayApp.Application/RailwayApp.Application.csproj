@@ -7,14 +7,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\RailwayApp.Domain\RailwayApp.Domain.csproj" />
-      <ProjectReference Include="..\RailwayApp.Infrastructure\RailwayApp.Infrastructure.csproj" />
+        <ProjectReference Include="..\RailwayApp.Domain\RailwayApp.Domain.csproj"/>
+        <ProjectReference Include="..\RailwayApp.Infrastructure\RailwayApp.Infrastructure.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="BCrypt.Net" Version="0.1.0" />
-      <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0-preview.3.25171.5" />
-      <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.9.0" />
+        <PackageReference Include="BCrypt.Net" Version="0.1.0"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0-preview.3.25171.5"/>
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.9.0"/>
     </ItemGroup>
 
 </Project>

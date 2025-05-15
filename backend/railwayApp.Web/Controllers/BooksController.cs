@@ -12,9 +12,10 @@ namespace RailwayApp.Web.Controllers;
 [Authorize(Roles = "Client")]
 public class BooksController(
     ITicketBookingService ticketBookingService,
-    ILogger<BooksController> logger) : ControllerBase
+    ILogger<BooksController> logger
+) : ControllerBase
 {
-    [HttpPost("bookSeats")]
+    [HttpPost("book-seats")]
     public async Task<ActionResult<Guid>> BookSeats([FromBody] List<BookSeatRequest> requests)
     {
         string? requestJson;

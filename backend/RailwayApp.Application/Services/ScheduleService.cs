@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices.JavaScript;
 using MongoDB.Driver;
 using RailwayApp.Application.Models;
 using RailwayApp.Domain;
@@ -7,7 +6,8 @@ using RailwayApp.Domain.Interfaces.IServices;
 
 namespace RailwayApp.Application.Services;
 
-public class ScheduleService(IConcreteRouteSegmentRepository concreteRouteSegmentRepository,
+public class ScheduleService(
+    IConcreteRouteSegmentRepository concreteRouteSegmentRepository,
     IAbstractRouteRepository abstractRouteRepository,
     IConcreteRouteRepository concreteRouteRepository,
     IStationRepository stationRepository) : IScheduleService
@@ -16,34 +16,25 @@ public class ScheduleService(IConcreteRouteSegmentRepository concreteRouteSegmen
     {
         // 1. Get concrete route
         var concreteRoute = await concreteRouteRepository.GetByIdAsync(concreteRouteId);
-        if(concreteRoute == null)
-        {
-            throw new ConcreteRouteNotFoundException(concreteRouteId);
-        }
-        
+        if (concreteRoute == null) throw new ConcreteRouteNotFoundException(concreteRouteId);
+
         // 2. Get abstract route
         var abstractRoute = await abstractRouteRepository.GetByIdAsync(concreteRoute.AbstractRouteId);
-        if(abstractRoute == null)
-        {
-            throw new AbstractRouteNotFoundException(concreteRoute.AbstractRouteId);
-        }
-        
+        if (abstractRoute == null) throw new AbstractRouteNotFoundException(concreteRoute.AbstractRouteId);
+
         // 3. Get concrete segments by concreteRouteId
-        var concreteRouteSegments = (await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(concreteRouteId)).ToList();
+        var concreteRouteSegments =
+            (await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(concreteRouteId)).ToList();
         if (concreteRouteSegments == null || concreteRouteSegments.Count == 0)
-        {
             throw new ConcreteRouteSegmentsNotFoundException(concreteRouteId);
-        }
 
         // 4. Get stations
-        
-        var stationIds = concreteRouteSegments.Select(x => x.ToStationId).Append(concreteRouteSegments[0].FromStationId);
+
+        var stationIds = concreteRouteSegments.Select(x => x.ToStationId)
+            .Append(concreteRouteSegments[0].FromStationId);
 
         var stations = await stationRepository.GetByIdsAsync(stationIds.ToList());
-        if (stations == null || stations.Count() == 0)
-        {
-            throw new StationExceptions("stations for given ids not found");
-        }
+        if (stations == null || stations.Count() == 0) throw new StationExceptions("stations for given ids not found");
         var stationsDictionary = stations.ToDictionary(x => x.Id, v => v.Name);
 
         // 6. Create segment schedule dtos
@@ -71,22 +62,25 @@ public class ScheduleService(IConcreteRouteSegmentRepository concreteRouteSegmen
         return scheduleDto;
     }
 
-    public async Task<DateTime> GetDepartureDateForSegment(Guid concreteRouteId, int segmentNumber, IClientSessionHandle? session = null)
+    public async Task<DateTime> GetDepartureDateForSegment(Guid concreteRouteId, int segmentNumber,
+        IClientSessionHandle? session = null)
     {
         var concreteRouteSegments =
             await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(concreteRouteId, session);
-        
-        var departureDate  = concreteRouteSegments.Where(s => s.SegmentNumber == segmentNumber).Select(s => s.ConcreteDepartureDate).FirstOrDefault();
+
+        var departureDate = concreteRouteSegments.Where(s => s.SegmentNumber == segmentNumber)
+            .Select(s => s.ConcreteDepartureDate).FirstOrDefault();
         return departureDate;
     }
-    
-    public async Task<DateTime> GetArrivalDateForSegment(Guid concreteRouteId, int segmentNumber, IClientSessionHandle? session = null)
+
+    public async Task<DateTime> GetArrivalDateForSegment(Guid concreteRouteId, int segmentNumber,
+        IClientSessionHandle? session = null)
     {
         var concreteRouteSegments =
             await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(concreteRouteId, session);
-        
-        var arrivalDate= concreteRouteSegments.Where(s => s.SegmentNumber == segmentNumber).Select(s => s.ConcreteArrivalDate).FirstOrDefault();
-        return arrivalDate;
 
+        var arrivalDate = concreteRouteSegments.Where(s => s.SegmentNumber == segmentNumber)
+            .Select(s => s.ConcreteArrivalDate).FirstOrDefault();
+        return arrivalDate;
     }
 }

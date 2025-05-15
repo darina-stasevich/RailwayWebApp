@@ -1,15 +1,14 @@
-using System.Diagnostics;
 using MongoDB.Driver;
 using RailwayApp.Application.Models.Dto;
 using RailwayApp.Domain;
 using RailwayApp.Domain.Entities;
 using RailwayApp.Domain.Interfaces.IRepositories;
 using RailwayApp.Domain.Interfaces.IServices;
-using RailwayApp.Infrastructure.Repositories;
 
 namespace RailwayApp.Application.Services;
 
-public class CarriageAvailabilityUpdateService(ICarriageService carriageService,
+public class CarriageAvailabilityUpdateService(
+    ICarriageService carriageService,
     ICarriageTemplateService carriageTemplateService,
     ICarriageAvailabilityRepository carriageAvailabilityRepository) : ICarriageAvailabilityUpdateService
 {
@@ -50,7 +49,7 @@ public class CarriageAvailabilityUpdateService(ICarriageService carriageService,
         var carriageTemplates =
             await carriageTemplateService.GetCarriageTemplateForRouteAsync(dto.ConcreteRouteId, session);
         var carriageTemplate = carriageTemplates.FirstOrDefault(x => x.CarriageNumber == dto.Carriage);
-        if(carriageTemplate == null)
+        if (carriageTemplate == null)
             throw new CarriageTemplateNotFoundException(dto.Carriage, dto.ConcreteRouteId);
         var seatDto = new OccupiedSeatDto
         {
@@ -64,7 +63,7 @@ public class CarriageAvailabilityUpdateService(ICarriageService carriageService,
         {
             if (carriageAvailability.OccupiedSeats.Count < dto.SeatNumber)
                 throw new CarriageAvailabilityUpdateServiceSeatNotFoundException(dto.SeatNumber);
-            if (carriageAvailability.OccupiedSeats[dto.SeatNumber - 1] == true)
+            if (carriageAvailability.OccupiedSeats[dto.SeatNumber - 1])
                 throw new CarriageAvailabilityUpdateServiceSeatAlreadyFreeException(dto.SeatNumber);
             carriageAvailability.OccupiedSeats[dto.SeatNumber - 1] = true;
         }

@@ -7,8 +7,6 @@ namespace RailwayApp.Domain.Entities;
 // номер сегмента в abstractsegmentid
 public class ConcreteRouteSegment : IEntity<Guid>
 {
-    [BsonId]
-    public Guid Id { get; set; } = Guid.NewGuid();
     public Guid AbstractSegmentId { get; set; }
     public Guid ConcreteRouteId { get; set; }
     public int SegmentNumber { get; set; }
@@ -16,7 +14,9 @@ public class ConcreteRouteSegment : IEntity<Guid>
     public Guid ToStationId { get; set; }
     public DateTime ConcreteDepartureDate { get; set; }
     public DateTime ConcreteArrivalDate { get; set; }
-    
+
+    [BsonId] public Guid Id { get; set; } = Guid.NewGuid();
+
     // connect to carriageAvailability through CarriageAvailability.ConcreteRouteSegmentId
 //    public List<CarriageAvailability> AvailableSeats { get; set; } = new List<CarriageAvailability>();
 }

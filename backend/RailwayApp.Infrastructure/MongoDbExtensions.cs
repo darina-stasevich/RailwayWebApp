@@ -1,16 +1,15 @@
-using System.Net.NetworkInformation;
-using Microsoft.Extensions.Options;
-using MongoDB.Bson;
-using RailwayApp.Domain.Interfaces;
-using RailwayApp.Domain.Interfaces.IRepositories;
-using RailwayApp.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using RailwayApp.Domain.Entities;
+using RailwayApp.Domain.Interfaces;
+using RailwayApp.Domain.Interfaces.IRepositories;
 using RailwayApp.Domain.Statuses;
+using RailwayApp.Infrastructure.Repositories;
 
 namespace RailwayApp.Infrastructure;
 
@@ -24,7 +23,7 @@ public static class MongoDbExtensions
 
         BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
         BsonSerializer.RegisterSerializer(new EnumSerializer<SeatLockStatus>(BsonType.String));
-        
+
         services.AddSingleton<IMongoClient>(serviceProvider =>
         {
             var settings = serviceProvider.GetRequiredService<IOptions<MongoDbSettings>>().Value;
@@ -36,8 +35,8 @@ public static class MongoDbExtensions
         var mongoClientForIndex = serviceProviderForIndex.GetRequiredService<IMongoClient>();
         var mongoSettingsForIndex = serviceProviderForIndex.GetRequiredService<IOptions<MongoDbSettings>>().Value;
 
-        
-        EnsureIndexAsync<SeatLock>(
+
+        EnsureIndexAsync(
                 mongoClientForIndex,
                 mongoSettingsForIndex.DatabaseName,
                 "SeatLocks",
@@ -49,13 +48,12 @@ public static class MongoDbExtensions
                 })
             .GetAwaiter().GetResult();
 
-        
+
         services.AddRepositories();
 
         return services;
-        
     }
-    
+
     private static async Task EnsureIndexAsync<TDocument>(
         IMongoClient mongoClient,
         string databaseName,
@@ -65,7 +63,8 @@ public static class MongoDbExtensions
     {
         if (string.IsNullOrWhiteSpace(databaseName))
         {
-            Console.WriteLine($"Error: DatabaseName is not configured for index creation for collection '{collectionName}'.");
+            Console.WriteLine(
+                $"Error: DatabaseName is not configured for index creation for collection '{collectionName}'.");
             return;
         }
 
@@ -74,20 +73,18 @@ public static class MongoDbExtensions
 
         try
         {
-            bool indexExists = false;
+            var indexExists = false;
             using (var cursor = await collection.Indexes.ListAsync())
             {
                 var indexes = await cursor.ToListAsync();
-                if (indexes.Any(idx => idx["name"] == indexOptions.Name))
-                {
-                    indexExists = true;
-                }
+                if (indexes.Any(idx => idx["name"] == indexOptions.Name)) indexExists = true;
             }
 
             if (!indexExists)
             {
                 await collection.Indexes.CreateOneAsync(new CreateIndexModel<TDocument>(keysDefinition, indexOptions));
-                Console.WriteLine($"Index '{indexOptions.Name}' for collection '{collectionName}' created successfully.");
+                Console.WriteLine(
+                    $"Index '{indexOptions.Name}' for collection '{collectionName}' created successfully.");
             }
             else
             {
@@ -96,7 +93,8 @@ public static class MongoDbExtensions
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error during index ('{indexOptions.Name}') creation/check for collection '{collectionName}': {ex.Message}");
+            Console.WriteLine(
+                $"Error during index ('{indexOptions.Name}') creation/check for collection '{collectionName}': {ex.Message}");
         }
     }
 

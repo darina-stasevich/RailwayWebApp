@@ -11,6 +11,7 @@ public class MongoDbConcreteRouteRepository(IMongoClient client, IOptions<MongoD
 {
     public async Task<IEnumerable<ConcreteRoute>> GetConcreteRoutesInDate(DateTime startDate, DateTime endDate)
     {
-        return await _collection.Find(r => r.RouteDepartureDate >= startDate && r.RouteDepartureDate < endDate).ToListAsync();
+        return await _collection.Find(r => r.RouteDepartureDate >= startDate && r.RouteDepartureDate < endDate)
+            .ToListAsync();
     }
 }

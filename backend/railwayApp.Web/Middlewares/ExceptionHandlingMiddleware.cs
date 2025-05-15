@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
@@ -35,6 +36,12 @@ public class ExceptionHandlingMiddleware(
 
         switch (exception)
         {
+            case ValidationException ex:
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                problemDetails.Status = StatusCodes.Status400BadRequest;
+                problemDetails.Title = "Ошибка валидации данных";
+                logger.LogWarning(ex, "ValidationException : {message}", ex.Message);
+                break;
             case UserAccountEmailAlreadyExistsException ex:
                 context.Response.StatusCode = StatusCodes.Status409Conflict;
                 problemDetails.Status = StatusCodes.Status409Conflict;
@@ -83,7 +90,9 @@ public class ExceptionHandlingMiddleware(
                 context.Response.StatusCode = StatusCodes.Status400BadRequest;
                 problemDetails.Status = StatusCodes.Status400BadRequest;
                 problemDetails.Title = "Поезд отправился";
-                logger.LogWarning(ex, "TicketBookingServiceTrainDepartedException: Route ID: {routeId}. Carriage: {carriage}, Seat: {seat}", ex.RouteId, ex.Carriage, ex.Seat);
+                logger.LogWarning(ex,
+                    "TicketBookingServiceTrainDepartedException: Route ID: {routeId}. Carriage: {carriage}, Seat: {seat}",
+                    ex.RouteId, ex.Carriage, ex.Seat);
                 break;
 
             case CarriageTemplatesNotFoundException ex:

@@ -8,46 +8,27 @@ using RailwayApp.Domain.Interfaces.IServices;
 
 namespace RailwayApp.Application.Services;
 
-public class CarriageService(ICarriageSeatService carriageSeatService,
+public class CarriageService(
+    ICarriageSeatService carriageSeatService,
     IPriceCalculationService priceCalculationService,
     ICarriageTemplateService carriageTemplateService,
     IConcreteRouteSegmentRepository concreteRouteSegmentRepository,
     ICarriageAvailabilityRepository carriageAvailabilityRepository
-    ) : ICarriageService
-{ 
-    private InfoRouteSegmentSearchPerCarriageDto MapInfoRouteSegmentPerCarriageSearch(CarriageInfoRequest request, Guid carriageTemplateId)
-    {
-        return new InfoRouteSegmentSearchPerCarriageDto
-        {
-            ConcreteRouteId = request.ConcreteRouteId,
-            EndSegmentNumber = request.EndSegmentNumber,
-            StartSegmentNumber = request.StartSegmentNumber,
-            CarriageTemplateId = carriageTemplateId
-        };
-    }
-
-    private InfoRouteSegmentSearchDto MapInfoRouteSegmentSearch(CarriagesInfoRequest request)
-    {
-        return new InfoRouteSegmentSearchDto
-        {
-            ConcreteRouteId = request.ConcreteRouteId,
-            StartSegmentNumber = request.StartSegmentNumber,
-            EndSegmentNumber = request.EndSegmentNumber
-        };
-    }
+) : ICarriageService
+{
     public async Task<IEnumerable<ShortCarriageInfoDto>> GetAllCarriagesInfo(CarriagesInfoRequest request)
     {
-        if(request.StartSegmentNumber > request.EndSegmentNumber)
+        if (request.StartSegmentNumber > request.EndSegmentNumber)
             throw new ArgumentException("Start segment number must be less than end segment number");
         var carriageTemplates = await carriageTemplateService.GetCarriageTemplateForRouteAsync(request.ConcreteRouteId);
         if (carriageTemplates == null)
             throw new CarriageTemplatesNotFoundException(request.ConcreteRouteId);
-        
+
         var searchInfoDto = MapInfoRouteSegmentSearch(request);
         // key: CarriageTemplateId, value is the number of available seats in carriage with given template
         var carriageAvailableSeats =
             await carriageSeatService.GetAvailableSeatCountsPerCarriageAsync(searchInfoDto);
-        
+
         var carriagesInfo = new List<ShortCarriageInfoDto>();
 
         var carriagePrices =
@@ -69,9 +50,9 @@ public class CarriageService(ICarriageSeatService carriageSeatService,
 
     public async Task<DetailedCarriageInfoDto> GetCarriageInfo(CarriageInfoRequest request)
     {
-        if(request.StartSegmentNumber > request.EndSegmentNumber)
+        if (request.StartSegmentNumber > request.EndSegmentNumber)
             throw new ArgumentException("Start segment number must be less than end segment number");
-        
+
         // 1. Get this carriageTemplate
         var carriageTemplates = await carriageTemplateService.GetCarriageTemplateForRouteAsync(request.ConcreteRouteId);
 
@@ -81,16 +62,14 @@ public class CarriageService(ICarriageSeatService carriageSeatService,
             .FirstOrDefault(x => x.CarriageNumber == request.CarriageNumber);
 
         if (carriageTemplate == null)
-        {
             throw new CarriageTemplateNotFoundException(request.CarriageNumber, request.ConcreteRouteId);
-        }
 
         var searchPerCarriageDto = MapInfoRouteSegmentPerCarriageSearch(request, carriageTemplate.Id);
         // 2. Get available seats for this carriage
         var availableSeats = await carriageSeatService.GetAvailableSeatsForCarriageAsync(searchPerCarriageDto);
-        
+
         var price = await priceCalculationService.CalculatePriceForCarriageAsync(searchPerCarriageDto);
-        
+
         var detailedCarriageDto = new DetailedCarriageInfoDto
         {
             CarriageNumber = carriageTemplate.CarriageNumber,
@@ -103,17 +82,19 @@ public class CarriageService(ICarriageSeatService carriageSeatService,
         return detailedCarriageDto;
     }
 
-    public async Task<IEnumerable<CarriageAvailability>> GetCarriageAvailabilitiesForSeat(OccupiedSeatDto dto, IClientSessionHandle session)
+    public async Task<IEnumerable<CarriageAvailability>> GetCarriageAvailabilitiesForSeat(OccupiedSeatDto dto,
+        IClientSessionHandle session)
     {
         var allConcreteRouteSegments =
-            await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(dto.ConcreteRouteId, session);
+            await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(dto.ConcreteRouteId,
+                session);
         var concreteRouteSegments = allConcreteRouteSegments.Where(s =>
             s.SegmentNumber >= dto.StartSegmentNumber && s.SegmentNumber <= dto.EndSegmentNumber);
 
         var carriageAvailabilities = new List<CarriageAvailability>();
         foreach (var segment in concreteRouteSegments)
         {
-            var carriageAvailability = await 
+            var carriageAvailability = await
                 carriageAvailabilityRepository.GetByConcreteSegmentIdAndTemplateIdAsync(segment.Id,
                     dto.CarriageTemplateId, session);
             carriageAvailabilities.Add(carriageAvailability);
@@ -121,8 +102,30 @@ public class CarriageService(ICarriageSeatService carriageSeatService,
 
         return carriageAvailabilities;
     }
+
+    private InfoRouteSegmentSearchPerCarriageDto MapInfoRouteSegmentPerCarriageSearch(CarriageInfoRequest request,
+        Guid carriageTemplateId)
+    {
+        return new InfoRouteSegmentSearchPerCarriageDto
+        {
+            ConcreteRouteId = request.ConcreteRouteId,
+            EndSegmentNumber = request.EndSegmentNumber,
+            StartSegmentNumber = request.StartSegmentNumber,
+            CarriageTemplateId = carriageTemplateId
+        };
+    }
+
+    private InfoRouteSegmentSearchDto MapInfoRouteSegmentSearch(CarriagesInfoRequest request)
+    {
+        return new InfoRouteSegmentSearchDto
+        {
+            ConcreteRouteId = request.ConcreteRouteId,
+            StartSegmentNumber = request.StartSegmentNumber,
+            EndSegmentNumber = request.EndSegmentNumber
+        };
+    }
 }
 
 /*
- 
+
 */

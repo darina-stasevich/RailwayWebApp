@@ -10,15 +10,15 @@ namespace RailwayApp.Infrastructure.Repositories;
 public class MongoDbSeatLockRepository(IMongoClient client, IOptions<MongoDbSettings> settings)
     : MongoDbGenericRepository<SeatLock, Guid>(client, settings, "SeatLocks"), ISeatLockRepository
 {
-    public async Task<IEnumerable<SeatLock>> GetByRouteIdAsync(Guid concreteRouteId, IClientSessionHandle? session = null)
+    public async Task<IEnumerable<SeatLock>> GetByRouteIdAsync(Guid concreteRouteId,
+        IClientSessionHandle? session = null)
     {
         var filter = Builders<SeatLock>.Filter.ElemMatch(
             sl => sl.LockedSeatInfos,
             lsi => lsi.ConcreteRouteId == concreteRouteId);
-        if(session == null)
+        if (session == null)
             return await _collection.Find(filter).ToListAsync();
-        else
-            return await _collection.Find(session, filter).ToListAsync();
+        return await _collection.Find(session, filter).ToListAsync();
     }
 
     public async Task<IEnumerable<SeatLock>> GetByUserAccountIdAsync(Guid userAccountId)
@@ -26,7 +26,8 @@ public class MongoDbSeatLockRepository(IMongoClient client, IOptions<MongoDbSett
         return await _collection.Find(x => x.UserAccountId == userAccountId).ToListAsync();
     }
 
-    public async Task<bool> UpdateStatusAsync(Guid seatLockId, SeatLockStatus status, IClientSessionHandle? session = null)
+    public async Task<bool> UpdateStatusAsync(Guid seatLockId, SeatLockStatus status,
+        IClientSessionHandle? session = null)
     {
         var filter = Builders<SeatLock>.Filter.Eq(u => u.Id, seatLockId);
         UpdateResult? updateResult = null;
@@ -46,7 +47,8 @@ public class MongoDbSeatLockRepository(IMongoClient client, IOptions<MongoDbSett
         return updateResult.IsAcknowledged && updateResult.MatchedCount > 0;
     }
 
-    public async Task<bool> PrepareForProcessingAsync(Guid seatLockId, DateTime newExpirationTime, SeatLockStatus newStatus, SeatLockStatus expectedCurrentStatus, IClientSessionHandle session)
+    public async Task<bool> PrepareForProcessingAsync(Guid seatLockId, DateTime newExpirationTime,
+        SeatLockStatus newStatus, SeatLockStatus expectedCurrentStatus, IClientSessionHandle session)
     {
         var filter = Builders<SeatLock>.Filter.And(
             Builders<SeatLock>.Filter.Eq(sl => sl.Id, seatLockId),
@@ -60,5 +62,4 @@ public class MongoDbSeatLockRepository(IMongoClient client, IOptions<MongoDbSett
         var result = await _collection.UpdateOneAsync(session, filter, update);
         return result.IsAcknowledged && result.ModifiedCount > 0;
     }
-
 }

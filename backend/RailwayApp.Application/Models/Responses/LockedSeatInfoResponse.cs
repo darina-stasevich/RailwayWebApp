@@ -13,5 +13,5 @@ public class LockedSeatInfoResponse
     public PassengerData PassengerData { get; set; }
     public DateTime DepartureDate { get; set; }
     public DateTime ArrivalDate { get; set; }
-    public Decimal Price { get; set; }
+    public decimal Price { get; set; }
 }

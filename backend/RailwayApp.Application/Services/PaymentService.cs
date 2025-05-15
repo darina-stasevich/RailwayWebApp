@@ -8,23 +8,23 @@ using RailwayApp.Domain.Statuses;
 
 namespace RailwayApp.Application.Services;
 
-public class PaymentService(IMongoClient mongoClient,
+public class PaymentService(
+    IMongoClient mongoClient,
     ISeatLockRepository seatLockRepository,
     IUserAccountRepository userAccountRepository,
     ITicketRepository ticketRepository,
     ICarriageAvailabilityUpdateService carriageAvailabilityUpdateService) : IPaymentService
 {
-    
     public async Task<List<Ticket>> PayTickets(Guid userAccountId, Guid seatLockId)
     {
         using var session = await mongoClient.StartSessionAsync();
         try
         {
             session.StartTransaction(new TransactionOptions(
-                readConcern: ReadConcern.Snapshot,
+                ReadConcern.Snapshot,
                 writeConcern: WriteConcern.WMajority));
-            
-            
+
+
             var userAccount = await userAccountRepository.GetByIdAsync(userAccountId, session);
             if (userAccount == null)
                 throw new UserAccountUserNotFoundException(userAccountId);
@@ -40,8 +40,8 @@ public class PaymentService(IMongoClient mongoClient,
                 throw new SeatLockExpiredException(seatLockId);
             if (seatLock.UserAccountId != userAccountId)
                 throw new SeatLockNotFoundException(seatLockId, userAccountId);
-            
-            bool prepared = await seatLockRepository.PrepareForProcessingAsync(
+
+            var prepared = await seatLockRepository.PrepareForProcessingAsync(
                 seatLockId,
                 DateTime.UtcNow.AddMinutes(10),
                 SeatLockStatus.Processing,
@@ -75,40 +75,25 @@ public class PaymentService(IMongoClient mongoClient,
 
             await ticketRepository.AddRange(tickets, session);
 
-            var occupiedSeatsUpdateResult = await carriageAvailabilityUpdateService.MarkSeatsAsOccupied(seatLock.LockedSeatInfos, session);
+            var occupiedSeatsUpdateResult =
+                await carriageAvailabilityUpdateService.MarkSeatsAsOccupied(seatLock.LockedSeatInfos, session);
             if (!occupiedSeatsUpdateResult)
                 throw new PaymentServiceException("updating seats in carriage availability failed");
-            
-            bool completed = await seatLockRepository.UpdateStatusAsync(seatLockId, SeatLockStatus.Completed, session);
-            if (!completed)
-            {
-                throw new PaymentServicePaymentFailedException(seatLockId);
-            }
-            
+
+            var completed = await seatLockRepository.UpdateStatusAsync(seatLockId, SeatLockStatus.Completed, session);
+            if (!completed) throw new PaymentServicePaymentFailedException(seatLockId);
+
             await session.CommitTransactionAsync();
 
             return tickets;
         }
         catch (Exception e)
         {
-            if (session.IsInTransaction) {
-                await session.AbortTransactionAsync();
-            }
+            if (session.IsInTransaction) await session.AbortTransactionAsync();
             throw;
         }
     }
 
-    private FreeTicketDto MapFreeTicketDto(Ticket ticket)
-    {
-        return new FreeTicketDto
-        {
-            Carriage = ticket.Carriage,
-            StartSegmentNumber = ticket.StartSegmentNumber,
-            EndSegmentNumber = ticket.EndSegmentNumber,
-            ConcreteRouteId = ticket.RouteId,
-            SeatNumber = ticket.Seat
-        };
-    }
     public async Task<bool> CancelTicket(Guid userAccountId, Guid ticketId)
     {
         using var session = await mongoClient.StartSessionAsync();
@@ -116,10 +101,10 @@ public class PaymentService(IMongoClient mongoClient,
         {
             //session.StartTransaction();
             session.StartTransaction(new TransactionOptions(
-                readConcern: ReadConcern.Snapshot,
+                ReadConcern.Snapshot,
                 writeConcern: WriteConcern.WMajority));
-            
-            
+
+
             var userAccount = await userAccountRepository.GetByIdAsync(userAccountId, session);
             if (userAccount == null)
                 throw new UserAccountUserNotFoundException(userAccountId);
@@ -135,21 +120,32 @@ public class PaymentService(IMongoClient mongoClient,
                 throw new PaymentServiceTicketNotPayedException(ticketId);
 
             await ticketRepository.UpdateStatusAsync(ticketId, TicketStatus.Cancelled, session);
-           
-            var occupiedSeatUpdateResult = await carriageAvailabilityUpdateService.MarkSeatAsFree(MapFreeTicketDto(ticket), session);
+
+            var occupiedSeatUpdateResult =
+                await carriageAvailabilityUpdateService.MarkSeatAsFree(MapFreeTicketDto(ticket), session);
             if (!occupiedSeatUpdateResult)
                 throw new PaymentServiceException("updating seat in carriage availability failed");
-            
+
             await session.CommitTransactionAsync();
 
             return true;
         }
         catch (Exception e)
         {
-            if (session.IsInTransaction) {
-                await session.AbortTransactionAsync();
-            }
+            if (session.IsInTransaction) await session.AbortTransactionAsync();
             throw;
         }
+    }
+
+    private FreeTicketDto MapFreeTicketDto(Ticket ticket)
+    {
+        return new FreeTicketDto
+        {
+            Carriage = ticket.Carriage,
+            StartSegmentNumber = ticket.StartSegmentNumber,
+            EndSegmentNumber = ticket.EndSegmentNumber,
+            ConcreteRouteId = ticket.RouteId,
+            SeatNumber = ticket.Seat
+        };
     }
 }

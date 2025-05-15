@@ -6,31 +6,27 @@ using RailwayApp.Domain.Interfaces.IRepositories;
 
 namespace RailwayApp.Infrastructure.Repositories;
 
-public abstract class MongoDbGenericRepository<TEntity, TId> : IGenericRepository<TEntity, TId> where TEntity : class, IEntity<TId>
+public abstract class MongoDbGenericRepository<TEntity, TId> : IGenericRepository<TEntity, TId>
+    where TEntity : class, IEntity<TId>
 {
     protected readonly IMongoCollection<TEntity> _collection;
-    
+
     public MongoDbGenericRepository(IMongoClient client, IOptions<MongoDbSettings> settings, string collectionName)
     {
         if (string.IsNullOrWhiteSpace(collectionName))
             throw new ArgumentNullException(nameof(collectionName), "collection name is whitespace or null");
-        
+
         var database = client.GetDatabase(settings.Value.DatabaseName);
         _collection = database.GetCollection<TEntity>(collectionName);
     }
-    
+
     public async Task<TEntity?> GetByIdAsync(TId id, IClientSessionHandle? session = null)
     {
         var filter = Builders<TEntity>.Filter.Eq("_id", id);
 
         if (session == null)
-        {
             return await _collection.Find(filter).FirstOrDefaultAsync();
-        }
-        else
-        {
-            return await _collection.Find(session, filter).FirstOrDefaultAsync();
-        }
+        return await _collection.Find(session, filter).FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<TEntity>> GetAllAsync()
@@ -40,7 +36,7 @@ public abstract class MongoDbGenericRepository<TEntity, TId> : IGenericRepositor
 
     public async Task<TId> AddAsync(TEntity entity, IClientSessionHandle? session = null)
     {
-        if(session == null)
+        if (session == null)
             await _collection.InsertOneAsync(entity);
         else
             await _collection.InsertOneAsync(session, entity);
@@ -51,7 +47,7 @@ public abstract class MongoDbGenericRepository<TEntity, TId> : IGenericRepositor
     {
         if (session == null)
             await _collection.InsertManyAsync(entities);
-        else 
+        else
             await _collection.InsertManyAsync(session, entities);
     }
 
