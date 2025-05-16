@@ -15,8 +15,8 @@ public class TicketBookingService(
     ICarriageSeatService carriageSeatService,
     IUserAccountRepository userAccountRepository,
     ISeatLockRepository seatLockRepository,
-    IStationRepository stationRepository,
     IStationService stationService,
+    IConcreteRouteSegmentRepository concreteRouteSegmentRepository,
     ICarriageTemplateService carriageTemplateService,
     IPriceCalculationService priceCalculationService,
     IScheduleService scheduleService) : ITicketBookingService
@@ -83,7 +83,6 @@ public class TicketBookingService(
                     StartSegmentNumber = seatRequest.StartSegmentNumber,
                     HasBedLinenSet = seatRequest.HasBedLinenSet,
                     PassengerData = seatRequest.PassengerData,
-
                     Carriage = carriageTemplate.CarriageNumber,
                     DepartureDateUtc = departureDate,
                     ArrivalDateUtc = arrivalDate,
@@ -144,16 +143,35 @@ public class TicketBookingService(
         }
     }
 
-    /*private async Task<List<LockedSeatInfoResponse>> MapLockedSeatInfoResponses(
+    private async Task<SeatLockResponse> MapSeatLockResponse(SeatLock seatLock)
+    {
+        return new SeatLockResponse
+        {
+            SeatLockId = seatLock.Id,
+            ExpirationTimeUtc = seatLock.ExpirationTimeUtc,
+            LockedSeatInfos = await MapLockedSeatInfoResponses(seatLock.LockedSeatInfos)
+        };
+    }
+    
+    private async Task<List<LockedSeatInfoResponse>> MapLockedSeatInfoResponses(
         IEnumerable<LockedSeatInfo> lockedSeatInfos)
     {
         var response = new List<LockedSeatInfoResponse>();
-
-
+        
         foreach (var seatInfo in lockedSeatInfos)
         {
-            var stations = stationService.GetStationByRouteId(seatInfo.ConcreteRouteId);
-
+            var concreteSegments = await 
+                concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(seatInfo.ConcreteRouteId);
+            
+            var startSegment = concreteSegments.FirstOrDefault(x => x.SegmentNumber == seatInfo.StartSegmentNumber);
+            if (startSegment == null)
+                throw new TicketBookingServiceRouteSegmentNotFound(seatInfo.ConcreteRouteId,
+                    seatInfo.StartSegmentNumber);
+            var endSegment = concreteSegments.FirstOrDefault(x => x.SegmentNumber == seatInfo.EndSegmentNumber);
+            if (endSegment == null)
+                throw new TicketBookingServiceRouteSegmentNotFound(seatInfo.ConcreteRouteId,
+                    seatInfo.EndSegmentNumber);
+            
             response.Add(new LockedSeatInfoResponse
             {
                 DepartureDate = seatInfo.DepartureDateUtc,
@@ -161,31 +179,20 @@ public class TicketBookingService(
                 Carriage = seatInfo.Carriage,
                 SeatNumber = seatInfo.SeatNumber,
                 ConcreteRouteId = seatInfo.ConcreteRouteId,
-                FromStation = ,
-                ToStation = ,
                 HasBedLinenSet = seatInfo.HasBedLinenSet,
                 PassengerData = seatInfo.PassengerData,
-                Price = seatInfo.Price
+                Price = seatInfo.Price,
+                FromStationId = startSegment.FromStationId,
+                ToStationId = endSegment.ToStationId
             });
         }
 
         return response;
     }
-
-    private async Task<SeatLockResponse> MapSeatLockResponse(SeatLock seatLock)
-    {
-        return new SeatLockResponse
-        {
-            ExpirationTimeUtc = seatLock.ExpirationTimeUtc,
-            LockedSeatInfos = await MapLockedSeatInfoResponses(seatLock.LockedSeatInfos)
-        };
-    }
-    */
-
+    
     public async Task<IEnumerable<SeatLockResponse>> GetBooks(Guid userAccountId)
     {
-        throw new NotImplementedException();
-/*        var userAccount = await userAccountRepository.GetByIdAsync(userAccountId);
+        var userAccount = await userAccountRepository.GetByIdAsync(userAccountId);
         if (userAccount == null)
         {
             throw new UserAccountUserNotFoundException(userAccountId);
@@ -204,7 +211,7 @@ public class TicketBookingService(
             response.Add(await MapSeatLockResponse(seatLock));
         }
 
-        return response;*/
+        return response;
     }
 
     private InfoSeatSearchDto MapInfoSeatSearchDto(BookSeatRequest dto, CarriageTemplate carriageTemplate)

@@ -16,7 +16,7 @@ public class PassengerData
     [MaxLength(40, ErrorMessage = "Maximal surname's length is 40")]
     public string Surname { get; set; }
 
-    [Required(ErrorMessage = "Surname required")]
+    [Required(ErrorMessage = "Name required")]
     [MinLength(2, ErrorMessage = "Minimal name's length is 2")]
     [MaxLength(40, ErrorMessage = "Maximal name's length is 40")]
     public string FirstName { get; set; }
@@ -27,12 +27,13 @@ public class PassengerData
 
     [BsonRepresentation(BsonType.String)] public Gender Gender { get; set; }
 
+    [Range(typeof(DateTime), "1900-01-01", "2100-01-01")]
     public DateTime BirthDate { get; set; }
 
     [RegularExpression(
         @"^[A-Z]{2}\d{7}$",
         ErrorMessage = "Incorrect format. Expected format is +AA0000000."
     )]
-    [Length(9, 9)]
+    [StringLength(9)]
     public string PassportNumber { get; set; }
 }

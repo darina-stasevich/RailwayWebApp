@@ -63,6 +63,8 @@ public class TicketBookingServiceTrainDepartedException(Guid routeId, int carria
     public int Seat { get; } = seat;
 }
 
+public class TicketBookingServiceRouteSegmentNotFound(Guid routeId, int segmentNumber) :
+    TicketBookingServiceException($"concrete route segment with number {segmentNumber} not found for route {routeId}");
 public class CarriageTemplateException(string message) : Exception(message);
 
 public class CarriageTemplatesNotFoundException(Guid routeId)
