@@ -1,0 +1,137 @@
+.showCarriagesButton {
+    display: block;
+    width: auto;
+    padding: 10px 18px;
+    background-color: #7b00ff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease-in-out;
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
+.showCarriagesButton:hover {
+    background-color: #4200b3;
+}
+
+.showCarriagesButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.showSeatsButton {
+    width: 300px;
+    height: auto;
+    padding: 10px 8px;
+    background-color: #5d1dbc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-align:  center;
+    transition: background-color 0.2s ease-in-out;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.showSeatsButton:hover {
+    background-color: #4200b3;
+}
+
+.showSeatsButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.saveSeatsButton {
+    background-color: #7b00ff;
+    color: white;
+    width: auto;
+    height: 25px;
+    border-radius: 4px;
+}
+
+.saveSeatsButton:hover {
+    background-color: #4200b3;
+}
+
+.backButton {
+    background-color: #363b40;
+    color: white;
+    width: auto;
+    height: 25px;
+    border-radius: 4px;
+
+}
+
+.backButton:hover {
+    background-color: #5a6268;
+}
+
+/* свободное место */
+.seatButton {
+    width: 45px;
+    height: 45px;
+    display: compact;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    border: 1px solid #7143a3;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.seatButton:hover:not(:disabled) {
+    background-color: #9664ed;
+}
+
+/* выбранное место */
+.seatSelected {
+    background-color: #5700b3;
+    color: white;
+    border-color: #4200b3;
+}
+
+/* недоступное место */
+.seatUnavailable {
+    background-color: #f9f9f9;
+    color: #999;
+    border-color: #ddd;
+    cursor: not-allowed;
+}
+
+.confirmSegmentButton {
+    display: block;
+    width: auto;
+    padding: 10px 18px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease-in-out;
+    margin-top: 15px;
+}
+
+.confirmSegmentButton:hover {
+    background-color: #218838;
+}
+
+.confirmSegmentButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.confirmSegmentButton:active {
+    transform: translateY(1px);
+}

@@ -1,11 +1,10 @@
-// App.jsx
 import {BrowserRouter, Routes, Route, Navigate} from "react-router-dom";
 import AuthorizationPage from "./pages/AuthorizationPage/AuthorizationPage.jsx";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import FindRoutePage from "./pages/FindRoutePage/FindRoutePage.jsx";
 import AdminPanel from "./pages/AdminPanel/AdminPanel.jsx";
 import TicketBookingPage from "./pages/TicketBookingPage/TicketBookingPage.jsx";
-import PassengersDetailsPage from "./pages/PassengersDetailsPage/PassengersDetailsPage.jsx";
+import FinalBookingPage from "./pages/FinalBookingPage/FinalBookingPage.jsx";
 
 function App() {
     return (
@@ -31,7 +30,7 @@ function App() {
                 </Route>
 
                 <Route element={<ProtectedRoute allowedRoles={['Client']} />}>
-                    <Route path="/passengers-details" element={<PassengersDetailsPage />} />
+                    <Route path="/passengers-details" element={<FinalBookingPage />} />
                 </Route>
 
                 {/* Обработка несуществующих путей */}

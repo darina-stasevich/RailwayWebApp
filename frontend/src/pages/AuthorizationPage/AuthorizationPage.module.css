@@ -1,10 +1,10 @@
-/* AuthorizationPage.module.css */
 .container {
     max-width: 400px;
     margin: 50px auto;
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 8px;
+    background-color: #f8f5ff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -33,6 +33,7 @@
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
+    background-color: white;
     box-sizing: border-box;
     font-size: 1rem;
     margin-bottom: 15px;
@@ -40,7 +41,8 @@
 
 .inputField:focus,
 .selectField:focus {
-    border-color: #007bff;
+    background-color: white;
+    border-color: #7b00ff;
     outline: none;
     box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
 }
@@ -57,12 +59,12 @@
 }
 
 .submitButton {
-    background-color: #007bff;
+    background-color: #7b00ff;
     margin-top: 10px;
 }
 .submitButton:hover {
     width: 100%;
-    background-color: #0056b3;
+    background-color: #2d00b3;
 }
 
 .toggleButton {

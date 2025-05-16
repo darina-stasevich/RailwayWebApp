@@ -1,4 +1,3 @@
-// ProtectedRoute.jsx
 import { Navigate, Outlet } from "react-router-dom";
 
 const ProtectedRoute = ({ allowedRoles }) => {

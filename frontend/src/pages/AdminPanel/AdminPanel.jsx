@@ -1,4 +1,3 @@
-// AdminPanel.jsx
 const AdminPanel = () => {
     return <div>Панель администратора</div>;
 };

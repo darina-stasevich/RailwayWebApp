@@ -1,0 +1,144 @@
+.ticketHeader {
+    background-color: #e4d6ff;
+    margin: -20px -20px 1px -20px;
+    padding: 12px 20px;
+    border-radius: 8px 8px 0 0;
+}
+
+.ticketHeader h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+}
+
+.ticketNumber {
+    display: inline-block;
+    margin-left: 8px;
+    font-weight: bold;
+}
+
+.ticketDetails {
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border-left: 3px solid #5700b3;
+}
+
+.ticketDetails p {
+    margin: 5px 0;
+}
+
+.passengerDetailsPage {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+.passengerFormCard {
+    border-left: 3px solid #5700b3;
+    background-color: white;
+    /*border: 1px solid #e0e0e0;*/
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.passengerFormCard h3 {
+    margin-top: 0;
+    color: #5700b3;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.ticketSegment {
+    background-color: #ffffff;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 10px;
+}
+
+.routeInfo {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px dashed #ddd;
+}
+
+.routeInfo p {
+    margin: 5px 0;
+}
+
+.routeLabel {
+    display: inline-block;
+    width: 100px;
+    color: #555;
+    font-weight: 500;
+}
+
+.passengerInfo {
+    margin-top: 15px;
+}
+
+.formRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.formRow label {
+    flex: 1;
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+    font-weight: bold;
+    color: #333;
+}
+
+.fullWidth {
+    flex-basis: 100%;
+}
+
+.formRow input,
+.formRow select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 0.95rem;
+    margin-top: 5px;
+}
+
+.formRow input:focus,
+.formRow select:focus {
+    border-color: #7b00ff;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(72, 0, 255, 0.1);
+}
+
+.bedLinenLabel {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+    cursor: pointer;
+    font-weight: normal;
+    color: #333;
+}
+
+.bedLinenLabel input[type="checkbox"] {
+    margin-right: 8px;
+    width: auto;
+}
+
+.cardValidationStatus {
+    background-color: #fff8f8;
+    border-left: 3px solid #dc3545;
+    color: #dc3545;
+    padding: 8px 15px;
+    margin-top: 10px;
+    font-size: 0.9rem;
+}

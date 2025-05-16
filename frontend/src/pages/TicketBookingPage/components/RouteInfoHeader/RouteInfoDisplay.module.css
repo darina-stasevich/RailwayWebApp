@@ -1,0 +1,23 @@
+
+.routeInfoSection {
+    margin: 20px -20px 20px -20px;
+    padding: 20px;
+}
+
+.routeTitle {
+    color: #2700b3;
+    margin: 0 0 10px 0;
+    font-size: 1.4rem;
+}
+
+.routeTimingInfo {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    color: #495057;
+}
+
+.routeDuration {
+    color: #6c757d;
+    font-style: italic;
+}

@@ -37,7 +37,7 @@
     display: inline-block;
     width: auto;
     padding: 8px 15px;
-    background-color: #007bff;
+    background-color: #7b00ff;
     color: white;
     border: none;
     border-radius: 4px;
@@ -53,11 +53,11 @@
 }
 
 .scheduleButton:hover {
-    background-color: #0056b3;
+    background-color: #2d00b3;
 }
 
 .scheduleButton:active {
-    background-color: #004085;
+    background-color: #210085;
     transform: translateY(1px);
 }
 
