@@ -41,21 +41,31 @@ export const StationsProvider = ({ children }) => {
                 });
 
                 if (!response.ok) {
-                    let errorDataMessage = `HTTP error ${response.status}`;
+                    let errorDetailMessage = `HTTP ошибка ${response.status}`;
                     try {
-                        const errorData = await response.json();
-                        errorDataMessage = errorData.message || errorData.title || JSON.stringify(errorData);
+                        const errorText = await response.text();
+                        if (errorText) {
+                            try {
+                                const errorJson = JSON.parse(errorText);
+                                errorDetailMessage = errorJson.message || errorJson.title || JSON.stringify(errorJson);
+                            } catch (jsonParseError) {
+                                errorDetailMessage = errorText.substring(0, 200) || errorDetailMessage;
+                            }
+                        }
                     } catch (e) {
-                        errorDataMessage = await response.text() || errorDataMessage;
+                        console.error("StationsProvider: Could not read error response body", e);
                     }
-                    throw new Error(`Failed to fetch stations: ${errorDataMessage}`);
+                    throw new Error(`Не удалось загрузить станции: ${errorDetailMessage}`);
                 }
 
                 const data = await response.json();
                 setStations(data || []);
-                console.log("StationsContext: Stations loaded successfully", data);
             } catch (err) {
-                setErrorStations(err.message);
+                if (err.message.includes("Пользователь не авторизован")) {
+                    setErrorStations(err.message);
+                } else {
+                    setErrorStations(err.message || "Произошла неизвестная ошибка при загрузке станций.");
+                }
                 console.error("Error in StationsProvider loading stations:", err);
             } finally {
                 setIsLoadingStations(false);
