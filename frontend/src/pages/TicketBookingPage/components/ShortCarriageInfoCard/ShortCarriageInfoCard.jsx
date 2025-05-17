@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './ShortCarriageInfoCard.module.css';
-import buttonStyles from '../../ButtonStyles.module.css';
+import buttonStyles from '../../../../styles/ButtonStyles.module.css';
 const ShortCarriageInfoCard = ({ carriageSummary, selectedInThisCarriageCount, onViewDetails, isLoadingDetails }) => {
     return (
         <div className={styles.shortCarriageItem}>

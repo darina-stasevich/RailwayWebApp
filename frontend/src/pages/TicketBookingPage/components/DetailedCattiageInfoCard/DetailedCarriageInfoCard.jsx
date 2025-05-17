@@ -1,7 +1,7 @@
 import React from 'react';
 import SeatButton from '../SeatButton/SeatButton.jsx';
 import styles from './DetailedCarriageInfoCard.module.css';
-import buttonStyles from '../../ButtonStyles.module.css'
+import buttonStyles from '../../../../styles/ButtonStyles.module.css'
 const DetailedCarriageInfoCard = ({ carriageDetails, temporarySeats, onToggleSeat, onSave, onBackToList }) => {
     if (!carriageDetails) return null;
 

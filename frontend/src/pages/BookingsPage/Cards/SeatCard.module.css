@@ -1,0 +1,54 @@
+.seatCard {
+    background-color: #ffffff;
+    border: 1px solid #e7e7e7;
+    border-radius: 6px;
+    padding: 15px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.seatCard h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 1.25em;
+    color: #5700b3;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 8px;
+}
+
+.seatCard p {
+    margin: 6px 0;
+    line-height: 1.6;
+    font-size: 0.95em;
+    color: black;
+}
+
+.passengerInfo {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed #dcdcdc;
+}
+
+.passengerInfo h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.infoDetailItem {
+    display: flex;
+    align-items: baseline;
+    margin-bottom: 6px;
+    color: black;
+}
+
+.infoLabel {
+    flex-shrink: 0;
+    margin-right: 8px;
+    min-width: 150px;
+    text-align: left;
+}
+
+.infoValue {
+    flex-grow: 1;
+    text-align: left;
+}

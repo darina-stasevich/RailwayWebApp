@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '../../ButtonStyles.module.css';
+import styles from '../../../../styles/ButtonStyles.module.css';
 
 const SeatButton = ({ seatNum, isAvailable, isSelected, onClick, title }) => {
     return (

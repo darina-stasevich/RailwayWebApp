@@ -108,7 +108,7 @@
     cursor: not-allowed;
 }
 
-.confirmSegmentButton {
+.confirmButton {
     display: block;
     width: auto;
     padding: 10px 18px;
@@ -123,15 +123,15 @@
     margin-top: 15px;
 }
 
-.confirmSegmentButton:hover {
+.confirmButton:hover {
     background-color: #218838;
 }
 
-.confirmSegmentButton:disabled {
+.confirmButton:disabled {
     background-color: #ccc;
     cursor: not-allowed;
 }
 
-.confirmSegmentButton:active {
+.confirmButton:active {
     transform: translateY(1px);
 }

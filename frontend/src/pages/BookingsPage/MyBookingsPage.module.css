@@ -1,0 +1,38 @@
+.container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    color: #410087;
+    background-color: #f8f5ff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.loading {
+    text-align: center;
+    font-size: 1.2em;
+    color: #555;
+    padding: 40px 20px;
+}
+
+.error {
+    text-align: center;
+    color: #D8000C;
+    background-color: #FFD2D2;
+    border: 1px solid #D8000C;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 20px 0;
+    font-size: 1em;
+}
+
+.noBookings {
+    text-align: center;
+    font-size: 1.1em;
+    color: #7533ea;
+    padding: 30px 20px;
+    background-color: #ffffff;
+    border: 1px dashed #ddd;
+    border-radius: 5px;
+}

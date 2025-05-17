@@ -3,7 +3,7 @@ import { useCarriageData } from '../../hooks/useCarriageData.jsx';
 import ShortCarriageInfoCard from '../ShortCarriageInfoCard/ShortCarriageInfoCard.jsx';
 import DetailedCarriageInfoCard from '../DetailedCattiageInfoCard/DetailedCarriageInfoCard.jsx';
 import styles from './ActiveSegmentControl.module.css';
-import buttonStyles from '../../ButtonStyles.module.css';
+import buttonStyles from '../../../../styles/ButtonStyles.module.css';
 
 const ActiveSegmentControls = ({
                                    segmentBookingData,
@@ -119,7 +119,7 @@ const ActiveSegmentControls = ({
 
             <hr />
             <p>Всего выбрано мест для этого участка: {totalSelectedSeatsForThisSegment}</p>
-            <button className={buttonStyles.confirmSegmentButton}
+            <button className={buttonStyles.confirmButton}
                     onClick={handleConfirmAndProceed}
                     disabled={totalSelectedSeatsForThisSegment === 0}>
                 Подтвердить выбор для участка и перейти к следующему

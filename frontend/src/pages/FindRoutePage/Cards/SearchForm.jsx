@@ -1,8 +1,7 @@
 import styles from "./SearchForm.module.css";
 import React from "react";
 
-const SearchForm = ({stations,
-                     fromStationId, onFromStationChange,
+const SearchForm = ({stations, fromStationId, onFromStationChange,
                      toStationId, onToStationChange,
                      departureDate, onDepartureDateChange,
                      isDirectRoute, onIsDirectRouteChange,

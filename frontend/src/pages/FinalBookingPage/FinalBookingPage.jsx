@@ -164,7 +164,7 @@ const FinalBookingPage = () => {
             const result = await response.json();
             console.log("Ответ от сервера на бронирование:", result);
             alert("Билеты успешно забронированы!");
-            navigate('/find-route');
+            navigate('/my-bookings');
         } catch (error) {
             console.error("Ошибка при отправке запроса на бронирование:", error);
             alert(`Произошла ошибка: ${error.message}`);

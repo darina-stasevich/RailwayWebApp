@@ -5,10 +5,11 @@ import ComplexRouteCard from "./Cards/ComplexRouteCard.jsx";
 import SearchForm from "./Cards/SearchForm.jsx";
 import ScheduleModal from "./Schedule/ScheduleModal.jsx";
 import {formatDateTime, formatDuration} from "../../utils/formatters.js";
+import { useStations } from '../../contexts/StationsContext.jsx';
 
 const FindRoutePage = () => {
-    // for route search: fromStation, toStation, departureDate, isDirectRoute
-    const [stations, setStations] = useState([]);
+    const { stations, isLoadingStations, errorStations, getStationNameById } = useStations();
+
     const [fromStationId, setFromStationId] = useState('');
     const [toStationId, setToStationId] = useState('');
     const [departureDate, setDepartureDate] = useState(() => {
@@ -21,6 +22,7 @@ const FindRoutePage = () => {
     const [searchResults, setSearchResults] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+
     const navigate = useNavigate();
 
     // for route schedule
@@ -29,42 +31,12 @@ const FindRoutePage = () => {
     const [isLoadingSchedule, setIsLoadingSchedule] = useState(false);
     const [scheduleError, setScheduleError] = useState('');
 
-    // for stations fetching
     useEffect(() => {
-        const fetchStations = async () => {
-            setIsLoading(true);
-            setError('');
-
-            const token = localStorage.getItem('token');
-
-            if (!token) {
-                setError('Ошибка: Пользователь не авторизован. Не удалось загрузить станции.');
-                setIsLoading(false);
-                navigate('/login');
-                return;
-            }
-            try {
-                const response = await fetch('http://localhost:5241/api/Stations', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                if (!response.ok) {
-                    throw new Error(`Ошибка загрузки станций: ${response.statusText}`);
-                }
-                const data = await response.json();
-                setStations(data || []);
-            } catch (err) {
-                setError(err.message);
-                console.error("Ошибка при загрузке станций:", err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchStations();
-    }, []);
+        if (!isLoadingStations && stations && stations.length > 0) {
+            if (!fromStationId && stations[0]) setFromStationId(stations[0].id);
+            if (!toStationId && stations[1]) setToStationId(stations[1].id);
+        }
+    }, [stations, isLoadingStations, fromStationId, toStationId]);
 
     // for route search
     const handleSearch = async (e) => {
@@ -175,15 +147,13 @@ const FindRoutePage = () => {
         }
     };
 
-    // get station name by id
-    const getStationNameById = (stationId) => {
-        if (!stationId || !stations || stations.length === 0) return 'Неизвестная станция';
-        const station = stations.find(s => s.id === stationId);
-        if (station) {
-            return `${station.name}`;
-        }
-        return `Станция (ID: ...${stationId.slice(-6)})`;
-    };
+    if (isLoadingStations) {
+        return <div className={styles.loadingMessage}>Загрузка данных станций...</div>;
+    }
+
+    if (errorStations) {
+        return <div className={styles.errorMessage}>Ошибка загрузки станций: {errorStations}. Пожалуйста, обновите страницу или попробуйте позже.</div>;
+    }
 
     return (
         <div className={styles.findRoutePage}>
