@@ -1,6 +1,13 @@
 import styles from "./SearchForm.module.css";
 import React from "react";
 
+const getFutureDateString = (daysToAdd) => {
+    const today = new Date();
+    const futureDate = new Date(today);
+    futureDate.setDate(today.getDate() + daysToAdd);
+    return futureDate.toISOString().split('T')[0];
+};
+
 const SearchForm = ({stations, fromStationId, onFromStationChange,
                      toStationId, onToStationChange,
                      departureDate, onDepartureDateChange,
@@ -50,6 +57,7 @@ const SearchForm = ({stations, fromStationId, onFromStationChange,
                         onChange={(e) => onDepartureDateChange(e.target.value)}
                         required
                         min={new Date().toISOString().split('T')[0]}
+                        max={getFutureDateString(30)}
                     />
                 </div>
                 <div className={`${styles.formGroup} ${styles.checkboxGroup}`}>
