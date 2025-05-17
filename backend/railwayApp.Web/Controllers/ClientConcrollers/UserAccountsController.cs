@@ -52,9 +52,9 @@ public class UserAccountsController(
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!Guid.TryParse(userIdString, out var id))
             return Unauthorized("User ID claim is missing or invalid.");
-        var userAccountId = await userAccountService.UpdateUserAccountAsync(id, request);
+        var userAccount = await userAccountService.UpdateUserAccountAsync(id, request);
         logger.LogInformation("data of user account with id {Id} was updated", id);
-        return Ok(userAccountId);
+        return Ok(userAccount);
     }
 
     [HttpPut("me/password")]

@@ -11,14 +11,41 @@ public class AdminUserAccountService(IUserAccountRepository userAccountRepositor
     {
         return await userAccountRepository.GetAllAsync();
     }
+    private void ValidateAge(DateTime date)
+    {
+        if(DateTime.Now.Year - date.Year < 18)
+            throw new UserAccountInvalidAgeException(date);
+        if (DateTime.Now.Year - date.Year > 120)
+            throw new UserAccountInvalidAgeException(date);
+        if (DateTime.Now.Year - date.Year > 18)
+        {
+            return;
+        }
 
+        if (DateTime.Now.Month > date.Month)
+        {
+            return;
+        }
+        if (DateTime.Now.Month < date.Month)
+        {
+            throw new UserAccountInvalidAgeException(date);
+        }
+        if (DateTime.Now.Day > date.Day)
+        {
+            return;
+        }
+        if (DateTime.Now.Day <= date.Day)
+        {
+            throw new UserAccountInvalidAgeException(date);
+        }
+        
+    }
     public async Task<Guid> CreateItem(UserAccount item)
     {
         var existingUserAccount = await userAccountRepository.GetByIdAsync(item.Id);
         if (existingUserAccount != null)
             throw new AdminDataConflictException($"User account with ID '{item.Id}' already exists.");
-        if (DateTime.Now - item.BirthDate < TimeSpan.FromDays(18 * 365))
-            throw new AdminDataConflictException($"User must be at least 18 years old");
+        ValidateAge(item.BirthDate);
         return await userAccountRepository.AddAsync(item);
     }
 
@@ -35,6 +62,7 @@ public class AdminUserAccountService(IUserAccountRepository userAccountRepositor
             throw new AdminResourceNotFoundException(nameof(UserAccount), id);
         }
 
+        ValidateAge(itemToUpdate.BirthDate);
         itemToUpdate.Email = existingUserAccount.Email;
         itemToUpdate.HashedPassword = existingUserAccount.HashedPassword;
        

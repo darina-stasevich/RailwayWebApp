@@ -33,7 +33,6 @@ const Navbar = () => {
                     <NavLink
                         to="/my-tickets"
                         className={({ isActive }) => isActive ? `${styles.navLink} ${styles.active}` : styles.navLink}
-                        onClick={handleLogout}
                     >
                         Билеты
                     </NavLink>
@@ -50,14 +49,11 @@ const Navbar = () => {
                     <NavLink
                         to="/login"
                         className={({ isActive}) =>  isActive ? `${styles.navLink} ${styles.active}` : styles.navLink}
+                        onClick={handleLogout}
                     >
                         Выход
                     </NavLink>
                 </li>
-                {/* Можно добавить ссылку для выхода, если потребуется */}
-                {/* <li className={styles.navItem} style={{ marginLeft: 'auto' }}>
-                    <NavLink to="/logout" className={styles.navLink}>Выход</NavLink>
-                </li> */}
             </ul>
         </nav>
     );

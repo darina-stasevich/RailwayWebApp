@@ -13,6 +13,7 @@ public class UserAccountService(
 {
     public async Task<Guid> CreateUserAccountAsync(CreateUserAccountRequest request)
     {
+        ValidateAge(request.BirthDate);
         var userAccountCheck = await userAccountRepository.GetByEmailAsync(request.Email);
         if (userAccountCheck != null)
             throw new UserAccountEmailAlreadyExistsException(request.Email);
@@ -25,8 +26,9 @@ public class UserAccountService(
         return await userAccountRepository.AddAsync(userAccount);
     }
 
-    public async Task<Guid> UpdateUserAccountAsync(Guid userAccountId, UpdateUserAccountRequest request)
+    public async Task<UserAccountDto> UpdateUserAccountAsync(Guid userAccountId, UpdateUserAccountRequest request)
     {
+        ValidateAge(request.BirthDate);
         var userAccount = await userAccountRepository.GetByIdAsync(userAccountId);
         if (userAccount == null)
             throw new UserAccountUserNotFoundException(userAccountId);
@@ -40,7 +42,7 @@ public class UserAccountService(
         if (resultUpdate == false)
             throw new UserAccountUpdatingFailed(userAccountId);
 
-        return userAccountId;
+        return MapUserAccountDto(userAccount);
     }
 
     public async Task<Guid> UpdateUserPasswordAsync(Guid userAccountId, ChangePasswordRequest request)
@@ -99,7 +101,8 @@ public class UserAccountService(
             Name = userAccount.Name,
             SecondName = userAccount.SecondName,
             PhoneNumber = userAccount.PhoneNumber,
-            BirthDate = userAccount.BirthDate
+            BirthDate = userAccount.BirthDate,
+            Gender = userAccount.Gender
         };
     }
 
@@ -128,5 +131,35 @@ public class UserAccountService(
         userAccount.PhoneNumber = request.PhoneNumber;
         userAccount.BirthDate = request.BirthDate.ToUniversalTime();
         userAccount.Gender = request.Gender;
+    }
+
+    private void ValidateAge(DateTime date)
+    {
+        if(DateTime.Now.Year - date.Year < 18)
+            throw new UserAccountInvalidAgeException(date);
+        if (DateTime.Now.Year - date.Year > 120)
+            throw new UserAccountInvalidAgeException(date);
+        if (DateTime.Now.Year - date.Year > 18)
+        {
+            return;
+        }
+
+        if (DateTime.Now.Month > date.Month)
+        {
+            return;
+        }
+        if (DateTime.Now.Month < date.Month)
+        {
+            throw new UserAccountInvalidAgeException(date);
+        }
+        if (DateTime.Now.Day > date.Day)
+        {
+            return;
+        }
+        if (DateTime.Now.Day <= date.Day)
+        {
+            throw new UserAccountInvalidAgeException(date);
+        }
+        
     }
 }

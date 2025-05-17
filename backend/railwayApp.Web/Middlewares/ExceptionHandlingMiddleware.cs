@@ -66,13 +66,18 @@ public class ExceptionHandlingMiddleware(
                 problemDetails.Title = "Неверный email или пароль";
                 logger.LogWarning(ex, "UserAccountInvalidPasswordException: Email: {Email}", ex.Email);
                 break;
+            case UserAccountInvalidAgeException ex:
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                problemDetails.Status = StatusCodes.Status400BadRequest;
+                problemDetails.Title = "Некорректный возраст";
+                logger.LogWarning(ex, "UserAccountInvalidAgeException: BirthDate: {BirthDate}", ex.Date);
+                break;
             case UserAccountUpdatingFailed ex:
                 context.Response.StatusCode = StatusCodes.Status500InternalServerError; // Already default, but explicit
                 problemDetails.Status = StatusCodes.Status500InternalServerError;
                 problemDetails.Title = "Ошибка обновления данных";
                 logger.LogError(ex, "UserAccountUpdatingFailed: User ID: {UserId}", ex.UserId);
                 break;
-
             case TicketBookingServiceSeatNotAvailableException ex:
                 context.Response.StatusCode = StatusCodes.Status409Conflict;
                 problemDetails.Status = StatusCodes.Status409Conflict;
