@@ -1,3 +1,4 @@
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using RailwayApp.Domain.Statuses;
 
@@ -35,6 +36,7 @@ public class Ticket : IEntity<Guid>
 
     public DateTime PurchaseTime { get; set; }
 
+    [BsonRepresentation(BsonType.String)]
     public TicketStatus Status { get; set; }
 
     [BsonId] public Guid Id { get; set; } = Guid.NewGuid();

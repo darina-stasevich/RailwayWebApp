@@ -51,6 +51,20 @@ public abstract class MongoDbGenericRepository<TEntity, TId> : IGenericRepositor
             await _collection.InsertManyAsync(session, entities);
     }
 
+    public async Task<bool> UpdateAsync(TEntity entity, IClientSessionHandle? session = null)
+    {
+        var filter = Builders<TEntity>.Filter.Eq(e => e.Id, entity.Id);
+        ReplaceOneResult result;
+
+        if (session == null)
+            result = await _collection.ReplaceOneAsync(filter, entity);
+        else
+            result = await _collection.ReplaceOneAsync(session, filter, entity);
+            
+        return result.IsAcknowledged && result.ModifiedCount > 0;
+    }
+
+
     public async Task<bool> ExistsAsync(TId id)
     {
         var filter = Builders<TEntity>.Filter.Eq("_id", id);

@@ -25,35 +25,7 @@ public class UserAccountsController(
         logger.LogInformation("User account with id {Id} was created", userAccountId);
         return Ok(userAccountId);
     }
-
-    /*[HttpGet("me")]
-    [Authorize]
-    [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetMyProfile()
-    {
-        var userId = GetCurrentUserId();
-        _logger.LogInformation("Attempting to get profile for UserId {UserId}", userId);
-
-        UserDto userDto = await _userService.GetUserProfileAsync(userId);
-
-        _logger.LogInformation("Profile retrieved successfully for UserId {UserId}", userId);
-        return Ok(userDto);
-    }*/
-
-    /*[HttpGet("{id}")]
-    public async Task<IActionResult> GetUserAccount(Guid id)
-    {
-        var userAccount = await userAccountService.GetByUserAccountIdAsync(id);
-        if (userAccount == null)
-        {
-            return NotFound();
-        }
-        return Ok(userAccount);
-    }*/
-
+    
     [HttpPut("me")]
     [Authorize(Roles = "Client")]
     public async Task<IActionResult> UpdateUserAccount([FromBody] UpdateUserAccountRequest request)

@@ -12,7 +12,7 @@ namespace RailwayApp.Web.Controllers;
 public class PaymentsController(IPaymentService paymentService, ILogger<PaymentsController> logger) : ControllerBase
 {
     [HttpPost("pay")]
-    public async Task<ActionResult<List<Ticket>>> PaySeatLock(Guid seatLockId)
+    public async Task<ActionResult<List<Ticket>>> PaySeatLock([FromBody] Guid seatLockId)
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!Guid.TryParse(userIdString, out var userAccountId))

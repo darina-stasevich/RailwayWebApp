@@ -226,3 +226,32 @@ public class StationNotFoundException(Guid id) : StationExceptions($"station {id
 {
     public Guid StationId { get; set; } = id;
 }
+
+public abstract class AdminOperationException : Exception
+{
+    protected AdminOperationException(string message) : base(message) { }
+    protected AdminOperationException(string message, Exception innerException) : base(message, innerException) { }
+}
+
+public class AdminResourceNotFoundException : AdminOperationException
+{
+    public string ResourceName { get; }
+    public object ResourceId { get; }
+
+    public AdminResourceNotFoundException(string resourceName, object resourceId)
+        : base($"Resource '{resourceName}' with ID '{resourceId}' was not found.")
+    {
+        ResourceName = resourceName;
+        ResourceId = resourceId;
+    }
+}
+
+public class AdminDataConflictException : AdminOperationException
+{ 
+    public AdminDataConflictException(string message) : base(message) { }
+}
+
+public class AdminValidationException : AdminOperationException
+{
+   public AdminValidationException(string message) : base(message) { }
+}

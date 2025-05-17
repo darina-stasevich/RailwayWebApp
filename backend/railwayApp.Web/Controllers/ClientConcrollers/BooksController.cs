@@ -56,7 +56,7 @@ public class BooksController(
         return result;
     }
 
-    [HttpGet("view")]
+    [HttpGet("my-bookings")]
     public async Task<ActionResult<List<SeatLockResponse>>> GetSeatLocks()
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
