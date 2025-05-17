@@ -6,24 +6,6 @@ const ScheduleModal = ({ isOpen, onClose, scheduleData, isLoading, error, format
         return null;
     }
 
-    const formatDateOnly = (dateOnlyString) => {
-        if (!dateOnlyString) return 'N/A';
-        try {
-            const [year, month, day] = dateOnlyString.split('-');
-            const date = new Date(Date.UTC(year, month - 1, day));
-            return new Intl.DateTimeFormat('ru-RU', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                timeZone: 'UTC'
-            }).format(date);
-        } catch (e) {
-            console.error("Ошибка форматирования DateOnly:", e, dateOnlyString);
-            return dateOnlyString;
-        }
-    };
-
-
     return (
         <div className={styles.modalOverlay}>
             <div className={styles.modalContent}>

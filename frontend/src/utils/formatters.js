@@ -26,3 +26,30 @@ export const formatDuration = (timespanString) => {
     }
     return formatted;
 };
+
+export const formatGender = (gender) => {
+    if (gender === 0 || gender === '0') return 'Мужской';
+    if (gender === 1 || gender === '1') return 'Женский';
+    return gender !== null && gender !== undefined ? String(gender) : 'Не указан';
+};
+
+export const formatDateOnly = (utcDateTimeString) => {
+    if (!utcDateTimeString) return 'N/A';
+    try {
+        const dateInUtc = new Date(utcDateTimeString);
+
+        if (isNaN(dateInUtc.getTime())) {
+            console.error("Invalid UTC DateTime string for formatDateOnly:", utcDateTimeString);
+            return utcDateTimeString;
+        }
+        return new Intl.DateTimeFormat('ru-RU', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        }).format(dateInUtc);
+
+    } catch (e) {
+        console.error("Ошибка форматирования DateOnly из UTC DateTime:", e, utcDateTimeString);
+        return utcDateTimeString;
+    }
+};

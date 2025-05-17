@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import styles from './MyBookingsPage.module.css';
-import { formatDateTime } from "../../utils/formatters.js";
+import { formatDateTime, formatDateOnly, formatGender } from "../../utils/formatters.js";
 import { useStations } from '../../contexts/StationsContext.jsx';
 import BookingCard from './Cards/BookingCard.jsx';
 
@@ -13,26 +13,6 @@ export const MyBookingsPage = () => {
     const [books, setBooks] = useState([]);
     const [isLoadingBookings, setIsLoadingBookings] = useState(false);
     const [errorBookings, setErrorBookings] = useState('');
-
-    const formatGender = (gender) => {
-        if (gender === 0 || gender === '0') return 'Мужской';
-        if (gender === 1 || gender === '1') return 'Женский';
-        return gender !== null && gender !== undefined ? String(gender) : 'Не указан';
-    };
-
-    const formatDateOnly = (dateString) => {
-        if (!dateString) return '';
-        try {
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) {
-                if (/^\d{2}\.\d{2}\.\d{4}$/.test(dateString)) return dateString;
-                return dateString;
-            }
-            return date.toLocaleDateString('ru-RU');
-        } catch (e) {
-            return dateString;
-        }
-    };
 
     const fetchBookings = useCallback(async () => {
         setIsLoadingBookings(true);
