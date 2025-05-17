@@ -1,8 +1,9 @@
 import React from 'react';
-import { useProfileData } from './hooks/useProfileData';
+import {useProfileData} from './hooks/useProfileData';
 import ProfileCard from './components/ProfileCard';
 import MessageDisplay from './components/MessageDisplay';
 import styles from './ProfilePage.module.css';
+import ChangePasswordModal from "./components/ChangePasswordModal.jsx";
 
 const ProfilePage = () => {
     const {
@@ -17,6 +18,11 @@ const ProfilePage = () => {
         handleChange,
         handleSubmit,
         handleDeleteAccount,
+        isPasswordModalOpen,
+        isChangingPassword,
+        openPasswordModal,
+        closePasswordModal,
+        handleChangePasswordSubmit,
     } = useProfileData();
 
     if (isLoading && !initialProfileData) {
@@ -33,24 +39,33 @@ const ProfilePage = () => {
     }
 
     return (
-        <div className={styles.profileContainer}>
-            <h1>Мой профиль</h1>
+        <>
+            <div className={styles.profileContainer}>
+                <h1>Мой профиль</h1>
 
-            <MessageDisplay message={message} error={error} />
+                <MessageDisplay message={message} error={error}/>
 
-            {initialProfileData && (
-                <ProfileCard
-                    profileData={profileData}
-                    genderOptions={genderOptions}
-                    isSaving={isSaving}
-                    isLoading={isLoading}
-                    isDeleting={isDeleting}
-                    handleChange={handleChange}
-                    handleSubmit={handleSubmit}
-                    handleDelete={handleDeleteAccount}
-                />
-            )}
-        </div>
+                {initialProfileData && (
+                    <ProfileCard
+                        profileData={profileData}
+                        genderOptions={genderOptions}
+                        isSaving={isSaving}
+                        isLoading={isLoading}
+                        isDeleting={isDeleting}
+                        handleChange={handleChange}
+                        handleSubmit={handleSubmit}
+                        handleDelete={handleDeleteAccount}
+                        openPasswordModal={openPasswordModal}
+                    />
+                )}
+            </div>
+            <ChangePasswordModal
+                isOpen={isPasswordModalOpen}
+                onClose={closePasswordModal}
+                onSubmit={handleChangePasswordSubmit}
+                isChangingPassword={isChangingPassword}
+            />
+        </>
     );
 };
 

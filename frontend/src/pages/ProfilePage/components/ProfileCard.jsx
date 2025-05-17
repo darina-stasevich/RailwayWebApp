@@ -10,7 +10,8 @@ const ProfileCard = ({
                          isLoading,
                          handleChange,
                          handleSubmit,
-                         handleDelete
+                         handleDelete,
+                         openPasswordModal
                      }) => {
     return (
         <form onSubmit={handleSubmit} className={styles.profileForm}>
@@ -58,12 +59,21 @@ const ProfileCard = ({
                 </button>
                 <button
                     type="button"
+                    onClick={openPasswordModal}
+                    className={buttonStyles.secondaryButton}
+                    disabled={isSaving || isLoading || isDeleting}
+                >
+                    Изменить пароль
+                </button>
+                <button
+                    type="button"
                     onClick={handleDelete}
                     className={buttonStyles.cancelButton}
                     disabled={isDeleting || isSaving || isLoading}
                 >
                     {isDeleting ? 'Удаление...' : 'Удалить аккаунт'}
                 </button>
+
             </div>
         </form>
     );

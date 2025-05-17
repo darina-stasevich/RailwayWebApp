@@ -159,3 +159,29 @@
 .cancelButton:active {
     transform: translateY(1px);
 }
+
+.secondaryButton {
+    width: auto;
+    padding: 10px 18px;
+    background-color: #6927ba;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-top: 15px;
+}
+
+.secondaryButton:hover {
+    background-color: #3b2188;
+}
+
+.secondaryButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.secondaryButton:active {
+    transform: translateY(1px);
+}

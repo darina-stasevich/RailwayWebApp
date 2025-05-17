@@ -200,7 +200,7 @@ const FindRoutePage = () => {
                 scheduleData={scheduleData}
                 isLoading={isLoadingSchedule}
                 error={scheduleError}
-                formatDateTime={formatDateTime}>
+                >
             </ScheduleModal>
         </div>
     );

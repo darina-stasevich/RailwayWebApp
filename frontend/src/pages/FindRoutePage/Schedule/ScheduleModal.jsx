@@ -1,7 +1,8 @@
 import React from 'react';
 import styles from './ScheduleModal.module.css';
+import {formatDateOnly, formatDateTime} from "../../../utils/formatters.js";
 
-const ScheduleModal = ({ isOpen, onClose, scheduleData, isLoading, error, formatDateTime }) => {
+const ScheduleModal = ({ isOpen, onClose, scheduleData, isLoading, error }) => {
     if (!isOpen) {
         return null;
     }

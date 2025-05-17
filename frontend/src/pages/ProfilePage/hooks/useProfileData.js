@@ -13,9 +13,12 @@ export const useProfileData = () => {
     const [initialProfileData, setInitialProfileData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false); // <-- НОВОЕ СОСТОЯНИЕ
+    const [isDeleting, setIsDeleting] = useState(false);
     const [error, setError] = useState(null);
     const [message, setMessage] = useState({ type: '', text: '' });
+
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [isChangingPassword, setIsChangingPassword] = useState(false);
 
     const genderOptions = [
         { value: 0, label: 'Мужской' },
@@ -181,6 +184,50 @@ export const useProfileData = () => {
         }
     }, [navigate]);
 
+    const openPasswordModal = useCallback(() => setIsPasswordModalOpen(true), []);
+    const closePasswordModal = useCallback(() => setIsPasswordModalOpen(false), []);
+
+    const handleChangePasswordSubmit = useCallback(async ({ oldPassword, newPassword, duplicateNewPassword }) => {
+        setIsChangingPassword(true);
+        const token = localStorage.getItem('token');
+        const requestBody = { oldPassword, newPassword, duplicateNewPassword};
+        console.log(JSON.stringify(requestBody));
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/UserAccounts/me/password`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody),
+            });
+
+            if (!response.ok) {
+                let errorDetailMessage = `Ошибка ${response.status}.`;
+                try {
+                    const errorData = await response.json();
+                    if (errorData.errors && typeof errorData.errors === 'object') {
+                        const messages = Object.values(errorData.errors).flat();
+                        errorDetailMessage = messages.join(' ');
+                    } else {
+                        errorDetailMessage = errorData.title || errorData.message || JSON.stringify(errorData);
+                    }
+                } catch (parseErr) {
+                    const textError = await response.text();
+                    errorDetailMessage = textError || errorDetailMessage;
+                }
+                return { success: false, error: `Не удалось изменить пароль: ${errorDetailMessage}` };
+            }
+            return { success: true, message: 'Пароль успешно изменен!' };
+        } catch (err) {
+            return { success: false, error: `Произошла ошибка: ${err.message}` };
+        } finally {
+            setIsChangingPassword(false);
+        }
+    }, []);
+
+
     return {
         profileData,
         initialProfileData,
@@ -192,6 +239,11 @@ export const useProfileData = () => {
         genderOptions,
         handleChange,
         handleSubmit,
-        handleDeleteAccount
+        handleDeleteAccount,
+        isPasswordModalOpen,
+        isChangingPassword,
+        openPasswordModal,
+        closePasswordModal,
+        handleChangePasswordSubmit
     };
 };
