@@ -11,7 +11,8 @@ public class TicketService(
     ITicketRepository ticketRepository,
     IUserAccountRepository userAccountRepository,
     IConcreteRouteRepository concreteRouteRepository,
-    IConcreteRouteSegmentRepository concreteRouteSegmentRepository) : ITicketService
+    IConcreteRouteSegmentRepository concreteRouteSegmentRepository,
+    IAbstractRouteRepository abstractRouteRepository) : ITicketService
 {
     
     public async Task<IEnumerable<TicketDto>> GetActiveTickets(Guid userAccountId)
@@ -52,13 +53,16 @@ public class TicketService(
         var ticketDtos = new List<TicketDto>();
         foreach (var ticket in tickets)
         {
-            var route = await concreteRouteRepository.GetByIdAsync(ticket.RouteId);
-            if(route == null)
+            var concreteRoute = await concreteRouteRepository.GetByIdAsync(ticket.RouteId);
+            if(concreteRoute == null)
                 throw new ConcreteRouteNotFoundException(ticket.RouteId);
+            var abstractRoute = await abstractRouteRepository.GetByIdAsync(concreteRoute.AbstractRouteId);
+            if(abstractRoute == null)
+                throw new AbstractRouteNotFoundException(concreteRoute.AbstractRouteId);
             var segments = await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(
-                route.Id);
+                concreteRoute.Id);
             if(segments == null)
-                throw new ConcreteRouteSegmentsNotFoundException(route.Id);
+                throw new ConcreteRouteSegmentsNotFoundException(concreteRoute.Id);
             var startSegment = segments.FirstOrDefault(s => s.SegmentNumber == ticket.StartSegmentNumber);
             if(startSegment == null)
                 throw new ConcreteRouteSegmentNotFoundException(ticket.StartSegmentNumber);
@@ -68,6 +72,7 @@ public class TicketService(
             ticketDtos.Add(new TicketDto
             {
                 TicketId = ticket.Id,
+                Train = abstractRoute.TrainNumber,
                 FromStationId = startSegment.FromStationId,
                 ToStationId = endSegment.ToStationId,
                 DepartureDate = ticket.DepartureDate,

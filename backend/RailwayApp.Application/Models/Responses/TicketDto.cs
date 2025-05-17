@@ -8,6 +8,7 @@ namespace RailwayApp.Application.Models;
 public class TicketDto
 {
     public Guid TicketId { get; set; }
+    public string Train { get; set;}
     public Guid FromStationId { get; set; }
     public Guid ToStationId { get; set; }
     public DateTime DepartureDate { get; set; }

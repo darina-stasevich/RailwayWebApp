@@ -80,6 +80,29 @@ public class UserAccountService(
         return userAccountId;
     }
 
+    public async Task<UserAccountDto> GetUserAccount(Guid userAccountId)
+    {
+        var userAccount = await userAccountRepository.GetByIdAsync(userAccountId);
+        if(userAccount == null)
+            throw new UserAccountUserNotFoundException(userAccountId);
+        if (userAccount.Status == UserAccountStatus.Blocked)
+            throw new UserAccountUserBlockedException(userAccountId);
+        return MapUserAccountDto(userAccount);
+    }
+
+    private UserAccountDto MapUserAccountDto(UserAccount userAccount)
+    {
+        return new UserAccountDto
+        {
+            Email = userAccount.Email,
+            Surname = userAccount.Surname,
+            Name = userAccount.Name,
+            SecondName = userAccount.SecondName,
+            PhoneNumber = userAccount.PhoneNumber,
+            BirthDate = userAccount.BirthDate
+        };
+    }
+
     private UserAccount MapUserAccount(CreateUserAccountRequest request)
     {
         var userAccount = new UserAccount

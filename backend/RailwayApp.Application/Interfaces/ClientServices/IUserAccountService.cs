@@ -8,4 +8,5 @@ public interface IUserAccountService
     Task<Guid> UpdateUserAccountAsync(Guid userAccountId, UpdateUserAccountRequest request);
     Task<Guid> UpdateUserPasswordAsync(Guid userAccountId, ChangePasswordRequest request);
     Task<Guid> DeleteUserAccountAsync(Guid userAccountId);
+    Task<UserAccountDto> GetUserAccount(Guid userAccountId);
 }

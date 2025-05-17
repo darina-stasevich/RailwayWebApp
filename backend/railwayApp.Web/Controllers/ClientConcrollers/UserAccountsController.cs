@@ -13,6 +13,7 @@ public class UserAccountsController(
     ILogger<UserAccountsController> logger) : ControllerBase
 {
     [HttpPost("register")]
+    [AllowAnonymous]
     public async Task<IActionResult> CreateUserAccount([FromBody] CreateUserAccountRequest request)
     {
         if (!ModelState.IsValid)
@@ -24,6 +25,18 @@ public class UserAccountsController(
         var userAccountId = await userAccountService.CreateUserAccountAsync(request);
         logger.LogInformation("User account with id {Id} was created", userAccountId);
         return Ok(userAccountId);
+    }
+
+    [HttpGet("me")]
+    [Authorize(Roles = "Client")]
+    public async Task<IActionResult> GetUserAccount()
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdString, out var id))
+            return Unauthorized("User ID claim is missing or invalid.");
+        var userAccountDto = await userAccountService.GetUserAccount(id);
+        logger.LogInformation("User account with id {Id} was retrieved", id);
+        return Ok(userAccountDto);
     }
     
     [HttpPut("me")]

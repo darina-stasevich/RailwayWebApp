@@ -25,7 +25,7 @@ public class PaymentsController(IPaymentService paymentService, ILogger<Payments
     }
 
     [HttpPost("cancelPay")]
-    public async Task<ActionResult<List<Ticket>>> CancelPayTicket(Guid ticketId)
+    public async Task<ActionResult<List<Ticket>>> CancelPayTicket([FromBody]Guid ticketId)
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!Guid.TryParse(userIdString, out var userAccountId))

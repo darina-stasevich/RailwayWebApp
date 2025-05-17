@@ -7,7 +7,6 @@ namespace RailwayApp.Application.Models;
 public class UserAccountDto
 {
     public string Email { get; set; }
-
     public string Surname { get; set; }
     public string Name { get; set; }
     public string? SecondName { get; set; }
