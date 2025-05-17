@@ -3,6 +3,13 @@ import { NavLink } from 'react-router-dom';
 import styles from './Navbar.module.css';
 
 const Navbar = () => {
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        localStorage.removeItem('userName');
+        console.log('Пользователь вышел, токен удален.');
+    };
     return (
         <nav className={styles.navbar}>
             <ul className={styles.navList}>
@@ -26,6 +33,7 @@ const Navbar = () => {
                     <NavLink
                         to="/my-tickets"
                         className={({ isActive }) => isActive ? `${styles.navLink} ${styles.active}` : styles.navLink}
+                        onClick={handleLogout}
                     >
                         Билеты
                     </NavLink>
@@ -36,6 +44,14 @@ const Navbar = () => {
                         className={({ isActive }) => isActive ? `${styles.navLink} ${styles.active}` : styles.navLink}
                     >
                         Профиль
+                    </NavLink>
+                </li>
+                <li className={styles.navItem}>
+                    <NavLink
+                        to="/login"
+                        className={({ isActive}) =>  isActive ? `${styles.navLink} ${styles.active}` : styles.navLink}
+                    >
+                        Выход
                     </NavLink>
                 </li>
                 {/* Можно добавить ссылку для выхода, если потребуется */}

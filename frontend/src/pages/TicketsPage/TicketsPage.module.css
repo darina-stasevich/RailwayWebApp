@@ -2,13 +2,15 @@
     max-width: 900px;
     margin: 20px auto;
     padding: 20px;
-    background-color: #f0ebfb;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    color: #410087;
+    background-color: #f8f5ff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .container h1 {
-    text-align: center;
-    color: #333;
+    color: #410087;
     margin-bottom: 0px;
     font-size: 2em;
 }
