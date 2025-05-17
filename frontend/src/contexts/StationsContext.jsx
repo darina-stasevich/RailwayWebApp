@@ -1,6 +1,7 @@
 import React, {createContext, useState, useEffect, useContext, useCallback} from 'react';
 import {useNavigate} from "react-router-dom";
 
+const API_BASE_URL = 'http://localhost:5241/api';
 const StationsContext = createContext();
 
 export const useStations = () => {
@@ -35,7 +36,7 @@ export const StationsProvider = ({ children }) => {
             }
 
             try {
-                const response = await fetch('http://localhost:5241/api/Stations', {
+                const response = await fetch(`${API_BASE_URL}/Stations`, {
                     method: 'GET',
                     headers: headers,
                 });

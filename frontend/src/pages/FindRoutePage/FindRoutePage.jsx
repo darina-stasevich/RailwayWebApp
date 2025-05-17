@@ -7,6 +7,8 @@ import ScheduleModal from "./Schedule/ScheduleModal.jsx";
 import {formatDateTime, formatDuration} from "../../utils/formatters.js";
 import { useStations } from '../../contexts/StationsContext.jsx';
 
+const API_BASE_URL = 'http://localhost:5241/api';
+
 const FindRoutePage = () => {
     const { stations, isLoadingStations, errorStations, getStationNameById } = useStations();
 
@@ -63,7 +65,7 @@ const FindRoutePage = () => {
         };
 
         try {
-            const response = await fetch('http://localhost:5241/api/Routes/search', {
+            const response = await fetch(`${API_BASE_URL}/Routes/search`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -123,7 +125,7 @@ const FindRoutePage = () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:5241/api/Schedules/${concreteRouteId}`, {
+            const response = await fetch(`${API_BASE_URL}/Schedules/${concreteRouteId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'

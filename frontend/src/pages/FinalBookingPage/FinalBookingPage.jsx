@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './FinalBookingPage.module.css';
 import PassengerDataCard from "./Cards/PassengerDataCard.jsx";
 
+const API_BASE_URL = 'http://localhost:5241/api';
+
 const FinalBookingPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
@@ -147,7 +149,7 @@ const FinalBookingPage = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:5241/api/Books/book-seats', {
+            const response = await fetch(`${API_BASE_URL}/Books/book-seats`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

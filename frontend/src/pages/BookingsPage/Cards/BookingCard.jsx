@@ -1,7 +1,7 @@
 import React from "react";
 import styles from './BookingCard.module.css';
 import buttonStyles from '../../../styles/ButtonStyles.module.css';
-import SeatCard from "./SeatCard.jsx";
+import SeatCard from "./SeatCard";
 
 const BookingCard = ({booking, getStationNameById, formatGender, formatDateOnly, handlePayBooking, formatDateTime}) => {
     return (<div key={booking.seatLockId} className={styles.bookingCard}>

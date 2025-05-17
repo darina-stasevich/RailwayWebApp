@@ -1,0 +1,48 @@
+.profileForm {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+}
+
+.formGroup label {
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 0.95em;
+}
+
+.formGroup input,
+.formGroup select {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1em;
+    background-color: #f9f9f9;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.formGroup input:focus,
+.formGroup select:focus {
+    border-color: #7b00ff;
+    background-color: #fff;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(123, 0, 255, 0.1);
+}
+
+.formGroup input[readonly],
+.formGroup input[disabled] {
+    background-color: rgba(240, 235, 251, 0.56);
+    color: #495057;
+    cursor: not-allowed;
+}
+
+.formActions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}

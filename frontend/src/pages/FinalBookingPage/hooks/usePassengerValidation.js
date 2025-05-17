@@ -15,12 +15,12 @@ export const usePassengerValidation = (passengerData) => {
             validationErrors.surname = 'Максимальная длина фамилии - 40 символов';
         }
 
-        if (!passengerData.firstName) {
-            validationErrors.firstName = 'Имя обязательно';
-        } else if (passengerData.firstName.length < 2) {
-            validationErrors.firstName = 'Минимальная длина имени - 2 символа';
-        } else if (passengerData.firstName.length > 40) {
-            validationErrors.firstName = 'Максимальная длина имени - 40 символов';
+        if (!passengerData.name) {
+            validationErrors.name = 'Имя обязательно';
+        } else if (passengerData.name.length < 2) {
+            validationErrors.name = 'Минимальная длина имени - 2 символа';
+        } else if (passengerData.name.length > 40) {
+            validationErrors.name = 'Максимальная длина имени - 40 символов';
         }
 
         if (passengerData.secondName) {

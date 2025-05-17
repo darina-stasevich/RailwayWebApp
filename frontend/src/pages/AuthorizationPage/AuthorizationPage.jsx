@@ -1,7 +1,9 @@
 import styles from './AuthorizationPage.module.css';
-import RegistrationFields from "./RegistrationFields.jsx";
+import RegistrationFields from "./RegistrationFields";
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+const API_BASE_URL = 'http://localhost:5241/api';
 
 const AuthorizationPage = () => {
     const [isLoginMode, setIsLoginMode] = useState(true);
@@ -41,7 +43,7 @@ const AuthorizationPage = () => {
         setError('');
         setSuccessMessage('');
         try {
-            const response = await fetch('http://localhost:5241/api/login', {
+            const response = await fetch(`${API_BASE_URL}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
@@ -110,7 +112,7 @@ const AuthorizationPage = () => {
         };
 
         try {
-            const response = await fetch('http://localhost:5241/api/UserAccounts/register', {
+            const response = await fetch(`${API_BASE_URL}/UserAccounts/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(registrationData),

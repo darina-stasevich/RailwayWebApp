@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const API_BASE_URL = 'http://localhost:5241/api';
+
 export const useCarriageData = (segmentApiParams, token) => {
     const navigate = useNavigate();
     const [shortCarriagesList, setShortCarriagesList] = useState(null);
@@ -32,7 +34,7 @@ export const useCarriageData = (segmentApiParams, token) => {
             return;
         }
         try {
-            const response = await fetch('http://localhost:5241/api/Carriages/summaries', {
+            const response = await fetch(`${API_BASE_URL}/Carriages/summaries`, {
                 method: 'POST',
                 body: JSON.stringify(requestBody),
                 headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
@@ -69,7 +71,7 @@ export const useCarriageData = (segmentApiParams, token) => {
             return;
         }
         try {
-            const response = await fetch('http://localhost:5241/api/Carriages/details', {
+            const response = await fetch(`${API_BASE_URL}/Carriages/details`, {
                 method: 'POST',
                 body: JSON.stringify(requestBody),
                 headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }

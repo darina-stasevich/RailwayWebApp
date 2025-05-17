@@ -5,6 +5,8 @@ import TicketCard from './TicketCard/TicketCard.jsx';
 import { useStations } from '../../contexts/StationsContext.jsx';
 import { formatDateTime, formatDateOnly, formatGender } from '../../utils/formatters.js';
 
+const API_BASE_URL = 'http://localhost:5241/api';
+
 const TICKET_TYPES = {
     ACTIVE: 'active',
     CANCELLED: 'cancelled',
@@ -40,7 +42,7 @@ const TicketsPage = () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:5241/api/Tickets/${type}`, {
+            const response = await fetch(`${API_BASE_URL}/Tickets/${type}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 },
@@ -102,7 +104,7 @@ const TicketsPage = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:5241/api/Payments/cancelPay', {
+            const response = await fetch(`${API_BASE_URL}/Payments/cancelPay`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

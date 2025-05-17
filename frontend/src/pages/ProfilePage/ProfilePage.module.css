@@ -1,0 +1,31 @@
+.profileContainer {
+    max-width: 700px;
+    margin: 30px auto;
+    padding: 25px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f8f5ff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.profileContainer h1 {
+    color: #410087;
+    text-align: left;
+    margin-bottom: 25px;
+    font-size: 2em;
+}
+
+.loading,
+.error {
+    text-align: center;
+    font-size: 1.2em;
+    padding: 40px 20px;
+}
+
+.error {
+    color: #D8000C;
+    background-color: #FFD2D2;
+    border: 1px solid #D8000C;
+    border-radius: 5px;
+    margin: 20px 0;
+}

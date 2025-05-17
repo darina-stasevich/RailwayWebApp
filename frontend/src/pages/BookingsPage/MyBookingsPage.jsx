@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import styles from './MyBookingsPage.module.css';
 import { formatDateTime, formatDateOnly, formatGender } from "../../utils/formatters.js";
 import { useStations } from '../../contexts/StationsContext.jsx';
-import BookingCard from './Cards/BookingCard.jsx';
+import BookingCard from './Cards/BookingCard';
+
+const API_BASE_URL = 'http://localhost:5241/api';
 
 export const MyBookingsPage = () => {
     const navigate = useNavigate();
@@ -27,7 +29,7 @@ export const MyBookingsPage = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:5241/api/Books/my-bookings', {
+            const response = await fetch(`${API_BASE_URL}/Books/my-bookings`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -72,7 +74,7 @@ export const MyBookingsPage = () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:5241/api/Payments/pay`, {
+            const response = await fetch(`${API_BASE_URL}/Payments/pay`, {
                 method: 'POST',
                 body: JSON.stringify(seatLockId),
                 headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
