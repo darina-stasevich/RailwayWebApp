@@ -11,5 +11,6 @@ public class ChangePasswordRequest
     [MinLength(4, ErrorMessage = "min length is 4")]
     public string NewPassword { get; set; }
 
-    [Compare(nameof(NewPassword))] public string DuplicateNewPassword { get; set; }
+    [Compare(nameof(NewPassword))] 
+    public string DuplicateNewPassword { get; set; }
 }

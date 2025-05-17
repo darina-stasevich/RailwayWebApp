@@ -54,13 +54,12 @@ public class UserAccountService(
         if (userAccount.Status == UserAccountStatus.Blocked)
             throw new UserAccountUserBlockedException(userAccountId);
 
-        var oldPasswordHash = userAccount.HashedPassword;
-        if (oldPasswordHash != userAccount.HashedPassword)
+        if (!passwordHasher.VerifyHashedPassword(userAccount.HashedPassword, request.OldPassword))
             throw new UserAccountInvalidPasswordException(userAccount.Email);
 
         var passwordHash = await passwordHasher.HashPassword(request.NewPassword);
         userAccount.HashedPassword = passwordHash;
-        var resultUpdate = await userAccountRepository.UpdateAsync(userAccountId, userAccount);
+        var resultUpdate = await userAccountRepository.UpdatePasswordAsync(userAccountId, userAccount);
 
         if (resultUpdate == false)
             throw new UserAccountUpdatingFailed(userAccountId);

@@ -31,4 +31,15 @@ public class MongoDbUserAccountRepository(IMongoClient client, IOptions<MongoDbS
 
         return updateResult.IsAcknowledged && updateResult.MatchedCount > 0;
     }
+    
+    public async Task<bool> UpdatePasswordAsync(Guid id, UserAccount user)
+    {
+        var filter = Builders<UserAccount>.Filter.Eq(u => u.Id, id);
+
+        var update = Builders<UserAccount>.Update
+            .Set(u => u.HashedPassword, user.HashedPassword);
+        var updateResult = await _collection.UpdateOneAsync(filter, update);
+
+        return updateResult.IsAcknowledged && updateResult.MatchedCount > 0;
+    }
 }

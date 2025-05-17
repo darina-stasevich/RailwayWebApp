@@ -6,4 +6,6 @@ public interface IUserAccountRepository : IGenericRepository<UserAccount, Guid>
 {
     Task<UserAccount?> GetByEmailAsync(string email);
     Task<bool> UpdateAsync(Guid id, UserAccount user);
+    Task<bool> UpdatePasswordAsync(Guid id, UserAccount user);
+
 }
