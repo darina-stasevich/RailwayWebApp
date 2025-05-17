@@ -2,10 +2,6 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace RailwayApp.Domain.Entities;
 
-/// <summary>
-///     Связь с абстрактным маршрутом по RouteId
-///     связь со станциями через FromStationId и ToStationId
-/// </summary>
 public class AbstractRouteSegment : IEntity<Guid>
 {
     public Guid AbstractRouteId { get; set; }

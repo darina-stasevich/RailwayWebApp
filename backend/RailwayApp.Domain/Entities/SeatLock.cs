@@ -13,8 +13,7 @@ public class SeatLock : IEntity<Guid>
     public DateTime ExpirationTimeUtc { get; set; }
 
     public DateTime CreatedAtTimeUtc { get; set; }
-
-
+    
     [BsonRepresentation(BsonType.String)] public SeatLockStatus Status { get; set; }
 
     [BsonId] public Guid Id { get; set; } = Guid.NewGuid();

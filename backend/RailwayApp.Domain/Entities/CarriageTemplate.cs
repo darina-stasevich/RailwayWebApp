@@ -2,7 +2,7 @@ namespace RailwayApp.Domain.Entities;
 
 public class CarriageTemplate : IEntity<Guid>
 {
-    public Guid TrainTypeId { get; set; } // to connect with TrainType
+    public Guid TrainTypeId { get; set; }
     public int CarriageNumber { get; set; }
     public required string LayoutIdentifier { get; set; }
     public int TotalSeats { get; set; }

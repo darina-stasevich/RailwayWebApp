@@ -132,7 +132,12 @@ public class ExceptionHandlingMiddleware(
                 problemDetails.Title = "Сегменты маршрута не найдены";
                 logger.LogWarning(ex, "ConcreteRouteSegmentsNotFoundException: Route ID: {RouteId}", ex.RouteId);
                 break;
-
+            case ConcreteRouteSegmentNotFoundException ex:
+                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                problemDetails.Status = StatusCodes.Status404NotFound;
+                problemDetails.Title = "Сегмент маршрута не найден";
+                logger.LogWarning(exception, "ConcreteRouteSegmentNotFoundException: {ExceptionMessage}", ex.Message);
+                break;
             case TrainNotFoundException ex:
                 context.Response.StatusCode = StatusCodes.Status404NotFound;
                 problemDetails.Status = StatusCodes.Status404NotFound;

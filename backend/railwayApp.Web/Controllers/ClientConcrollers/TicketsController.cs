@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RailwayApp.Application.Models;
 using RailwayApp.Domain.Entities;
 using RailwayApp.Domain.Interfaces.IServices;
 
@@ -12,7 +13,7 @@ namespace RailwayApp.Web.ClientControllers;
 public class TicketsController(ILogger<TicketsController> logger, ITicketService ticketService) : ControllerBase
 {
     [HttpGet("active")]
-    public async Task<ActionResult<IEnumerable<Ticket>>> GetActiveTickets()
+    public async Task<ActionResult<IEnumerable<TicketDto>>> GetActiveTickets()
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!Guid.TryParse(userIdString, out var userAccountId))
@@ -24,7 +25,7 @@ public class TicketsController(ILogger<TicketsController> logger, ITicketService
     }
 
     [HttpGet("cancelled")]
-    public async Task<ActionResult<IEnumerable<Ticket>>> GetCancelledTickets()
+    public async Task<ActionResult<IEnumerable<TicketDto>>> GetCancelledTickets()
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!Guid.TryParse(userIdString, out var userAccountId))
@@ -36,7 +37,7 @@ public class TicketsController(ILogger<TicketsController> logger, ITicketService
     }
 
     [HttpGet("expired")]
-    public async Task<ActionResult<IEnumerable<Ticket>>> GetExpiredTickets()
+    public async Task<ActionResult<IEnumerable<TicketDto>>> GetExpiredTickets()
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!Guid.TryParse(userIdString, out var userAccountId))

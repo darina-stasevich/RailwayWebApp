@@ -128,6 +128,11 @@ public class ConcreteRouteSegmentsNotFoundException(Guid routeId)
     public Guid RouteId { get; } = routeId;
 }
 
+public class ConcreteRouteSegmentNotFoundException(int segmentNumber)
+    : Exception($"concrete route segment not found with number {segmentNumber}")
+{
+    public int SegmentNumber { get; } = segmentNumber;
+}
 public class TrainNotFoundException(string number) : Exception($"train {number} not found")
 {
     public string Number { get; } = number;

@@ -9,6 +9,7 @@ namespace RailwayApp.Domain.Entities;
 
 public class UserAccount : IEntity<Guid>
 {
+    [BsonId] public Guid Id { get; set; } = Guid.NewGuid();
     public string Email { get; set; }
     public string Surname { get; set; }
     public string Name { get; set; }
@@ -25,8 +26,5 @@ public class UserAccount : IEntity<Guid>
     [BsonRepresentation(BsonType.String)] public UserRole Role { get; set; } = UserRole.Client;
 
     public DateTime StatusChangedDate { get; set; }
-
-    [BsonId] public Guid Id { get; set; } = Guid.NewGuid();
-
-    // public List<Ticket> Tickets { get; set; } = new List<Ticket>();    
+    
 }

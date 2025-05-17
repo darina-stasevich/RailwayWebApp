@@ -5,10 +5,6 @@ using RailwayApp.Domain.Statuses;
 
 namespace RailwayApp.Domain.Entities;
 
-/// <summary>
-///     Id как id
-///     TicketId как связь с id билета
-/// </summary>
 public class PassengerData
 {
     [Required(ErrorMessage = "Surname required")]

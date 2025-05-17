@@ -2,10 +2,6 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace RailwayApp.Domain.Entities;
 
-/// <summary>
-///     связь с поездом через TrainNumber
-///     связь с сегментами через List<AbstractRouteSegment>
-/// </summary>
 public class AbstractRoute : IEntity<Guid>
 {
     public string TrainNumber { get; set; } // connect with Train

@@ -8,7 +8,4 @@ public class ConcreteRoute : IEntity<Guid>
     public DateTime RouteDepartureDate { get; set; }
 
     [BsonId] public Guid Id { get; set; } = Guid.NewGuid();
-
-    // connect to segments through ConcreteRouteSegment.ConcreteRouteId
-    //public List<ConcreteRouteSegment> Segments { get; set; } = new();
 }
