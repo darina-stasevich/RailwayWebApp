@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 
-namespace JsonSerializer;
+namespace CustomJsonSerializer;
 
 public class CustomJsonSerializer
 {
@@ -167,7 +167,7 @@ public class CustomJsonSerializer
     public T Deserialize<T>(string json) where T : new()
     {
         if (string.IsNullOrWhiteSpace(json))
-            return default;
+            return default; 
 
         using (JsonDocument document = JsonDocument.Parse(json))
         {

@@ -28,6 +28,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Reference Include="CustomJsonSerializer">
+        <HintPath>..\..\CustomSerializer\CustomJsonSerializer\bin\Debug\net8.0\CustomJsonSerializer.dll</HintPath>
+      </Reference>
       <Reference Include="CustomSerializer">
         <HintPath>..\..\CustomSerializer\CustomSerializer\bin\Debug\net8.0\CustomSerializer.dll</HintPath>
       </Reference>

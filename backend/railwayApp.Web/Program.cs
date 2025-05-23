@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using railway_service;
 using RailwayApp.Application.Services;
 using RailwayApp.Application.Services.PasswordHashers;
 using RailwayApp.Domain.Interfaces.IServices;
@@ -27,6 +28,8 @@ Log.Logger = new LoggerConfiguration()
         outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"
     )
     .CreateLogger();
+
+builder.Services.AddSingleton<IMyCustomLogger, MyCustomFileJsonLogger>();
 
 builder.Host.UseSerilog();
 

@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using CustomSerializer;
-using JsonSerializer;
+
 using MongoDB.Driver.Linq;
 using RailwayApp.Domain.Entities;
 using RailwayApp.Domain.Statuses;
@@ -9,12 +9,12 @@ namespace TestSerializer;
 
 public class JsonSerializerTests
 {
-    private CustomJsonSerializer _serializer;
+    private CustomJsonSerializer.CustomJsonSerializer _serializer;
     
     [SetUp]
     public void Setup()
     {
-        _serializer = new CustomJsonSerializer();
+        _serializer = new CustomJsonSerializer.CustomJsonSerializer();
     }
 
     [Test]
