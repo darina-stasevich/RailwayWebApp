@@ -28,7 +28,7 @@ Log.Logger = new LoggerConfiguration()
     )
     .CreateLogger();
 
-builder.Host.UseSerilog(); // Интеграция с ASP.NET Core
+builder.Host.UseSerilog();
 
 builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
 builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();

@@ -43,10 +43,12 @@ public class TicketBookingTest
         _mockScheduleService = new ScheduleService(_mockConcreteRouteSegmentRepository.Object,
             _mockAbstractRouteRepository.Object,
             _mockConcreteRouteRepository.Object, _mockStationRepository.Object);
+
+        _mockStationService = new StationService(_mockStationRepository.Object);
         ConfigureMocks();
 
         _ticketBookingService = new TicketBookingService(new MongoClient(), _mockCarriageSeatService,
-            _mockUserAccountRepository.Object, _mockSeatLockRepository.Object, _mockCarriageTemplateService,
+            _mockUserAccountRepository.Object, _mockSeatLockRepository.Object, _mockStationService, _mockConcreteRouteSegmentRepository.Object, _mockCarriageTemplateService,
             _mockPriceCalculationService, _mockScheduleService);
     }
 
@@ -67,6 +69,8 @@ public class TicketBookingTest
     private CarriageTemplateService _mockCarriageTemplateService;
     private CarriageSeatService _mockCarriageSeatService;
     private ScheduleService _mockScheduleService;
+    private StationService _mockStationService;
+    
     private readonly TrainCarriageInitializer _trainCarriageInitializer = new();
 
     private TestDataContainer _testData;
@@ -666,7 +670,7 @@ public class TicketBookingTest
             Id = userAccountId,
             Surname = "surname",
             Name = "name",
-            BirthDate = DateTime.UtcNow,
+            BirthDate = DateTime.UtcNow.Subtract(TimeSpan.FromDays(20)),
             Email = "email@mail.com",
             Gender = Gender.Female,
             HashedPassword = "1",
@@ -681,7 +685,15 @@ public class TicketBookingTest
             ConcreteRouteId = _testData.ConcreteRouteBrestMinskDirectId,
             StartSegmentNumber = 1,
             EndSegmentNumber = 1,
-            SeatNumber = 9
+            SeatNumber = 9,
+            PassengerData = new PassengerData
+            {
+                BirthDate = DateTime.Today.AddMonths(-30),
+                FirstName = "firstName",
+                Gender = Gender.Female,
+                PassportNumber = "AB1234567",
+                Surname = "surname"
+            }
         };
 
         var result =

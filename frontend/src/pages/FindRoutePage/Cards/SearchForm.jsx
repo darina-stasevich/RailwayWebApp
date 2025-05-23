@@ -1,12 +1,6 @@
 import styles from "./SearchForm.module.css";
 import React from "react";
-
-const getFutureDateString = (daysToAdd) => {
-    const today = new Date();
-    const futureDate = new Date(today);
-    futureDate.setDate(today.getDate() + daysToAdd);
-    return futureDate.toISOString().split('T')[0];
-};
+import {getFutureDateString} from "../../../utils/formatters.js";
 
 const SearchForm = ({stations, fromStationId, onFromStationChange,
                      toStationId, onToStationChange,

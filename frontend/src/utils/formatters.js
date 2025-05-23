@@ -16,11 +16,24 @@ export const formatDuration = (timespanString) => {
     const parts = timespanString.split(':');
     let formatted = '';
     if (parts.length >= 3) {
-        const hours = parseInt(parts[0].slice(-2), 10);
-        const minutes = parseInt(parts[1], 10);
-        if (hours > 0) formatted += `${hours} ч `;
-        if (minutes > 0) formatted += `${minutes} мин`;
-        if (!formatted) formatted = "Менее минуты";
+        const bigDate = parts[0].split('.');
+        if(bigDate.length > 1) {
+            const days = parseInt(bigDate[0], 10);
+            formatted += `${days} дн `;
+            const hours = parseInt(bigDate[1], 10);
+            const minutes = parseInt(parts[1], 10);
+            if (hours > 0) formatted += `${hours} ч `;
+            if (minutes > 0) formatted += `${minutes} мин`;
+            if (!formatted) formatted = "Менее минуты";
+        }
+        else
+        {
+            const hours = parseInt(parts[0].slice(-2), 10);
+            const minutes = parseInt(parts[1], 10);
+            if (hours > 0) formatted += `${hours} ч `;
+            if (minutes > 0) formatted += `${minutes} мин`;
+            if (!formatted) formatted = "Менее минуты";
+        }
     } else {
         return timespanString;
     }
@@ -52,4 +65,11 @@ export const formatDateOnly = (utcDateTimeString) => {
         console.error("Ошибка форматирования DateOnly из UTC DateTime:", e, utcDateTimeString);
         return utcDateTimeString;
     }
+};
+
+export const getFutureDateString = (daysToAdd) => {
+    const today = new Date();
+    const futureDate = new Date(today);
+    futureDate.setDate(today.getDate() + daysToAdd);
+    return futureDate.toISOString().split('T')[0];
 };

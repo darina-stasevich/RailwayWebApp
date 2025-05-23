@@ -79,9 +79,9 @@ public class UserAccountServiceTest
                 return Task.CompletedTask;
             });
         _mockUserAccountRepository.Setup(repo => repo.UpdateAsync(It.IsAny<Guid>(), It.IsAny<UserAccount>()))
-            .ReturnsAsync((Guid IDictionary, UserAccount userAccount) =>
+            .ReturnsAsync((Guid id, UserAccount userAccount) =>
             {
-                var user = _testData.UserAccounts.FirstOrDefault(u => u.Id == IDictionary);
+                var user = _testData.UserAccounts.FirstOrDefault(u => u.Id == id);
                 if (user == null) return false;
 
                 user.Email = userAccount.Email;
@@ -93,6 +93,17 @@ public class UserAccountServiceTest
 
                 return true;
             });
+        _mockUserAccountRepository.Setup(repo => repo.UpdatePasswordAsync(It.IsAny<Guid>(), It.IsAny<UserAccount>()))
+            .ReturnsAsync((Guid id, UserAccount userAccount) =>
+            {
+                var user = _testData.UserAccounts.FirstOrDefault(u => u.Id == id);
+                if (user == null) return false;
+
+                user.HashedPassword = userAccount.HashedPassword;
+
+                return true;
+            });
+
     }
 
     [Test]
@@ -122,8 +133,13 @@ public class UserAccountServiceTest
             BirthDate = DateTime.UtcNow.AddYears(-25)
         };
 
-        var updatedUserId = await _userAccountService.UpdateUserAccountAsync(userId, updateUserRequest);
-        Assert.That(updatedUserId, Is.EqualTo(userId));
+        var updatedUser = await _userAccountService.UpdateUserAccountAsync(userId, updateUserRequest);
+        Assert.That(updatedUser.PhoneNumber, Is.EqualTo(updateUserRequest.PhoneNumber));
+        Assert.That(updatedUser.Name, Is.EqualTo(updateUserRequest.Name));
+        Assert.That(updatedUser.Surname, Is.EqualTo(updateUserRequest.Surname));
+        Assert.That(updatedUser.SecondName, Is.EqualTo(updateUserRequest.SecondName));
+        Assert.That(updatedUser.BirthDate, Is.EqualTo(updateUserRequest.BirthDate));
+
 
         var updatePasswordRequest = new ChangePasswordRequest
         {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatDateTime } from '../../../utils/formatters.js';
+import {formatDateTime, getFutureDateString} from '../../../utils/formatters.js';
 import { usePassengerValidation } from '../hooks/usePassengerValidation.js';
 import styles from './PassengerDataCard.module.css';
 
@@ -100,6 +100,7 @@ const PassengerDataCard = ({
                                 value={form.passengerData.birthDate}
                                 onChange={(e) => handleInputChange(form.formId, 'passengerData.birthDate', e.target.value)}
                                 required
+                                max={getFutureDateString(0)}
                             />
                             {errors.birthDate && <span className={styles.errorText}>{errors.birthDate}</span>}
                         </label>
