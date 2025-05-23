@@ -1,0 +1,8 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=9c74406e_002Df491_002D4df0_002Da02c_002D731c776520db/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Test1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::7548A11E-FCD1-4B64-9F58-B6B2EAAC192F::net8.0::TestSerializer.CustomTextSerializerTests.TestStationsSerializer&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::7548A11E-FCD1-4B64-9F58-B6B2EAAC192F::net8.0::TestSerializer.CustomTextSerializerTests.TicketSerializer&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::7548A11E-FCD1-4B64-9F58-B6B2EAAC192F::net8.0::TestSerializer.CustomTextSerializerTests.AbstractRouteTest&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
