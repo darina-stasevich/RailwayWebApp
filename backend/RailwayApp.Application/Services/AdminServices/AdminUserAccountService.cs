@@ -11,7 +11,7 @@ public class AdminUserAccountService(IUserAccountRepository userAccountRepositor
     {
         return await userAccountRepository.GetAllAsync();
     }
-    private void ValidateAge(DateTime date)
+    private void ValidateAge(DateOnly date)
     {
         if(DateTime.Now.Year - date.Year < 18)
             throw new UserAccountInvalidAgeException(date);

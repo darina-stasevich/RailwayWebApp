@@ -670,7 +670,7 @@ public class TicketBookingTest
             Id = userAccountId,
             Surname = "surname",
             Name = "name",
-            BirthDate = DateTime.UtcNow.Subtract(TimeSpan.FromDays(20)),
+            BirthDate = new DateOnly(1990, 1, 1),
             Email = "email@mail.com",
             Gender = Gender.Female,
             HashedPassword = "1",

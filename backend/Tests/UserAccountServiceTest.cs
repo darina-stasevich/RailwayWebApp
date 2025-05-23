@@ -42,7 +42,7 @@ public class UserAccountServiceTest
             Name = "Name1",
             SecondName = "SecondName1",
             PhoneNumber = "+1234567890",
-            BirthDate = DateTime.UtcNow.AddYears(-20),
+            BirthDate = new DateOnly(2000, 1, 1),
             Gender = Gender.Female,
             Status = UserAccountStatus.Active,
             StatusChangedDate = DateTime.UtcNow,
@@ -116,7 +116,7 @@ public class UserAccountServiceTest
             Name = "Name1",
             SecondName = "SecondName1",
             PhoneNumber = "+1234567890",
-            BirthDate = DateTime.UtcNow.AddYears(-20),
+            BirthDate = new DateOnly(2000, 1, 1),
             Gender = Gender.Female,
             Password = "1111"
         };
@@ -130,7 +130,7 @@ public class UserAccountServiceTest
             Name = "Name2",
             SecondName = "SecondName2",
             PhoneNumber = "+0987654321",
-            BirthDate = DateTime.UtcNow.AddYears(-25)
+            BirthDate = new DateOnly(1990, 1, 1)
         };
 
         var updatedUser = await _userAccountService.UpdateUserAccountAsync(userId, updateUserRequest);

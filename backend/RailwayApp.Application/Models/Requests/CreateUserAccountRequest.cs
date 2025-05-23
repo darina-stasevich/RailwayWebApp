@@ -33,7 +33,7 @@ public class CreateUserAccountRequest
     public string? PhoneNumber { get; set; }
 
     [Required(ErrorMessage = "Birth day is required")]
-    public DateTime BirthDate { get; set; }
+    public DateOnly BirthDate { get; set; }
 
     [BsonRepresentation(BsonType.String)] public Gender? Gender { get; set; }
 
