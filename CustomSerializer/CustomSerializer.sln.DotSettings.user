@@ -4,5 +4,8 @@
     &lt;TestId&gt;NUnit3x::7548A11E-FCD1-4B64-9F58-B6B2EAAC192F::net8.0::TestSerializer.CustomTextSerializerTests.TestStationsSerializer&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::7548A11E-FCD1-4B64-9F58-B6B2EAAC192F::net8.0::TestSerializer.CustomTextSerializerTests.TicketSerializer&lt;/TestId&gt;&#xD;
     &lt;TestId&gt;NUnit3x::7548A11E-FCD1-4B64-9F58-B6B2EAAC192F::net8.0::TestSerializer.CustomTextSerializerTests.AbstractRouteTest&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::7548A11E-FCD1-4B64-9F58-B6B2EAAC192F::net8.0::TestSerializer.JsonSerializerTests.TestStationsSerializer&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::7548A11E-FCD1-4B64-9F58-B6B2EAAC192F::net8.0::TestSerializer.JsonSerializerTests.AbstractRouteTest&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::7548A11E-FCD1-4B64-9F58-B6B2EAAC192F::net8.0::TestSerializer.JsonSerializerTests.TicketSerializer&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
