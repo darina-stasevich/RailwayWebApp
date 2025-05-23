@@ -27,4 +27,10 @@
         <ProjectReference Include="..\RailwayApp.Domain\RailwayApp.Domain.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="CustomSerializer">
+        <HintPath>..\..\CustomSerializer\CustomSerializer\bin\Debug\net8.0\CustomSerializer.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>

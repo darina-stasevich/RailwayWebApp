@@ -688,7 +688,7 @@ public class TicketBookingTest
             SeatNumber = 9,
             PassengerData = new PassengerData
             {
-                BirthDate = DateTime.Today.AddMonths(-30),
+                BirthDate = new DateOnly(2020, 1, 1),
                 FirstName = "firstName",
                 Gender = Gender.Female,
                 PassportNumber = "AB1234567",
