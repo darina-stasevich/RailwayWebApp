@@ -136,6 +136,8 @@ const FinalBookingPage = () => {
             }
         }));
 
+        console.log("Сформированный объект для отправки (bookSeatRequests):", JSON.stringify(bookSeatRequests, null, 2));
+
         if (!bookSeatRequests || bookSeatRequests.length === 0) {
             alert("Нет данных для бронирования.");
             return;

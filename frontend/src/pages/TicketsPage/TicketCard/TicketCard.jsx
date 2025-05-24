@@ -46,7 +46,7 @@ const TicketCard = ({ ticket, getStationNameById, formatDateTime, formatGender, 
                     </div>
                     <div className={styles.passengerDetailItem}>
                         <span className={styles.passengerLabel}><strong>Дата рождения:</strong></span>
-                        <span className={styles.passengerValue}>{formatDateOnly(passengerData.birthDate)}</span>
+                        <span className={styles.passengerValue}>{passengerData.birthDate}</span>
                     </div>
                     <div className={styles.passengerDetailItem}>
                         <span className={styles.passengerLabel}><strong>Документ:</strong></span>

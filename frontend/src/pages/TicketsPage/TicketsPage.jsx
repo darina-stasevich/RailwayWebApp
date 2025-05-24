@@ -104,7 +104,7 @@ const TicketsPage = () => {
         }
 
         try {
-            const response = await fetch(`${API_BASE_URL}/Payments/cancelPay`, {
+                const response = await fetch(`${API_BASE_URL}/Payments/cancel-pay`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

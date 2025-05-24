@@ -38,7 +38,7 @@ const SeatCard = ({seat, getStationNameById, formatDateTime, formatGender, forma
                 </div>
                 <div className={styles.infoDetailItem}>
                     <span className={styles.infoLabel}><strong>Дата рождения:</strong></span>
-                    <span className={styles.infoValue}>{formatDateOnly(passengerData.birthDate)}</span>
+                    <span className={styles.infoValue}>{passengerData.birthDate}</span>
                 </div>
                 <div className={styles.infoDetailItem}>
                     <span className={styles.infoLabel}><strong>Документ:</strong></span>
