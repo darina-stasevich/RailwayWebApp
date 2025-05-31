@@ -4,9 +4,6 @@ using RailwayApp.Domain.Statuses;
 
 namespace RailwayApp.Domain.Entities;
 
-// поставить email как index,
-// разобраться с Id
-
 public class UserAccount : IEntity<Guid>
 {
     [BsonId] public Guid Id { get; set; } = Guid.NewGuid();
@@ -15,7 +12,7 @@ public class UserAccount : IEntity<Guid>
     public string Name { get; set; }
     public string? SecondName { get; set; }
     public string? PhoneNumber { get; set; }
-    public DateTime BirthDate { get; set; }
+    public DateOnly BirthDate { get; set; }
 
     [BsonRepresentation(BsonType.String)] public Gender? Gender { get; set; }
 

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import styles from './MyBookingsPage.module.css';
-import { formatDateTime, formatDateOnly, formatGender } from "../../utils/formatters.js";
+import { formatDateTime, formatGender } from "../../utils/formatters.js";
 import { useStations } from '../../contexts/StationsContext.jsx';
 import BookingCard from './Cards/BookingCard';
 
@@ -124,7 +124,6 @@ export const MyBookingsPage = () => {
                         booking = {booking}
                         getStationNameById = {getStationNameById}
                         formatGender = {formatGender}
-                        formatDateOnly = {formatDateOnly}
                         handlePayBooking = {handlePayBooking}
                         formatDateTime={formatDateTime}
                     />

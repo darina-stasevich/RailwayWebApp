@@ -240,8 +240,9 @@ public class TicketBookingService(
 
     private void ValidateRequests(List<BookSeatRequest> requests)
     {
+        var today = new DateOnly(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
         foreach (var request in requests)
-            if (DateTime.Now.Date - request.PassengerData.BirthDate.Date < TimeSpan.Zero)
+            if (today < request.PassengerData.BirthDate)
                 throw new ValidationException("validation of birth date failed");
     }
 }

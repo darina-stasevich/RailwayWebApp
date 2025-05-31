@@ -89,7 +89,7 @@ export const useProfileData = () => {
             surname: profileData.surname || null,
             secondName: profileData.secondName || null,
             phoneNumber: profileData.phoneNumber || null,
-            birthDate: profileData.birthDate ? new Date(profileData.birthDate).toISOString() : null,
+            birthDate: profileData.birthDate || null,
             gender: profileData.gender === '' ? null : profileData.gender,
         };
 

@@ -128,11 +128,11 @@ public class UserAccountService(
         userAccount.Name = request.Name;
         userAccount.SecondName = request.SecondName;
         userAccount.PhoneNumber = request.PhoneNumber;
-        userAccount.BirthDate = request.BirthDate.ToUniversalTime();
+        userAccount.BirthDate = request.BirthDate;
         userAccount.Gender = request.Gender;
     }
 
-    private void ValidateAge(DateTime date)
+    private void ValidateAge(DateOnly date)
     {
         if(DateTime.Now.Year - date.Year < 18)
             throw new UserAccountInvalidAgeException(date);

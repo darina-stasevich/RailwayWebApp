@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './TicketCard.module.css';
 import buttonStyles from '../../../styles/ButtonStyles.module.css';
 
-const TicketCard = ({ ticket, getStationNameById, formatDateTime, formatGender, formatDateOnly, isCancellable, onCancelTicket }) => {
+const TicketCard = ({ ticket, getStationNameById, formatDateTime, formatGender, isCancellable, onCancelTicket }) => {
     if (!ticket) {
         return null;
     }
@@ -46,7 +46,7 @@ const TicketCard = ({ ticket, getStationNameById, formatDateTime, formatGender, 
                     </div>
                     <div className={styles.passengerDetailItem}>
                         <span className={styles.passengerLabel}><strong>Дата рождения:</strong></span>
-                        <span className={styles.passengerValue}>{formatDateOnly(passengerData.birthDate)}</span>
+                        <span className={styles.passengerValue}>{passengerData.birthDate}</span>
                     </div>
                     <div className={styles.passengerDetailItem}>
                         <span className={styles.passengerLabel}><strong>Документ:</strong></span>

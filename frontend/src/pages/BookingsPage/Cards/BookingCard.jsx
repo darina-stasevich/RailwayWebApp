@@ -3,7 +3,7 @@ import styles from './BookingCard.module.css';
 import buttonStyles from '../../../styles/ButtonStyles.module.css';
 import SeatCard from "./SeatCard";
 
-const BookingCard = ({booking, getStationNameById, formatGender, formatDateOnly, handlePayBooking, formatDateTime}) => {
+const BookingCard = ({booking, getStationNameById, formatGender, handlePayBooking, formatDateTime}) => {
     return (<div key={booking.seatLockId} className={styles.bookingCard}>
         <div className={styles.bookingHeader}>
             <h2>Бронирование #{booking.seatLockId.substring(0, 8)}</h2>
@@ -15,7 +15,6 @@ const BookingCard = ({booking, getStationNameById, formatGender, formatDateOnly,
                 <SeatCard
                     key={`${booking.seatLockId}-${seat.carriage}-${seat.seatNumber}-${index}`}
                     formatDateTime={formatDateTime}
-                    formatDateOnly={formatDateOnly}
                     formatGender={formatGender}
                     getStationNameById={getStationNameById}
                     seat={seat}

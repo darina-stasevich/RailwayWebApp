@@ -22,14 +22,14 @@ public class UpdateUserAccountRequest
     public string? SecondName { get; set; }
 
     [RegularExpression(
-        @"^\+375\s?\(?\d{2}\)?\s?\d{7}$", // Само регулярное выражение
+        @"^\+375\s?\(?\d{2}\)?\s?\d{7}$",
         ErrorMessage = "Incorrect format. Expected format is +375(XX)XXXXXXX."
     )]
     [MaxLength(20)]
     public string? PhoneNumber { get; set; }
 
     [Required(ErrorMessage = "Birth day is required")]
-    public DateTime BirthDate { get; set; }
+    public DateOnly BirthDate { get; set; }
 
     [BsonRepresentation(BsonType.String)] public Gender? Gender { get; set; }
 }

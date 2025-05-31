@@ -34,10 +34,10 @@ public class UserAccountUpdatingFailed(Guid id)
     public Guid UserId { get; } = id;
 }
 
-public class UserAccountInvalidAgeException(DateTime date)
+public class UserAccountInvalidAgeException(DateOnly date)
     : UserAccountException("given age is smaller than 18")
 {
-    public DateTime Date { get; } = date;
+    public DateOnly Date { get; } = date;
 }
 public class TicketBookingServiceException(string message) : Exception(message);
 

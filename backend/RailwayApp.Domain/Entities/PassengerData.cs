@@ -23,8 +23,7 @@ public class PassengerData
 
     [BsonRepresentation(BsonType.String)] public Gender Gender { get; set; }
 
-    [Range(typeof(DateTime), "1900-01-01", "2100-01-01")]
-    public DateTime BirthDate { get; set; }
+    public DateOnly BirthDate { get; set; }
 
     [RegularExpression(
         @"^[A-Z]{2}\d{7}$",

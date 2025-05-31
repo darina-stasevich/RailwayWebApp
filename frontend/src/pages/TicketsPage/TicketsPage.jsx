@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from './TicketsPage.module.css';
 import TicketCard from './TicketCard/TicketCard.jsx';
 import { useStations } from '../../contexts/StationsContext.jsx';
-import { formatDateTime, formatDateOnly, formatGender } from '../../utils/formatters.js';
+import { formatDateTime, formatGender } from '../../utils/formatters.js';
 
 const API_BASE_URL = 'http://localhost:5241/api';
 
@@ -50,16 +50,11 @@ const TicketsPage = () => {
 
             if (!response.ok) {
                 let errorDetailMessage = `HTTP ошибка ${response.status}`;
-                try {
-                    const errorText = await response.text();
-                    if (errorText) {
-                        const errorJson = JSON.parse(errorText);
-                        errorDetailMessage = errorJson.message || errorJson.title || JSON.stringify(errorJson);
+                const errorText = await response.text();
+                if (errorText) {
+                    const errorJson = JSON.parse(errorText);
+                    errorDetailMessage = errorJson.message || errorJson.title || JSON.stringify(errorJson);
                     }
-                } catch (e)
-                {
-
-                }
                 throw new Error(`Не удалось загрузить билеты: ${errorDetailMessage}`);
             }
             const data = await response.json();
@@ -104,7 +99,7 @@ const TicketsPage = () => {
         }
 
         try {
-            const response = await fetch(`${API_BASE_URL}/Payments/cancelPay`, {
+            const response = await fetch(`${API_BASE_URL}/Payments/cancel-pay`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -117,7 +112,7 @@ const TicketsPage = () => {
                 let errorDetailMessage = `Ошибка ${response.status}`;
                 let errorBodyText = '';
                 try {
-                   errorBodyText = await response.text();
+                    errorBodyText = await response.text();
                     if (errorBodyText) {
                         try {
                             const errorJson = JSON.parse(errorBodyText);
@@ -194,7 +189,6 @@ const TicketsPage = () => {
                             getStationNameById={getStationNameById}
                             formatDateTime={formatDateTime}
                             formatGender={formatGender}
-                            formatDateOnly={formatDateOnly}
                             isCancellable={selectedTicketType === TICKET_TYPES.ACTIVE}
                             onCancelTicket={handleCancelTicket}
                         />
