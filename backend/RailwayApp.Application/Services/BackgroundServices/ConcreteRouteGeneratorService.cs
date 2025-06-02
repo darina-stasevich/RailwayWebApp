@@ -9,15 +9,12 @@ using RailwayApp.Domain.Interfaces.IRepositories;
 
 public class ConcreteRouteGeneratorService(
     ILogger<ConcreteRouteGeneratorService> logger,
-    IConfiguration configuration,
     IMongoClient mongoClient,
     IServiceScopeFactory scopeFactory)
     : IHostedService, IDisposable
 {
     private const int GenerationAdvanceDays = 30;
 
-    private static readonly TimeSpan LocalOffset = TimeSpan.FromHours(3);
-    private readonly IConfiguration _configuration = configuration;
     private Timer _timer;
 
     public void Dispose()
@@ -29,14 +26,7 @@ public class ConcreteRouteGeneratorService(
     {
         logger.LogInformation("ConcreteRouteGeneratorService is starting.");
         ScheduleNextRun(stoppingToken);
-        /*var now = DateTime.Now;
-        var nextRunTime = now.Date.AddMinutes(5);
-//        var nextRunTime = now.Date.AddDays(1);
-        var dueTime = nextRunTime - now;
-        if (dueTime <= TimeSpan.Zero) dueTime = TimeSpan.Zero;
-        _timer = new Timer(async (state) => await DoWorkAsync(state, stoppingToken), null, dueTime, TimeSpan.FromMinutes(5));
-        logger.LogInformation("ConcreteRouteGeneratorService scheduled. Next run at {NextRunTimeUtc}", nextRunTime);
-        */
+       
         return Task.CompletedTask;
     }
 
@@ -51,7 +41,6 @@ public class ConcreteRouteGeneratorService(
     {
         var now = DateTime.Now;
         var nextRunTime = now.Date.AddDays(1);
-        //var nextRunTime = now.AddMinutes(5);
         var dueTime = nextRunTime - now;
         if (dueTime <= TimeSpan.Zero)
             dueTime = TimeSpan.Zero;

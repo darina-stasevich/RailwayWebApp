@@ -72,7 +72,7 @@ builder.Services.AddAuthentication(options =>
     });
 
 builder.Services.AddHostedService<ConcreteRouteGeneratorService>();
-
+builder.Services.AddHostedService<TicketUpdateStatusService>();
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddControllers();
