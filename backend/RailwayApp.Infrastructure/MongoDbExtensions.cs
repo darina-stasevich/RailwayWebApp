@@ -35,7 +35,6 @@ public static class MongoDbExtensions
         var mongoClientForIndex = serviceProviderForIndex.GetRequiredService<IMongoClient>();
         var mongoSettingsForIndex = serviceProviderForIndex.GetRequiredService<IOptions<MongoDbSettings>>().Value;
 
-
         EnsureIndexAsync(
                 mongoClientForIndex,
                 mongoSettingsForIndex.DatabaseName,
@@ -48,9 +47,8 @@ public static class MongoDbExtensions
                 })
             .GetAwaiter().GetResult();
 
-
+        services.AddUnitOfWork();
         services.AddRepositories();
-
         return services;
     }
 
@@ -98,7 +96,12 @@ public static class MongoDbExtensions
         }
     }
 
-
+    private static IServiceCollection AddUnitOfWork(this IServiceCollection services)
+    {
+        services.AddScoped<IUnitOfWork, MongoDbUnitOfWork>();
+        return services;
+    }
+    
     private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         services.AddScoped<IUserAccountRepository, MongoDbUserAccountRepository>();

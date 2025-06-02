@@ -8,9 +8,9 @@ using RailwayApp.Domain.Interfaces.IServices;
 namespace RailwayApp.Application.Services;
 
 public class CarriageAvailabilityUpdateService(
+    IUnitOfWork unitOfWork,
     ICarriageService carriageService,
-    ICarriageTemplateService carriageTemplateService,
-    ICarriageAvailabilityRepository carriageAvailabilityRepository) : ICarriageAvailabilityUpdateService
+    ICarriageTemplateService carriageTemplateService) : ICarriageAvailabilityUpdateService
 {
     public async Task<bool> MarkSeatsAsOccupied(List<LockedSeatInfo> lockedSeatInfos, IClientSessionHandle session)
     {
@@ -36,7 +36,7 @@ public class CarriageAvailabilityUpdateService(
             }
 
             var updateResult =
-                await carriageAvailabilityRepository.UpdateOccupiedSeats(carriageAvailabilities, session);
+                await unitOfWork.CarriageAvailabilities.UpdateOccupiedSeats(carriageAvailabilities, session);
             if (!updateResult)
                 return false;
         }
@@ -69,7 +69,7 @@ public class CarriageAvailabilityUpdateService(
         }
 
         var updateResult =
-            await carriageAvailabilityRepository.UpdateOccupiedSeats(carriageAvailabilities, session);
+            await unitOfWork.CarriageAvailabilities.UpdateOccupiedSeats(carriageAvailabilities, session);
         return updateResult;
     }
 }

@@ -8,10 +8,7 @@ using RailwayApp.Domain.Interfaces.IServices;
 namespace RailwayApp.Application.Services;
 
 public class PriceCalculationService(
-    IConcreteRouteRepository concreteRouteRepository,
-    IAbstractRouteRepository abstractRouteRepository,
-    IAbstractRouteSegmentRepository abstractRouteSegmentRepository,
-    ICarriageTemplateRepository carriageTemplateRepository,
+    IUnitOfWork unitOfWork,
     ICarriageTemplateService carriageTemplateService) : IPriceCalculationService
 {
     public async Task<decimal> CalculatePriceForCarriageAsync(InfoRouteSegmentSearchPerCarriageDto dto,
@@ -19,7 +16,7 @@ public class PriceCalculationService(
     {
         var baseCost =
             await CalculateBasePriceAsync(dto.ConcreteRouteId, dto.StartSegmentNumber, dto.EndSegmentNumber, session);
-        var carriageTemplate = await carriageTemplateRepository.GetByIdAsync(dto.CarriageTemplateId, session);
+        var carriageTemplate = await unitOfWork.CarriageTemplates.GetByIdAsync(dto.CarriageTemplateId, session);
         if (carriageTemplate == null)
             throw new CarriageTemplateNotFoundException(dto.CarriageTemplateId, dto.ConcreteRouteId);
         return baseCost * carriageTemplate.PriceMultiplier;
@@ -64,14 +61,14 @@ public class PriceCalculationService(
     private async Task<decimal> CalculateBasePriceAsync(Guid concreteRouteId, int startSegmentNumber,
         int endSegmentNumber, IClientSessionHandle? session = null)
     {
-        var concreteRoute = await concreteRouteRepository.GetByIdAsync(concreteRouteId, session);
+        var concreteRoute = await unitOfWork.ConcreteRoutes.GetByIdAsync(concreteRouteId, session);
         if (concreteRoute == null) throw new ConcreteRouteNotFoundException(concreteRouteId);
-        var abstractRoute = await abstractRouteRepository.GetByIdAsync(concreteRoute.AbstractRouteId, session);
+        var abstractRoute = await unitOfWork.AbstractRoutes.GetByIdAsync(concreteRoute.AbstractRouteId, session);
         if (abstractRoute == null) throw new AbstractRouteNotFoundException(concreteRoute.AbstractRouteId);
 
         var transferCost = abstractRoute.TransferCost;
         var abstractRouteSegments =
-            await abstractRouteSegmentRepository.GetAbstractSegmentsByRouteIdAsync(abstractRoute.Id, session);
+            await unitOfWork.AbstractRouteSegments.GetAbstractSegmentsByRouteIdAsync(abstractRoute.Id, session);
         var price = abstractRouteSegments
             .Where(s => s.SegmentNumber >= startSegmentNumber && s.SegmentNumber <= endSegmentNumber)
             .Sum(s => s.SegmentCost);

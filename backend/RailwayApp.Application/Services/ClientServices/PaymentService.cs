@@ -9,29 +9,24 @@ using RailwayApp.Domain.Statuses;
 namespace RailwayApp.Application.Services;
 
 public class PaymentService(
-    IMongoClient mongoClient,
-    ISeatLockRepository seatLockRepository,
-    IUserAccountRepository userAccountRepository,
-    ITicketRepository ticketRepository,
+    IUnitOfWork unitOfWork,
     ICarriageAvailabilityUpdateService carriageAvailabilityUpdateService) : IPaymentService
 {
     public async Task<List<Ticket>> PayTickets(Guid userAccountId, Guid seatLockId)
     {
-        using var session = await mongoClient.StartSessionAsync();
+        await unitOfWork.BeginTransactionAsync(new TransactionOptions(
+            ReadConcern.Snapshot,
+            writeConcern: WriteConcern.WMajority));
+        
         try
         {
-            session.StartTransaction(new TransactionOptions(
-                ReadConcern.Snapshot,
-                writeConcern: WriteConcern.WMajority));
-
-
-            var userAccount = await userAccountRepository.GetByIdAsync(userAccountId, session);
+            var userAccount = await unitOfWork.UserAccounts.GetByIdAsync(userAccountId, unitOfWork.CurrentSession);
             if (userAccount == null)
                 throw new UserAccountUserNotFoundException(userAccountId);
             if (userAccount.Status == UserAccountStatus.Blocked)
                 throw new UserAccountUserBlockedException(userAccountId);
 
-            var seatLock = await seatLockRepository.GetByIdAsync(seatLockId, session);
+            var seatLock = await unitOfWork.SeatLocks.GetByIdAsync(seatLockId, unitOfWork.CurrentSession);
             if (seatLock == null)
                 throw new SeatLockExpiredException(seatLockId);
             if (seatLock.Status != SeatLockStatus.Active)
@@ -41,12 +36,12 @@ public class PaymentService(
             if (seatLock.UserAccountId != userAccountId)
                 throw new SeatLockNotFoundException(seatLockId, userAccountId);
 
-            var prepared = await seatLockRepository.PrepareForProcessingAsync(
+            var prepared = await unitOfWork.SeatLocks.PrepareForProcessingAsync(
                 seatLockId,
                 DateTime.UtcNow.AddMinutes(10),
                 SeatLockStatus.Processing,
                 SeatLockStatus.Active,
-                session);
+                unitOfWork.CurrentSession);
 
             if (prepared == false)
                 throw new PaymentServicePreparingFailedException(seatLockId);
@@ -73,45 +68,42 @@ public class PaymentService(
                 tickets.Add(ticket);
             }
 
-            await ticketRepository.AddRange(tickets, session);
+            await unitOfWork.Tickets.AddRange(tickets, unitOfWork.CurrentSession);
 
             var occupiedSeatsUpdateResult =
-                await carriageAvailabilityUpdateService.MarkSeatsAsOccupied(seatLock.LockedSeatInfos, session);
+                await carriageAvailabilityUpdateService.MarkSeatsAsOccupied(seatLock.LockedSeatInfos, unitOfWork.CurrentSession);
             if (!occupiedSeatsUpdateResult)
                 throw new PaymentServiceException("updating seats in carriage availability failed");
 
-            var completed = await seatLockRepository.UpdateStatusAsync(seatLockId, SeatLockStatus.Completed, session);
+            var completed = await unitOfWork.SeatLocks.UpdateStatusAsync(seatLockId, SeatLockStatus.Completed, unitOfWork.CurrentSession);
             if (!completed) throw new PaymentServicePaymentFailedException(seatLockId);
 
-            await session.CommitTransactionAsync();
+            await unitOfWork.CommitTransactionAsync();
 
             return tickets;
         }
         catch (Exception e)
         {
-            if (session.IsInTransaction) await session.AbortTransactionAsync();
+            await unitOfWork.RollbackTransactionAsync();
             throw;
         }
     }
 
     public async Task<bool> CancelTicket(Guid userAccountId, Guid ticketId)
     {
-        using var session = await mongoClient.StartSessionAsync();
+        await unitOfWork.BeginTransactionAsync(new TransactionOptions(
+            ReadConcern.Snapshot,
+            writeConcern: WriteConcern.WMajority));
+        
         try
         {
-            //session.StartTransaction();
-            session.StartTransaction(new TransactionOptions(
-                ReadConcern.Snapshot,
-                writeConcern: WriteConcern.WMajority));
-
-
-            var userAccount = await userAccountRepository.GetByIdAsync(userAccountId, session);
+            var userAccount = await unitOfWork.UserAccounts.GetByIdAsync(userAccountId, unitOfWork.CurrentSession);
             if (userAccount == null)
                 throw new UserAccountUserNotFoundException(userAccountId);
             if (userAccount.Status == UserAccountStatus.Blocked)
                 throw new UserAccountUserBlockedException(userAccountId);
 
-            var ticket = await ticketRepository.GetByIdAsync(ticketId, session);
+            var ticket = await unitOfWork.Tickets.GetByIdAsync(ticketId, unitOfWork.CurrentSession);
             if (ticket == null)
                 throw new TicketNotFoundException(ticketId);
             if (ticket.UserAccountId != userAccountId)
@@ -119,20 +111,20 @@ public class PaymentService(
             if (ticket.Status != TicketStatus.Payed)
                 throw new PaymentServiceTicketNotPayedException(ticketId);
 
-            await ticketRepository.UpdateStatusAsync(ticketId, TicketStatus.Cancelled, session);
+            await unitOfWork.Tickets.UpdateStatusAsync(ticketId, TicketStatus.Cancelled, unitOfWork.CurrentSession);
 
             var occupiedSeatUpdateResult =
-                await carriageAvailabilityUpdateService.MarkSeatAsFree(MapFreeTicketDto(ticket), session);
+                await carriageAvailabilityUpdateService.MarkSeatAsFree(MapFreeTicketDto(ticket), unitOfWork.CurrentSession);
             if (!occupiedSeatUpdateResult)
                 throw new PaymentServiceException("updating seat in carriage availability failed");
 
-            await session.CommitTransactionAsync();
+            await unitOfWork.CommitTransactionAsync();
 
             return true;
         }
         catch (Exception e)
         {
-            if (session.IsInTransaction) await session.AbortTransactionAsync();
+            await unitOfWork.RollbackTransactionAsync();
             throw;
         }
     }

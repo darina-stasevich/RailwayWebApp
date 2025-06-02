@@ -9,17 +9,15 @@ using RailwayApp.Domain.Interfaces.IServices;
 namespace RailwayApp.Application.Services;
 
 public class RouteSearchService(
-    IStationRepository stationRepository,
-    IAbstractRouteSegmentRepository abstractRouteSegmentRepository,
-    IConcreteRouteSegmentRepository concreteRouteSegmentRepository,
+    IUnitOfWork unitOfWork,
     IPriceCalculationService priceCalculationService,
     ICarriageSeatService carriageSeatService) : IRouteSearchService
 {
     public async Task<IEnumerable<ComplexRouteDto>> GetRoutesAsync(RouteSearchRequest request)
     {
-        var fromStation = await stationRepository.GetByIdAsync(request.FromStationId);
+        var fromStation = await unitOfWork.Stations.GetByIdAsync(request.FromStationId);
         if (fromStation == null) throw new StationNotFoundException(request.FromStationId);
-        var toStation = await stationRepository.GetByIdAsync(request.ToStationId);
+        var toStation = await unitOfWork.Stations.GetByIdAsync(request.ToStationId);
         if (toStation == null) throw new StationNotFoundException(request.ToStationId);
         if (request.DepartureDate.Date - DateTime.UtcNow.Date > TimeSpan.FromDays(30))
             throw new ArgumentException("Departure date cannot be more than 30 days in the future");
@@ -82,7 +80,7 @@ public class RouteSearchService(
 
         // 1. Get concrete route segments that departure from fromStation
         var allStartConcreteRouteSegments =
-            await concreteRouteSegmentRepository.GetConcreteSegmentsByFromStationAsync(fromStation.Id);
+            await unitOfWork.ConcreteRouteSegments.GetConcreteSegmentsByFromStationAsync(fromStation.Id);
         // 2. Get concrete route segments that departure in given day after current time
         var startConcreteRouteSegments = allStartConcreteRouteSegments.Where(segment =>
             {
@@ -102,7 +100,7 @@ public class RouteSearchService(
 
         // 4. Find concrete route segments that end in toStation
         var allEndConcreteRouteSegments =
-            await concreteRouteSegmentRepository.GetConcreteSegmentsByToStationAsync(toStation.Id);
+            await unitOfWork.ConcreteRouteSegments.GetConcreteSegmentsByToStationAsync(toStation.Id);
 
         // 5. Find concrete end route segments that are in start concrete route segments
         var endConcreteRouteSegments =
@@ -179,8 +177,8 @@ public class RouteSearchService(
     {
         var segmentsList = segments.OrderBy(s => s.ConcreteDepartureDate).ToList();
 
-        var startAbstractSegment = await abstractRouteSegmentRepository.GetByIdAsync(segmentsList[0].AbstractSegmentId);
-        var endAbstractSegment = await abstractRouteSegmentRepository.GetByIdAsync(segmentsList[^1].AbstractSegmentId);
+        var startAbstractSegment = await unitOfWork.AbstractRouteSegments.GetByIdAsync(segmentsList[0].AbstractSegmentId);
+        var endAbstractSegment = await unitOfWork.AbstractRouteSegments.GetByIdAsync(segmentsList[^1].AbstractSegmentId);
 
         if (startAbstractSegment == null)
             throw new AbstractRouteSegmentNotFoundException(segmentsList[0].AbstractSegmentId);
@@ -240,7 +238,7 @@ public class RouteSearchService(
 
         // 1. Get concrete route segments that departure from fromStation
         var allStartConcreteRouteSegments =
-            await concreteRouteSegmentRepository.GetConcreteSegmentsByFromStationAsync(fromStation.Id);
+            await unitOfWork.ConcreteRouteSegments.GetConcreteSegmentsByFromStationAsync(fromStation.Id);
         // 2. Get concrete route segments that departure in given day after current time
         var startConcreteRouteSegments = allStartConcreteRouteSegments.Where(segment =>
             {
@@ -291,7 +289,7 @@ public class RouteSearchService(
                     if (!concreteSegmentsCash.ContainsKey(currentStationId))
                     {
                         var allConcreteSegmentsForStation =
-                            await concreteRouteSegmentRepository
+                            await unitOfWork.ConcreteRouteSegments
                                 .GetConcreteSegmentsByFromStationAsync(currentStationId);
 
                         var actualConcreteSegments = allConcreteSegmentsForStation

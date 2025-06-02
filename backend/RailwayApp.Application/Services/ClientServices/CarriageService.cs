@@ -9,11 +9,10 @@ using RailwayApp.Domain.Interfaces.IServices;
 namespace RailwayApp.Application.Services;
 
 public class CarriageService(
+    IUnitOfWork unitOfWork,
     ICarriageSeatService carriageSeatService,
     IPriceCalculationService priceCalculationService,
-    ICarriageTemplateService carriageTemplateService,
-    IConcreteRouteSegmentRepository concreteRouteSegmentRepository,
-    ICarriageAvailabilityRepository carriageAvailabilityRepository
+    ICarriageTemplateService carriageTemplateService
 ) : ICarriageService
 {
     public async Task<IEnumerable<ShortCarriageInfoDto>> GetAllCarriagesInfo(CarriagesInfoRequest request)
@@ -86,7 +85,7 @@ public class CarriageService(
         IClientSessionHandle session)
     {
         var allConcreteRouteSegments =
-            await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(dto.ConcreteRouteId,
+            await unitOfWork.ConcreteRouteSegments.GetConcreteSegmentsByConcreteRouteIdAsync(dto.ConcreteRouteId,
                 session);
         var concreteRouteSegments = allConcreteRouteSegments.Where(s =>
             s.SegmentNumber >= dto.StartSegmentNumber && s.SegmentNumber <= dto.EndSegmentNumber);
@@ -95,7 +94,7 @@ public class CarriageService(
         foreach (var segment in concreteRouteSegments)
         {
             var carriageAvailability = await
-                carriageAvailabilityRepository.GetByConcreteSegmentIdAndTemplateIdAsync(segment.Id,
+                unitOfWork.CarriageAvailabilities.GetByConcreteSegmentIdAndTemplateIdAsync(segment.Id,
                     dto.CarriageTemplateId, session);
             carriageAvailabilities.Add(carriageAvailability);
         }
@@ -125,7 +124,3 @@ public class CarriageService(
         };
     }
 }
-
-/*
-
-*/

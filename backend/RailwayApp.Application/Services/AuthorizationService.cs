@@ -12,12 +12,12 @@ namespace RailwayApp.Application.Services;
 
 public class AuthorizationService(
     IConfiguration configuration,
-    IUserAccountRepository userAccountRepository,
+    IUnitOfWork unitOfWork,
     IPasswordHasher passwordHasher) : IAuthorizationService
 {
     public async Task<LoginResponse?> AuthorizeAsync(LoginRequest request)
     {
-        var userAccount = await userAccountRepository.GetByEmailAsync(request.Email);
+        var userAccount = await unitOfWork.UserAccounts.GetByEmailAsync(request.Email);
         if (userAccount == null)
             throw new HttpRequestException("User not found", null, HttpStatusCode.NotFound);
 

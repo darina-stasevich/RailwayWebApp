@@ -5,11 +5,11 @@ using RailwayApp.Domain.Interfaces.IServices;
 
 namespace RailwayApp.Application.Services;
 
-public class StationService(IStationRepository stationRepository) : IStationService
+public class StationService(IUnitOfWork unitOfWork) : IStationService
 {
     public async Task<IEnumerable<Station>> GetAllStationsAsync()
     {
-        return await stationRepository.GetAllAsync();
+        return await unitOfWork.Stations.GetAllAsync();
     }
 
 }

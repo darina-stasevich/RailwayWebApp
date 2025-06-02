@@ -7,25 +7,22 @@ using RailwayApp.Domain.Interfaces.IServices;
 namespace RailwayApp.Application.Services;
 
 public class CarriageTemplateService(
-    IConcreteRouteRepository concreteRouteRepository,
-    IAbstractRouteRepository abstractRouteRepository,
-    ITrainRepository trainRepository,
-    ICarriageTemplateRepository carriageTemplateRepository) : ICarriageTemplateService
+    IUnitOfWork unitOfWork) : ICarriageTemplateService
 {
     public async Task<IEnumerable<CarriageTemplate>?> GetCarriageTemplateForRouteAsync(Guid concreteRouteId,
         IClientSessionHandle? session = null)
     {
-        var concreteRoute = await concreteRouteRepository.GetByIdAsync(concreteRouteId, session);
+        var concreteRoute = await unitOfWork.ConcreteRoutes.GetByIdAsync(concreteRouteId, session);
         if (concreteRoute == null) throw new ConcreteRouteNotFoundException(concreteRouteId);
 
-        var abstractRoute = await abstractRouteRepository.GetByIdAsync(concreteRoute.AbstractRouteId, session);
+        var abstractRoute = await unitOfWork.AbstractRoutes.GetByIdAsync(concreteRoute.AbstractRouteId, session);
         if (abstractRoute == null) throw new AbstractRouteNotFoundException(concreteRoute.AbstractRouteId);
 
-        var train = await trainRepository.GetByIdAsync(abstractRoute.TrainNumber, session);
+        var train = await unitOfWork.Trains.GetByIdAsync(abstractRoute.TrainNumber, session);
         if (train == null) throw new TrainNotFoundException(abstractRoute.TrainNumber);
 
         var carriageTemplates =
-            await carriageTemplateRepository.GetByTrainTypeIdAsync(train.TrainTypeId, session);
+            await unitOfWork.CarriageTemplates.GetByTrainTypeIdAsync(train.TrainTypeId, session);
 
         return carriageTemplates;
     }

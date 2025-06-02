@@ -10,9 +10,7 @@ using RailwayApp.Domain.Statuses;
 namespace RailwayApp.Application.Services;
 
 public class CarriageSeatService(
-    IConcreteRouteSegmentRepository concreteRouteSegmentRepository,
-    ICarriageAvailabilityRepository carriageAvailabilityRepository,
-    ISeatLockRepository seatLockRepository
+    IUnitOfWork unitOfWork
 ) : ICarriageSeatService
 {
     public async Task<int> GetAvailableSeatsAmountAsync(InfoRouteSegmentSearchDto dto)
@@ -137,7 +135,7 @@ public class CarriageSeatService(
         InfoRouteSegmentSearchDto dto, IClientSessionHandle? session = null)
     {
         var concreteRouteSegments =
-            await concreteRouteSegmentRepository.GetConcreteSegmentsByConcreteRouteIdAsync(dto.ConcreteRouteId,
+            await unitOfWork.ConcreteRouteSegments.GetConcreteSegmentsByConcreteRouteIdAsync(dto.ConcreteRouteId,
                 session);
         var relevantConcreteRouteSegments = concreteRouteSegments.Where(s =>
             s.SegmentNumber >= dto.StartSegmentNumber && s.SegmentNumber <= dto.EndSegmentNumber);
@@ -146,7 +144,7 @@ public class CarriageSeatService(
         foreach (var routeSegment in relevantConcreteRouteSegments)
         {
             var carriageAvailabilities =
-                await carriageAvailabilityRepository.GetByConcreteSegmentIdAsync(routeSegment.Id, session);
+                await unitOfWork.CarriageAvailabilities.GetByConcreteSegmentIdAsync(routeSegment.Id, session);
             allAvailabilities.AddRange(carriageAvailabilities);
         }
 
@@ -167,7 +165,7 @@ public class CarriageSeatService(
 
     private async Task<IEnumerable<Tuple<Guid, int>>> GetBookedSeats(InfoRouteSegmentSearchDto dto)
     {
-        var seatLocks = await seatLockRepository.GetByRouteIdAsync(dto.ConcreteRouteId);
+        var seatLocks = await unitOfWork.SeatLocks.GetByRouteIdAsync(dto.ConcreteRouteId);
         var seatLockInfos = seatLocks
             .Where(slis => slis.Status == SeatLockStatus.Active)
             .Where(slis => slis.ExpirationTimeUtc > DateTime.UtcNow)
@@ -185,7 +183,7 @@ public class CarriageSeatService(
     private async Task<IEnumerable<int>> GetBookedSeatsPerCarriage(InfoRouteSegmentSearchPerCarriageDto dto,
         IClientSessionHandle? session = null)
     {
-        var seatLocks = await seatLockRepository.GetByRouteIdAsync(dto.ConcreteRouteId, session);
+        var seatLocks = await unitOfWork.SeatLocks.GetByRouteIdAsync(dto.ConcreteRouteId, session);
         var seatLockInfos = seatLocks
             .Where(slis => slis.Status == SeatLockStatus.Active)
             .Where(slis => slis.ExpirationTimeUtc > DateTime.UtcNow)
