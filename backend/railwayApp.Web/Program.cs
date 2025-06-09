@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using RailwayApp.Application.Services;
+using RailwayApp.Application.Services.AdminServices;
 using RailwayApp.Application.Services.PasswordHashers;
 using RailwayApp.Domain.Interfaces.IServices;
+using RailwayApp.Domain.Interfaces.IServices.AdminServices;
 using RailwayApp.Infrastructure;
 using RailwayApp.Web.Middlewares;
 using Serilog;
@@ -44,6 +46,19 @@ builder.Services.AddScoped<IStationService, StationService>();
 builder.Services.AddScoped<ITicketBookingService, TicketBookingService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddScoped<IUserAccountService, UserAccountService>();
+
+builder.Services.AddScoped<IAdminAbstractRouteService, AdminAbstractRouteService>();
+builder.Services.AddScoped<IAdminAbstractRouteSegmentService, AdminAbstractRouteSegmentService>();
+builder.Services.AddScoped<IAdminCarriageAvailabilityService, AdminCarriageAvailabilityService>();
+builder.Services.AddScoped<IAdminCarriageTemplateService, AdminCarriageTemplateService>();
+builder.Services.AddScoped<IAdminConcreteRouteService, AdminConcreteRouteService>();
+builder.Services.AddScoped<IAdminConcreteRouteSegmentService, AdminConcreteRouteSegmentService>();
+builder.Services.AddScoped<IAdminSeatLockService, AdminSeatLockService>();
+builder.Services.AddScoped<IAdminStationService, AdminStationService>();
+builder.Services.AddScoped<IAdminTicketService, AdminTicketService>();
+builder.Services.AddScoped<IAdminTrainService, AdminTrainService>();
+builder.Services.AddScoped<IAdminTrainTypeService, AdminTrainTypeService>();
+builder.Services.AddScoped<IAdminUserAccountService, AdminUserAccountService>();
 
 builder.Services.AddMongoDb(builder.Configuration);
 

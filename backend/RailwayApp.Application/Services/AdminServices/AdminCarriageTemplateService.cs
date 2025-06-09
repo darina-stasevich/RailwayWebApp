@@ -7,11 +7,19 @@ namespace RailwayApp.Application.Services.AdminServices;
 
 public class AdminCarriageTemplateService(
     ICarriageTemplateRepository carriageTemplateRepository,
-    ITrainTypeRepository trainTypeRepository) : IAdminService<CarriageTemplate, Guid>, IAdminCarriageTemplateService
+    ITrainTypeRepository trainTypeRepository) : IAdminCarriageTemplateService
 {
     public async Task<IEnumerable<CarriageTemplate>> GetAllItems()
     {
         return await carriageTemplateRepository.GetAllAsync();
+    }
+
+    public async Task<CarriageTemplate> GetItemByIdAsync(Guid id)
+    {
+        var carriageTemplate = await carriageTemplateRepository.GetByIdAsync(id);
+        if (carriageTemplate == null)
+            throw new AdminResourceNotFoundException(nameof(CarriageTemplate), id);
+        return carriageTemplate;
     }
 
     private async Task ValidateCarriageTemplateData(CarriageTemplate item)

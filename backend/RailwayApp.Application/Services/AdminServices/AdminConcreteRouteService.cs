@@ -7,11 +7,19 @@ namespace RailwayApp.Application.Services.AdminServices;
 
 public class AdminConcreteRouteService(
     IConcreteRouteRepository concreteRouteRepository,
-    IAbstractRouteRepository abstractRouteRepository) : IAdminService<ConcreteRoute, Guid>, IAdminConcreteRouteService
+    IAbstractRouteRepository abstractRouteRepository) :IAdminConcreteRouteService
 {
     public async Task<IEnumerable<ConcreteRoute>> GetAllItems()
     {
         return await concreteRouteRepository.GetAllAsync();
+    }
+
+    public async Task<ConcreteRoute> GetItemByIdAsync(Guid id)
+    {
+        var concreteRoute = await concreteRouteRepository.GetByIdAsync(id);
+        if (concreteRoute == null)
+            throw new AdminResourceNotFoundException(nameof(concreteRoute), id);
+        return concreteRoute;
     }
 
     private async Task ValidateConcreteRouteData(ConcreteRoute item, bool isUpdate = false, Guid? existingItemId = null)

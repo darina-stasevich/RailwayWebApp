@@ -5,12 +5,21 @@ using RailwayApp.Domain.Interfaces.IServices.AdminServices;
 
 namespace RailwayApp.Application.Services.AdminServices;
 
-public class AdminUserAccountService(IUserAccountRepository userAccountRepository) : IAdminService<UserAccount, Guid>, IAdminUserAccountService
+public class AdminUserAccountService(IUserAccountRepository userAccountRepository) : IAdminUserAccountService
 {
     public async Task<IEnumerable<UserAccount>> GetAllItems()
     {
         return await userAccountRepository.GetAllAsync();
     }
+
+    public async Task<UserAccount> GetItemByIdAsync(Guid id)
+    {
+        var userAccount = await userAccountRepository.GetByIdAsync(id);
+        if (userAccount == null)
+            throw new AdminResourceNotFoundException(nameof(UserAccount), id);
+        return userAccount;
+    }
+
     private void ValidateAge(DateOnly date)
     {
         if(DateTime.Now.Year - date.Year < 18)

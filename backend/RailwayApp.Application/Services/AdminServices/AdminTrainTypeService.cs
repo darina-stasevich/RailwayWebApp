@@ -5,11 +5,19 @@ using RailwayApp.Domain.Interfaces.IServices.AdminServices;
 
 namespace RailwayApp.Application.Services.AdminServices;
 
-public class AdminTrainTypeService(ITrainTypeRepository trainTypeRepository) : IAdminService<TrainType, Guid>, IAdminTrainTypeService
+public class AdminTrainTypeService(ITrainTypeRepository trainTypeRepository) :IAdminTrainTypeService
 {
     public async Task<IEnumerable<TrainType>> GetAllItems()
     {
         return await trainTypeRepository.GetAllAsync();
+    }
+
+    public async Task<TrainType> GetItemByIdAsync(Guid id)
+    {
+        var trainType = await trainTypeRepository.GetByIdAsync(id);
+        if (trainType == null)
+            throw new AdminResourceNotFoundException(nameof(TrainType), id);
+        return trainType;
     }
 
     public async Task<Guid> CreateItem(TrainType item)

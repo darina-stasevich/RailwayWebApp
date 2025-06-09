@@ -12,6 +12,14 @@ public class AdminStationService(IStationRepository stationRepository) : IAdminS
         return await stationRepository.GetAllAsync();
     }
 
+    public async Task<Station> GetItemByIdAsync(Guid id)
+    {
+        var station = await stationRepository.GetByIdAsync(id);
+        if (station == null)
+            throw new AdminResourceNotFoundException(nameof(Station), id);
+        return station;
+    }
+
     private async Task ValidateStationData(Station item, bool isUpdate = false, Guid? existingItemId = null)
     {
         if (string.IsNullOrWhiteSpace(item.Name))

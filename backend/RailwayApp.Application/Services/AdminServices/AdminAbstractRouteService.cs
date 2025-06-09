@@ -7,11 +7,21 @@ namespace RailwayApp.Application.Services.AdminServices;
 
 public class AdminAbstractRouteService(
     IAbstractRouteRepository abstractRouteRepository,
-    ITrainRepository trainRepository) : IAdminService<AbstractRoute, Guid>, IAdminAbstractRouteService
+    ITrainRepository trainRepository) : IAdminAbstractRouteService
 {
     public async Task<IEnumerable<AbstractRoute>> GetAllItems()
     {
         return await abstractRouteRepository.GetAllAsync();
+    }
+
+    public async Task<AbstractRoute> GetItemByIdAsync(Guid id)
+    {
+        var route = await abstractRouteRepository.GetByIdAsync(id);
+        if (route == null)
+        {
+            throw new AdminResourceNotFoundException(nameof(AbstractRoute), id);
+        } 
+        return route;
     }
 
     private async Task ValidateAbstractRouteData(AbstractRoute item)

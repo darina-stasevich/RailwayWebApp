@@ -9,14 +9,22 @@ public class AdminCarriageAvailabilityService(
     ICarriageAvailabilityRepository carriageAvailabilityRepository,
     IConcreteRouteSegmentRepository concreteRouteSegmentRepository,
     ICarriageTemplateRepository carriageTemplateRepository)
-    : IAdminService<CarriageAvailability, Guid>, IAdminCarriageAvailabilityService
+    : IAdminCarriageAvailabilityService
 {
     public async Task<IEnumerable<CarriageAvailability>> GetAllItems()
     {
         return await carriageAvailabilityRepository.GetAllAsync();
     }
 
-   private async Task ValidateCarriageAvailabilityData(CarriageAvailability item, bool isUpdate = false, Guid? existingItemId = null)
+    public async Task<CarriageAvailability> GetItemByIdAsync(Guid id)
+    {
+        var carriageAvailability = await carriageAvailabilityRepository.GetByIdAsync(id);
+        if (carriageAvailability == null)
+            throw new AdminResourceNotFoundException(nameof(CarriageAvailability), id);
+        return carriageAvailability;
+    }
+
+    private async Task ValidateCarriageAvailabilityData(CarriageAvailability item, bool isUpdate = false, Guid? existingItemId = null)
     {
         var concreteSegment = await concreteRouteSegmentRepository.GetByIdAsync(item.ConcreteRouteSegmentId);
         if (concreteSegment == null)

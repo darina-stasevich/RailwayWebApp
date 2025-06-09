@@ -265,6 +265,30 @@ public class ExceptionHandlingMiddleware(
                 logger.LogWarning(argEx, "ArgumentException: ParameterName: {ParamName}, Message: {Message}",
                     argEx.ParamName, argEx.Message);
                 break;
+            
+            case AdminResourceNotFoundException ex:
+                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                problemDetails.Status = StatusCodes.Status404NotFound;
+                problemDetails.Title = "Ресурс администрирования не найден";
+                problemDetails.Detail = ex.Message;
+                logger.LogWarning(ex, "AdminResourceNotFoundException: Resource: {ResourceName}, ID: {ResourceId}", ex.ResourceName, ex.ResourceId);
+                break;
+
+            case AdminDataConflictException ex:
+                context.Response.StatusCode = StatusCodes.Status409Conflict;
+                problemDetails.Status = StatusCodes.Status409Conflict;
+                problemDetails.Title = "Конфликт данных при операции администрирования";
+                problemDetails.Detail = ex.Message;
+                logger.LogWarning(ex, "AdminDataConflictException: {Message}", ex.Message);
+                break;
+
+            case AdminValidationException ex:
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                problemDetails.Status = StatusCodes.Status400BadRequest;
+                problemDetails.Title = "Ошибка валидации данных при операции администрирования";
+                problemDetails.Detail = ex.Message;
+                logger.LogWarning(ex, "AdminValidationException: {Message}", ex.Message);
+                break;
 
             default:
                 logger.LogError(exception,

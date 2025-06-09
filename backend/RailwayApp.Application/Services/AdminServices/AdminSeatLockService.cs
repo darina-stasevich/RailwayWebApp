@@ -8,11 +8,19 @@ namespace RailwayApp.Application.Services.AdminServices;
 public class AdminSeatLockService(
     ISeatLockRepository seatLockRepository,
     IConcreteRouteRepository concreteRouteRepository,
-    IConcreteRouteSegmentRepository concreteRouteSegmentRepository) : IAdminService<SeatLock, Guid>, IAdminSeatLockService
+    IConcreteRouteSegmentRepository concreteRouteSegmentRepository) :IAdminSeatLockService
 {
     public async Task<IEnumerable<SeatLock>> GetAllItems()
     {
         return await seatLockRepository.GetAllAsync();
+    }
+
+    public async Task<SeatLock> GetItemByIdAsync(Guid id)
+    {
+        var seatLock = await seatLockRepository.GetByIdAsync(id);
+        if (seatLock == null)
+            throw new AdminResourceNotFoundException(nameof(SeatLock), id);
+        return seatLock;
     }
 
     private async Task ValidateSeatLockData(SeatLock item, bool isUpdate = false)

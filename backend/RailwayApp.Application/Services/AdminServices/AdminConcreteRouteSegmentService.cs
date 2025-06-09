@@ -9,11 +9,19 @@ public class AdminConcreteRouteSegmentService(
     IConcreteRouteSegmentRepository concreteRouteSegmentRepository,
     IAbstractRouteSegmentRepository abstractRouteSegmentRepository,
     IConcreteRouteRepository concreteRouteRepository,
-    IStationRepository stationRepository) : IAdminService<ConcreteRouteSegment, Guid>, IAdminConcreteRouteSegmentService
+    IStationRepository stationRepository) : IAdminConcreteRouteSegmentService
 {
     public async Task<IEnumerable<ConcreteRouteSegment>> GetAllItems()
     {
         return await concreteRouteSegmentRepository.GetAllAsync();
+    }
+
+    public async Task<ConcreteRouteSegment> GetItemByIdAsync(Guid id)
+    {
+        var concreteRouteSegment = await concreteRouteSegmentRepository.GetByIdAsync(id);
+        if (concreteRouteSegment == null)
+            throw new AdminResourceNotFoundException(nameof(concreteRouteSegment), id);
+        return concreteRouteSegment;
     }
 
     private async Task ValidateData(ConcreteRouteSegment item)

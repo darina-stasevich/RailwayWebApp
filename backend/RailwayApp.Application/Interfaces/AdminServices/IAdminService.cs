@@ -3,7 +3,8 @@ namespace RailwayApp.Domain.Interfaces.IServices.AdminServices;
 public interface IAdminService<T, TK>
 {
     public Task<IEnumerable<T>> GetAllItems();
-
+    public Task<T> GetItemByIdAsync(TK id);
+    
     public Task<TK> CreateItem(T item);
 
     public Task<bool> UpdateItem(TK id, T item);

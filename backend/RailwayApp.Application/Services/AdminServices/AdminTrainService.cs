@@ -13,6 +13,14 @@ public class AdminTrainService(ITrainRepository trainRepository, ITrainTypeRepos
         return await trainRepository.GetAllAsync();
     }
 
+    public async Task<Train> GetItemByIdAsync(string id)
+    {
+        var train = await trainRepository.GetByIdAsync(id);
+        if (train == null)
+            throw new AdminResourceNotFoundException(nameof(Train), id);
+        return train;
+    }
+
     private async Task ValidateTrainData(Train item)
     {
         var trainType = await trainTypeRepository.GetByIdAsync(item.TrainTypeId);

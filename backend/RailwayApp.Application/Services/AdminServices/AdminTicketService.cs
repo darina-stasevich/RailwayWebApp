@@ -9,14 +9,22 @@ namespace RailwayApp.Application.Services.AdminServices;
 public class AdminTicketService(
     ITicketRepository ticketRepository,
     IConcreteRouteRepository concreteRouteRepository,
-    IUserAccountRepository userAccountRepository) : IAdminService<Ticket, Guid>, IAdminTicketService
+    IUserAccountRepository userAccountRepository) : IAdminTicketService
 {
     public async Task<IEnumerable<Ticket>> GetAllItems()
     {
         return await ticketRepository.GetAllAsync();
     }
 
-private async Task ValidateTicketData(Ticket item, bool isUpdate = false, Guid? existingItemId = null)
+    public async Task<Ticket> GetItemByIdAsync(Guid id)
+    {
+        var ticket = await ticketRepository.GetByIdAsync(id);
+        if (ticket == null)
+            throw new AdminResourceNotFoundException(nameof(Ticket), id);
+        return ticket;
+    }
+
+    private async Task ValidateTicketData(Ticket item, bool isUpdate = false, Guid? existingItemId = null)
     {
         
         var userAccount = await userAccountRepository.GetByIdAsync(item.UserAccountId);

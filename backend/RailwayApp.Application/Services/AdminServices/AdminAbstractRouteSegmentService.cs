@@ -8,11 +8,21 @@ namespace RailwayApp.Application.Services.AdminServices;
 public class AdminAbstractRouteSegmentService(
     IAbstractRouteSegmentRepository abstractRouteSegmentRepository,
     IAbstractRouteRepository abstractRouteRepository,
-    IStationRepository stationRepository) : IAdminService<AbstractRouteSegment, Guid>, IAdminAbstractRouteSegmentService
+    IStationRepository stationRepository) : IAdminAbstractRouteSegmentService
 {
     public async Task<IEnumerable<AbstractRouteSegment>> GetAllItems()
     {
         return await abstractRouteSegmentRepository.GetAllAsync();
+    }
+
+    public async Task<AbstractRouteSegment> GetItemByIdAsync(Guid id)
+    {
+        var routeSegment = await abstractRouteSegmentRepository.GetByIdAsync(id);
+        if (routeSegment == null)
+        {
+            throw new AdminResourceNotFoundException(nameof(AbstractRouteSegment), id);
+        } 
+        return routeSegment;
     }
 
     private async Task ValidateAbstractRouteSegmentData(AbstractRouteSegment item, bool isUpdate = false, Guid? existingItemId = null)
